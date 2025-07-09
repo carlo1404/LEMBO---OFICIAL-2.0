@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Sensor</title>
+    <link rel="stylesheet" href="/frontend/public/css/components/tabla-unificada.css">
     <link rel="stylesheet" href="/frontend/public/css/pages/insumo.css">
+    <link rel="stylesheet" href="/frontend/public/css/components/modal.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/frontend/JS/sidebar.js" defer></script>
@@ -62,18 +64,8 @@
                                 <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails"
-                                    title="Más información">
-                                    <i class='bx bx-plus-circle' id="showCycleDetails"></i>
-                                </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                            <!-- Aquí se carga dinámicamente el contenido del sensor -->
-                                        </div>
-                                    </div>
+                                <div class="icon-container__icon icon-container__icon--green show-details-button" title="Más información">
+                                    <i class='bx bx-plus-circle'></i>
                                 </div>
 
                             </div>
@@ -253,56 +245,181 @@
         </section>
     </main>
 
-    <!-- Modal de Edición -->
-    <div class="modal" id="editSensorModal">
-        <div class="modal__content">
-            <div class="modal__header">
-                <h2 class="modal__title">Editar Sensor</h2>
-                <span class="modal__close" id="closeEditModal">&times;</span>
+    <!-- Modal para Agregar Sensor -->
+    <div id="addSensorModal" class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Agregar Sensor</h2>
+                <span class="close-button">&times;</span>
             </div>
-            <div class="modal__body">
-                <form id="editSensorForm" class="form">
-                    <div class="form__field">
-                        <label class="form__label" for="editTipoSensor">Tipo de sensor:</label>
-                        <select class="form__select" name="tipo" id="editTipoSensor">
+            <div class="modal-body">
+                <form id="addSensorForm">
+                    <div class="form-group">
+                        <label for="addTipoSensor">Tipo de sensor:</label>
+                        <select name="tipo" id="addTipoSensor">
                             <option value="luz">Luz</option>
                             <option value="movimiento">Movimiento</option>
                             <option value="temperatura">Temperatura</option>
                             <option value="humedad">Humedad</option>
                         </select>
                     </div>
-                    <div class="form__field">
-                        <label class="form__label" for="editNombre">Nombre:</label>
-                        <input class="form__input" type="text" id="editNombre" required>
+                    <div class="form-group">
+                        <label for="addNombre">Nombre:</label>
+                        <input type="text" id="addNombre" required>
                     </div>
-                    <div class="form__field">
-                        <label class="form__label" for="editUnidad">Unidad de medida:</label>
-                        <select class="form__select" id="editUnidad">
+                    <div class="form-group">
+                        <label for="addUnidad">Unidad de medida:</label>
+                        <select id="addUnidad">
                             <option value="metros">Metros</option>
                             <option value="lux">Intensidad (lux)</option>
                             <option value="temperatura">Temperatura (ºC)</option>
                             <option value="humedad">Humedad (%)</option>
                         </select>
                     </div>
-                    <div class="form__field">
-                        <label class="form__label" for="editTiempo">Tiempo de escaneo:</label>
-                        <input class="form__input" type="text" id="editTiempo" required>
+                    <div class="form-group">
+                        <label for="addTiempo">Tiempo de muestreo (segundos):</label>
+                        <input type="number" id="addTiempo" required>
                     </div>
-                    <div class="form__field">
-                        <label class="form__label" for="editEstado">Estado:</label>
-                        <select class="form__select" id="editEstado">
+                    <div class="form-group">
+                        <label for="addEstado">Estado:</label>
+                        <select id="addEstado">
                             <option value="habilitado">Habilitado</option>
                             <option value="deshabilitado">Deshabilitado</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="addImagen">Imagen del Sensor:</label>
+                        <input type="file" id="addImagen">
+                    </div>
+                    <div class="form-group">
+                        <label for="addDescripcion">Descripción:</label>
+                        <textarea id="addDescripcion"></textarea>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn-primary">Agregar Sensor</button>
+                        <button type="button" class="btn-secondary close-button">Cancelar</button>
+                    </div>
                 </form>
-            </div>
-            <div class="modal__footer">
-                <button class="form__button" id="saveEditSensor">Guardar Cambios</button>
             </div>
         </div>
     </div>
 
+        <!-- Modal de Edición -->
+    <div id="editSensorModal" class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Sensor</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editSensorForm">
+                    <div class="form-group">
+                        <label for="editTipoSensor">Tipo de sensor:</label>
+                        <select name="tipo" id="editTipoSensor">
+                            <option value="luz">Luz</option>
+                            <option value="movimiento">Movimiento</option>
+                            <option value="temperatura">Temperatura</option>
+                            <option value="humedad">Humedad</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editNombre">Nombre:</label>
+                        <input type="text" id="editNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editUnidad">Unidad de medida:</label>
+                        <select id="editUnidad">
+                            <option value="metros">Metros</option>
+                            <option value="lux">Intensidad (lux)</option>
+                            <option value="temperatura">Temperatura (ºC)</option>
+                            <option value="humedad">Humedad (%)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTiempo">Tiempo de escaneo:</label>
+                        <input type="text" id="editTiempo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editEstado">Estado:</label>
+                        <select id="editEstado">
+                            <option value="habilitado">Habilitado</option>
+                            <option value="deshabilitado">Deshabilitado</option>
+                        </select>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn-primary">Guardar Cambios</button>
+                        <button type="button" class="btn-secondary close-button">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Detalles del Sensor -->
+    <div id="cropCycleModal" class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalles del Sensor</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div id="modalContent" class="modal-body">
+                <!-- Aquí se carga dinámicamente el contenido del sensor -->
+            </div>
+             <div class="form-buttons">
+                <button type="button" class="btn-secondary close-button">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+                document.addEventListener('DOMContentLoaded', () => {
+            const addSensorModal = document.getElementById('addSensorModal');
+            const editSensorModal = document.getElementById('editSensorModal');
+            const cropCycleModal = document.getElementById('cropCycleModal');
+
+            const addButton = document.getElementById('add');
+            const editButtons = document.querySelectorAll('.edit-button');
+            const showDetailsButtons = document.querySelectorAll('.show-details-button');
+
+            // Function to open a modal
+            const openModal = (modal) => modal.classList.add('active');
+
+            // Function to close a modal
+            const closeModal = (modal) => modal.classList.remove('active');
+
+            // Open "Add" modal
+            if (addButton) {
+                addButton.addEventListener('click', () => openModal(addSensorModal));
+            }
+
+            // Open "Edit" modal
+            editButtons.forEach(button => {
+                button.addEventListener('click', () => openModal(editSensorModal));
+            });
+
+            // Open "Details" modal
+            showDetailsButtons.forEach(button => {
+                button.addEventListener('click', () => openModal(cropCycleModal));
+            });
+
+            // Close modals using their close buttons
+            [addSensorModal, editSensorModal, cropCycleModal].forEach(modal => {
+                if (modal) {
+                    const closeButtons = modal.querySelectorAll('.close-button');
+                    closeButtons.forEach(button => {
+                        button.addEventListener('click', () => closeModal(modal));
+                    });
+
+                    // Close modal when clicking on the background
+                    modal.addEventListener('click', (event) => {
+                        if (event.target === modal) {
+                            closeModal(modal);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

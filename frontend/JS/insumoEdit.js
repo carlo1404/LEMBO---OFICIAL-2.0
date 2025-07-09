@@ -1,7 +1,3 @@
-document.getElementById("add").onclick = function() {
-    window.location.href = "Agregar_Insumo.html";
-};
-
 document.getElementById("download").onclick = function() {
     window.location.href = "informe-insumo.html";
 };

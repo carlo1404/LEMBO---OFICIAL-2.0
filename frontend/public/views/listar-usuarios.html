@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Usuarios</title>
+    <link rel="stylesheet" href="/frontend/public/css/components/tabla-unificada.css">
     <link rel="stylesheet" href="/frontend/public/css/pages/listaru.css">
+    <link rel="stylesheet" href="/frontend/public/css/components/modal.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="/frontend/JS/sidebar.js" defer></script>
-    <script src="../../JS/usuarioEdit.js" defer></script>
+    
 </head>
 <body>
     <div class="header">
@@ -45,14 +47,14 @@
                     <td class="content__table-data">Luciano Anal</td>
                     <td class="content__table-data">USR76286</td>
                     <td class="content__table-data">Personal de Apoyo</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
+                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
                     <td class="content__table-data">
-                        <div class="icon-container">
-                            <div  class="icon icon--blue" title="Editar">
+                        <div class="content__icon-container">
+                            <div  class="content__icon content__icon--blue" title="Editar">
                                 <i class='bx bxs-edit edit-button'></i>
                             </div>
 
-                            <div class="icon icon--red" title="Eliminar">
+                            <div class="content__icon content__icon--red" title="Eliminar">
                                 <i class='bx bxs-trash'></i>
                             </div>
                         </div>
@@ -62,13 +64,13 @@
                     <td class="content__table-data">Elver Gonzio</td>
                     <td class="content__table-data">USR76286</td>
                     <td class="content__table-data">Personal de Apoyo</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
+                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
                     <td class="content__table-data">
-                        <div class="icon-container">
-                        <div class="icon icon--blue" title="Editar">
+                        <div class="content__icon-container">
+                        <div class="content__icon content__icon--blue" title="Editar">
                             <i class='bx bxs-edit edit-button'></i>
                         </div>
-                        <div class="icon icon--red" title="Eliminar">
+                        <div class="content__icon content__icon--red" title="Eliminar">
                             <i class='bx bxs-trash'></i>
                         </div>
                         </div>
@@ -78,13 +80,13 @@
                     <td class="content__table-data">Leslie Caracas</td>
                     <td class="content__table-data">USR76286</td>
                     <td class="content__table-data">Administrador</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
+                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
                     <td class="content__table-data">
-                        <div class="icon-container">
-                        <div class="icon icon--blue" title="Editar">
+                        <div class="content__icon-container">
+                        <div class="content__icon content__icon--blue" title="Editar">
                             <i class='bx bxs-edit edit-button'></i>
                         </div>
-                        <div class="icon icon--red" title="Eliminar">
+                        <div class="content__icon content__icon--red" title="Eliminar">
                             <i class='bx bxs-trash'></i>
                         </div>
                         </div>
@@ -96,11 +98,11 @@
                     <td class="content__table-data">Personal de Apoyo</td>
                     <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span></span>&nbsp; Deshabilitado: &nbsp;<span class="status-disabled"></span></td>
                     <td class="content__table-data">
-                        <div class="icon-container">
-                        <div class="icon icon--blue" title="Editar">
+                        <div class="content__icon-container">
+                        <div class="content__icon content__icon--blue" title="Editar">
                             <i class='bx bxs-edit edit-button'></i>
                         </div>
-                        <div class="icon icon--red" title="Eliminar">
+                        <div class="content__icon content__icon--red" title="Eliminar">
                             <i class='bx bxs-trash'></i>
                         </div>
                         </div>
@@ -112,11 +114,11 @@
                     <td class="content__table-data">Visitante</td>
                     <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span></span>&nbsp; Deshabilitado: &nbsp;<span class="status-disabled"></span></td>
                     <td class="content__table-data">
-                        <div class="icon-container">
-                        <div class="icon icon--blue" title="Editar">
+                        <div class="content__icon-container">
+                        <div class="content__icon content__icon--blue" title="Editar">
                             <i class='bx bxs-edit edit-button'></i>
                         </div>
-                        <div class="icon icon--red" title="Eliminar">
+                        <div class="content__icon content__icon--red" title="Eliminar">
                             <i class='bx bxs-trash'></i>
                         </div>
                         </div>
@@ -128,11 +130,11 @@
                     <td class="content__table-data">Personal de Apoyo</td>
                     <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span></span>&nbsp; Deshabilitado: &nbsp;<span class="status-disabled"></span></td>
                     <td class="content__table-data">
-                        <div class="icon-container">
-                        <div class="icon icon--blue" title="Editar">
+                        <div class="content__icon-container">
+                        <div class="content__icon content__icon--blue" title="Editar">
                             <i class='bx bxs-edit edit-button'></i>
                         </div>
-                        <div class="icon icon--red" title="Eliminar">
+                        <div class="content__icon content__icon--red" title="Eliminar">
                             <i class='bx bxs-trash'></i>
                         </div>
                         </div>
@@ -142,13 +144,13 @@
                     <td class="content__table-data">Santiago Cachon L</td>
                     <td class="content__table-data">USR76286</td>
                     <td class="content__table-data">Visitante</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
+                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
                     <td class="content__table-data">
-                        <div class="icon-container">
-                        <div class="icon icon--blue" title="Editar">
+                        <div class="content__icon-container">
+                        <div class="content__icon content__icon--blue" title="Editar">
                             <i class='bx bxs-edit edit-button'></i>
                         </div>
-                        <div class="icon icon--red" title="Eliminar">
+                        <div class="content__icon content__icon--red" title="Eliminar">
                             <i class='bx bxs-trash'></i>
                         </div>
                         </div>
@@ -158,13 +160,13 @@
                     <td class="content__table-data">Ana Zorria Riaño</td>
                     <td class="content__table-data">USR76286</td>
                     <td class="content__table-data">Personal de Apoyo</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
+                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
                     <td class="content__table-data">
-                        <div class="icon-container">
-                        <div class="icon icon--blue" title="Editar">
+                        <div class="content__icon-container">
+                        <div class="content__icon content__icon--blue" title="Editar">
                             <i class='bx bxs-edit edit-button'></i>
                         </div>
-                        <div class="icon icon--red" title="Eliminar">
+                        <div class="content__icon content__icon--red" title="Eliminar">
                             <i class='bx bxs-trash'></i>
                         </div>
                         </div>
@@ -174,13 +176,13 @@
                     <td class="content__table-data">Justin Bieber</td>
                     <td class="content__table-data">USR76286</td>
                     <td class="content__table-data">Personal de Apoyo</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
+                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
                     <td class="content__table-data">
-                        <div class="icon-container">
-                        <div class="icon icon--blue" title="Editar">
+                        <div class="content__icon-container">
+                        <div class="content__icon content__icon--blue" title="Editar">
                             <i class='bx bxs-edit edit-button'></i>
                         </div>
-                        <div class="icon icon--red" title="Eliminar">
+                        <div class="content__icon content__icon--red" title="Eliminar">
                             <i class='bx bxs-trash'></i>
                         </div>
                         </div>
@@ -192,11 +194,11 @@
                     <td class="content__table-data">Personal de Apoyo</td>
                     <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span></span>&nbsp; Deshabilitado: &nbsp;<span class="status-disabled"></span></td>
                     <td class="content__table-data">
-                        <div class="icon-container">
-                        <div class="icon icon--blue" title="Editar">
+                        <div class="content__icon-container">
+                        <div class="content__icon content__icon--blue" title="Editar">
                             <i class='bx bxs-edit edit-button'></i>
                         </div>
-                        <div class="icon icon--red" title="Eliminar">
+                        <div class="content__icon content__icon--red" title="Eliminar">
                             <i class='bx bxs-trash'></i>
                         </div>
                         </div>
@@ -206,13 +208,13 @@
                     <td class="content__table-data">Papa Francisco</td>
                     <td class="content__table-data">USR76286</td>
                     <td class="content__table-data">Administrador</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
+                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
                     <td class="content__table-data">
-                        <div class="icon-container">
-                        <div class="icon icon--blue" title="Editar">
+                        <div class="content__icon-container">
+                        <div class="content__icon content__icon--blue" title="Editar">
                             <i class='bx bxs-edit edit-button'></i>
                         </div>
-                        <div class="icon icon--red" title="Eliminar">
+                        <div class="content__icon content__icon--red" title="Eliminar">
                             <i class='bx bxs-trash'></i>
                         </div>
                         </div>
@@ -222,13 +224,13 @@
                     <td class="content__table-data">Edward Follone</td>
                     <td class="content__table-data">USR76286</td>
                     <td class="content__table-data">Administrador</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
+                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
                     <td class="content__table-data">
-                        <div class="icon-container">
-                        <div class="icon icon--blue" title="Editar">
+                        <div class="content__icon-container">
+                        <div class="content__icon content__icon--blue" title="Editar">
                             <i class='bx bxs-edit edit-button'></i>
                         </div>
-                        <div class="icon icon--red" title="Eliminar">
+                        <div class="content__icon content__icon--red" title="Eliminar">
                             <i class='bx bxs-trash'></i>
                         </div>
                         </div>
@@ -239,50 +241,157 @@
         </section>
     </main>
 
-    <!-- Modal de Edición -->
-    <div class="modal" id="editUsuarioModal">
-        <div class="modal__content">
-            <div class="modal__header">
-                <h2 class="modal__title">Editar Usuario</h2>
-                <span class="modal__close" id="closeEditModal">&times;</span>
+        <!-- Modal para Agregar Usuario -->
+    <div id="addUsuarioModal" class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Agregar Usuario</h2>
+                <span class="close-button">&times;</span>
             </div>
-            <div class="modal__body">
-                <form id="editUsuarioForm" class="form">
-                    <div class="form__field">
-                        <label class="form__label" for="editNombre">Nombre:</label>
-                        <input class="form__input" type="text" id="editNombre" required>
+            <div class="modal-body">
+                <form id="addUsuarioForm">
+                    <div class="form-group">
+                        <label for="addNombre">Nombre:</label>
+                        <input type="text" id="addNombre" required>
                     </div>
-                    <div class="form__field">
-                        <label class="form__label" for="editRol">Rol:</label>
-                        <select class="form__select" id="editRol" required>
+                    <div class="form-group">
+                        <label for="addTipoDocumento">Tipo de documento:</label>
+                        <select id="addTipoDocumento" required>
+                            <option value="CC">Cédula de Ciudadanía</option>
+                            <option value="TI">Tarjeta de identidad</option>
+                            <option value="CE">Cédula de extranjería</option>
+                            <option value="PEP">PEP</option>
+                            <option value="PPT">Permiso Por Protección Temporal</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="addNumeroDocumento">Numero de documento:</label>
+                        <input type="text" id="addNumeroDocumento" required>
+                    </div>
+                    <div class="form-group form-group--double">
+                        <div>
+                            <label for="addCorreo">Correo:</label>
+                            <input type="email" id="addCorreo" required>
+                        </div>
+                        <div>
+                            <label for="addContraseña">Contraseña:</label>
+                            <input type="password" id="addContraseña" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="addRol">Rol:</label>
+                        <select id="addRol" required>
                             <option value="Administrador">Administrador</option>
                             <option value="Personal de Apoyo">Personal de Apoyo</option>
                             <option value="Visitante">Visitante</option>
                             <option value="Usuario">Usuario</option>
                         </select>
                     </div>
-                    <div class="form__field">
-                        <label class="form__label" for="editEstado">Estado:</label>
-                        <select class="form__select" id="editEstado">
+                    <div class="form-group">
+                        <label for="addEstado">Estado:</label>
+                        <select id="addEstado">
                             <option value="habilitado">Habilitado</option>
                             <option value="deshabilitado">Deshabilitado</option>
                         </select>
                     </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn-primary">Agregar Usuario</button>
+                        <button type="button" class="btn-secondary close-button">Cancelar</button>
+                    </div>
                 </form>
             </div>
-            <div class="modal__footer">
-                <button class="form__button" id="saveEditUsuario">Guardar Cambios</button>
+        </div>
+    </div>
+
+        <!-- Modal de Edición -->
+    <div id="editUsuarioModal" class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Usuario</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editUsuarioForm">
+                    <div class="form-group">
+                        <label for="editNombre">Nombre:</label>
+                        <input type="text" id="editNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editRol">Rol:</label>
+                        <select id="editRol" required>
+                            <option value="Administrador">Administrador</option>
+                            <option value="Personal de Apoyo">Personal de Apoyo</option>
+                            <option value="Visitante">Visitante</option>
+                            <option value="Usuario">Usuario</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editEstado">Estado:</label>
+                        <select id="editEstado">
+                            <option value="habilitado">Habilitado</option>
+                            <option value="deshabilitado">Deshabilitado</option>
+                        </select>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn-primary">Guardar Cambios</button>
+                        <button type="button" class="btn-secondary close-button">Cancelar</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
     <script>
-        document.getElementById("add").onclick = function () {
-            window.location.href = "agregar-usuario.html";
-        };
-        document.getElementById("descarga").onclick = function () {
-            window.location.href = "informe_usuarios.html";
-        };
+        document.addEventListener('DOMContentLoaded', () => {
+            const addUsuarioModal = document.getElementById('addUsuarioModal');
+            const editUsuarioModal = document.getElementById('editUsuarioModal');
+
+            const addButton = document.getElementById('add');
+            const editButtons = document.querySelectorAll('.edit-button');
+
+            // Función para abrir un modal
+            const openModal = (modal) => modal.classList.add('active');
+
+            // Función para cerrar un modal
+            const closeModal = (modal) => modal.classList.remove('active');
+
+            // Abrir modal de "Agregar"
+            if (addButton) {
+                addButton.addEventListener('click', () => openModal(addUsuarioModal));
+            }
+
+            // Abrir modal de "Editar"
+            editButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Aquí se puede añadir la lógica para cargar los datos del usuario en el formulario
+                    openModal(editUsuarioModal);
+                });
+            });
+
+            // Cerrar modales con sus botones de cierre o haciendo clic en el fondo
+            [addUsuarioModal, editUsuarioModal].forEach(modal => {
+                if (modal) {
+                    const closeButtons = modal.querySelectorAll('.close-button');
+                    closeButtons.forEach(button => {
+                        button.addEventListener('click', () => closeModal(modal));
+                    });
+
+                    modal.addEventListener('click', (event) => {
+                        if (event.target === modal) {
+                            closeModal(modal);
+                        }
+                    });
+                }
+            });
+
+            // Lógica de redirección existente
+            const descargaButton = document.getElementById("descarga");
+            if (descargaButton) {
+                descargaButton.onclick = function () {
+                    window.location.href = "informe_usuarios.html";
+                };
+            }
+        });
     </script>
 </body>
 </html>

@@ -39,16 +39,17 @@
                 <button class="button__listar-insumos" id="listar-insumos">Listar Insumos</button>
             </div>
         </section>
-    </main>
-    <script src="/frontend/JS/grafico_insumo.js" defer></script>
-    <script>
-        document.getElementById("listar-insumos").onclick = function () {
-            window.location.href = "insumo.html";
-        }
-        
-    </script>
-</body>
 
-</html>
+        
+    </main>
+    <script>
+        document.addEventListener("click", function (e) {
+            if (e.target.id === "listar-insumos") {
+                window.location.href = "insumo.html";
+            }
+        })
+    </script>
+    <script src="/frontend/JS/grafico_insumo.js" defer></script>
+</body>
 
 </html>

@@ -1,6 +1,3 @@
-document.getElementById("add").onclick = function () {
-    window.location.href = "agregar_sensor.html";
-};
 document.getElementById("download").onclick = function () {
     window.location.href = "informe_sensor.html";
 };

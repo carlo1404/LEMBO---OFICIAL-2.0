@@ -55,6 +55,7 @@ main {
     transition: width 0.3s ease;
     background-color: var(--green-600);
     height: 100vh;
+    z-index: 9;
     position: fixed;
 }
 
@@ -111,52 +112,80 @@ main {
 
 /* Header */
 .header {
-    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0.3rem 1.5rem;
     background-color: var(--green-600);
-    padding: 0.625rem 1.25rem;
-    color: var(--black);
+    width: 100%;
 }
 
-.header__left-section .header__menu-item {
-    font-size: 0.875rem;
-    margin-right: 0.3125rem;
+.header__left-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.header__left-section .header__menu-separator {
-    font-size: 0.875rem;
-    margin-right: 0.3125rem;
+.header__menu-item {
+    font-size: 0.95rem;
+    color: var(--white);
+    font-weight: 500;
+}
+
+.header__menu-item:not(:first-child) {
+    color: var(--white);
+    opacity: 0.8;
+}
+
+.header__menu-separator {
+    color: var(--white);
+    opacity: 0.8;
 }
 
 .header__right-section {
     display: flex;
     align-items: center;
+    gap: 1rem;
 }
 
 .header__search-bar {
-    width: 18.75rem;
-    padding: 0.3125rem 0.625rem;
-    font-size: 0.875rem;
-    margin-right: 0.625rem;
-    border: 1px solid var(--gray-60);
-    border-radius: 0.3125rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+    border-radius: 2rem;
+    background-color: var(--green-700);
+    color: var(--white);
+    width: 250px;
+    transition: all 0.3s ease;
+}
+
+.header__search-bar::placeholder {
+    color: var(--green-200);
+}
+
+.header__search-bar:focus {
+    outline: none;
+    border-color: var(--green-200);
+    background-color: var(--green-500);
+    box-shadow: none;
 }
 
 .header__icon {
-    width: 1.875rem;
-    height: 1.875rem;
     display: flex;
-    justify-content: center;
     align-items: center;
-    border-radius: 0.25rem;
+    justify-content: center;
     font-size: 1.5rem;
-    margin-left: 0.625rem;
+    color: var(--white);
     cursor: pointer;
-    color: var(--black);
-    background: none;
-    border: none;
+    transition: color 0.3s ease, background-color 0.3s ease;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+}
+
+.header__icon:hover {
+    color: var(--green-600);
+    background-color: var(--white);
 }
 
 /* Contenido principal */
@@ -167,201 +196,7 @@ main {
     height: calc(100vh - 3.125rem);
 }
 
-table {
-    margin-left: 5rem;
-    width: 95%;
-    border-collapse: collapse;
-    background-color: var(--white);
-    border-radius: 0.5rem;
-    overflow: hidden;
-}
 
-thead {
-    background-color: var(--green-200);
-    text-align: left;
-}
-
-thead th {
-    padding: 0.9375rem;
-    font-size: 0.875rem;
-    font-weight: bold;
-    color: var(--black);
-    text-transform: uppercase;
-}
-
-tbody tr {
-    border-bottom: 1px solid var(--gray-60);
-}
-
-tbody tr:hover {
-    background-color: var(--green-50);
-}
-
-tbody td {
-    padding: 0.9375rem;
-    font-size: 0.875rem;
-    color: var(--gray-100);
-}
-
-tbody .content__table-data--status span {
-    display: inline-block;
-    width: 0.625rem;
-    height: 0.625rem;
-    border-radius: 50%;
-}
-
-.content__status-enabled {
-    background-color: var(--green-800);
-}
-
-.content__status-disabled {
-    background-color: var(--secundary-1000);
-}
-
-/* Botones de acción */
-tbody td:last-child {
-    display: flex;
-    gap: 0.625rem;
-}
-
-tbody td:last-child .action-btn {
-    background: none;
-    border: none;
-    font-size: 1.125rem;
-    cursor: pointer;
-    color: var(--gray-60);
-}
-
-tbody td:last-child .action-btn:hover {
-    color: var(--black);
-}
-
-.content__icon-container {
-    display: flex;
-    flex-direction: row;
-    gap: 0.4rem;
-    justify-content: center;
-    cursor:pointer;
-}
-
-.bx-plus-circle{
-    cursor: pointer;
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 9999;
-    left: 0;
-    top: 0;
-    width: 100vw;
-    height: 100vh;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.6);
-}
-
-.modal__overlay {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-color: transparent;
-}
-
-.modal__content {
-    position: relative;
-    background-color: var(--white);
-    margin: 5% auto;
-    padding: 1.875rem;
-    border-radius: 0.75rem;
-    width: 80%;
-    max-width: 43.75rem;
-    box-shadow: 0 0 1.25rem rgba(0,0,0,0.2);
-    z-index: 1000;
-}
-
-.modal__close {
-    position: absolute;
-    top: 0.625rem;
-    right: 1.25rem;
-    font-size: 1.75rem;
-    cursor: pointer;
-    color: var(--gray-80);
-}
-
-.modal__body {
-    max-height: 70vh;
-    overflow-y: auto;
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-}
-
-.modal__content {
-    background-color: white;
-    margin: 10% auto;
-    padding: 20px;
-    width: 50%;
-    border-radius: 5px;
-    position: relative;
-}
-
-.modal__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.modal__close {
-    cursor: pointer;
-    font-size: 24px;
-}
-
-.modal__body {
-    margin-bottom: 20px;
-}
-
-.modal__footer {
-    text-align: right;
-}
-
-.form__field {
-    margin-bottom: 15px;
-}
-
-.form__label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.form__input,
-.form__select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.form__button {
-    background-color: var(--green-600);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.form__button:hover {
-    background-color: var(--green-700);
-}
 
 /* Media Queries */
 @media (max-width: 768px) {
@@ -377,10 +212,7 @@ tbody td:last-child .action-btn:hover {
         padding: 1rem;
     }
 
-    thead th, tbody td {
-        padding: 0.625rem;
-        font-size: 0.75rem;
-    }
+
 
     .header__icon {
         font-size: 1.25rem;
@@ -400,10 +232,7 @@ tbody td:last-child .action-btn:hover {
         padding: 0.875rem;
     }
 
-    thead th, tbody td {
-        padding: 0.625rem;
-        font-size: 0.7rem;
-    }
+
 
     .header__icon {
         font-size: 1.125rem;

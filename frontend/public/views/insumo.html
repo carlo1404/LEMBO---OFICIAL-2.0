@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Insumos</title>
+    <link rel="stylesheet" href="/frontend/public/css/components/tabla-unificada.css">
     <link rel="stylesheet" href="/frontend/public/css/pages/insumo.css">
+    <link rel="stylesheet" href="/frontend/public/css/components/modal.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/frontend/JS/sidebar.js" defer></script>
@@ -232,22 +234,39 @@
 
     </main>
 
-    <!-- Modal de Edición -->
-    <div class="modal" id="editInsumoModal">
-        <div class="modal__content">
-            <div class="modal__header">
-                <h2 class="modal__title">Editar Insumo</h2>
-                <span class="modal__close" id="closeEditModal">&times;</span>
+    <!-- Modal para Agregar Insumo -->
+    <div id="addInsumoModal" class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Agregar Insumo</h2>
+                <span class="close-button">&times;</span>
             </div>
-            <div class="modal__body">
-                <form id="editInsumoForm" class="form">
-                    <div class="form__field">
-                        <label class="form__label" for="editNombre">Nombre:</label>
-                        <input class="form__input" type="text" id="editNombre" required>
+            <div class="modal-body">
+                <form id="addInsumoForm">
+                    <div class="form-group">
+                        <label for="addTipo">Tipo Insumo:</label>
+                        <select id="addTipo" name="tipo" required>
+                            <option value="">Seleccione una opción</option>
+                            <option value="Fertilizantes">Fertilizantes</option>
+                            <option value="Fungicidas">Fungicidas</option>
+                            <option value="Invernaderos">Invernaderos</option>
+                            <option value="Mangas">Mangas</option>
+                            <option value="Mallas protectoras">Mallas protectoras</option>
+                            <option value="Personal de Apoyo">Personal de Apoyo</option>
+                        </select>
                     </div>
-                    <div class="form__field">
-                        <label class="form__label" for="editUnidad">Unidad de medida:</label>
-                        <select class="form__select" id="editUnidad">
+                    <div class="form-group">
+                        <label for="addId">ID Insumo:</label>
+                        <input type="text" id="addId" name="id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="addNombre">Nombre del Insumo:</label>
+                        <input type="text" id="addNombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="addUnidad">Unidad de medida:</label>
+                        <select id="addUnidad" name="unidad" required>
+                            <option value="">Seleccione una opción</option>
                             <option value="Gramos">Gramos</option>
                             <option value="Kilos">Kilos</option>
                             <option value="Metros">Metros</option>
@@ -255,29 +274,127 @@
                             <option value="Personal de Apoyo">Personal de Apoyo</option>
                         </select>
                     </div>
-                    <div class="form__field">
-                        <label class="form__label" for="editCantidad">Cantidad:</label>
-                        <input class="form__input" type="number" id="editCantidad" required>
+                    <div class="form-group">
+                        <label for="addCantidad">Cantidad:</label>
+                        <input type="number" id="addCantidad" name="cantidad" required>
                     </div>
-                    <div class="form__field">
-                        <label class="form__label" for="editValor">Valor Unitario:</label>
-                        <input class="form__input" type="number" id="editValor" required>
+                    <div class="form-group">
+                        <label for="addValorUnitario">Valor Unitario:</label>
+                        <input type="number" id="addValorUnitario" name="valorUnitario" required>
                     </div>
-                    <div class="form__field">
-                        <label class="form__label" for="editEstado">Estado:</label>
-                        <select class="form__select" id="editEstado">
+                    <div class="form-group">
+                        <label for="addValorTotal">Valor Total:</label>
+                        <input type="number" id="addValorTotal" name="valorTotal" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="addDescripcion">Descripción:</label>
+                        <textarea id="addDescripcion" name="descripcion" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="addEstado">Estado:</label>
+                        <select id="addEstado" name="estado" required>
+                            <option value="">Seleccione una opción</option>
                             <option value="habilitado">Habilitado</option>
                             <option value="deshabilitado">Deshabilitado</option>
                         </select>
                     </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn-primary">Agregar Insumo</button>
+                        <button type="button" class="btn-secondary close-button">Cancelar</button>
+                    </div>
                 </form>
-            </div>
-            <div class="modal__footer">
-                <button class="form__button" id="saveEditInsumo">Guardar Cambios</button>
             </div>
         </div>
     </div>
 
+    <!-- Modal de Edición -->
+    <div id="editInsumoModal" class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Insumo</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editInsumoForm">
+                    <div class="form-group">
+                        <label for="editNombre">Nombre:</label>
+                        <input type="text" id="editNombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editUnidad">Unidad de medida:</label>
+                        <select id="editUnidad" name="unidad">
+                            <option value="Gramos">Gramos</option>
+                            <option value="Kilos">Kilos</option>
+                            <option value="Metros">Metros</option>
+                            <option value="Metro Cubico">Metro Cúbico</option>
+                            <option value="Personal de Apoyo">Personal de Apoyo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCantidad">Cantidad:</label>
+                        <input type="number" id="editCantidad" name="cantidad" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editValor">Valor Unitario:</label>
+                        <input type="number" id="editValor" name="valor" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editEstado">Estado:</label>
+                        <select id="editEstado" name="estado">
+                            <option value="habilitado">Habilitado</option>
+                            <option value="deshabilitado">Deshabilitado</option>
+                        </select>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn-primary">Guardar Cambios</button>
+                        <button type="button" class="btn-secondary close-button">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+                document.addEventListener('DOMContentLoaded', () => {
+            const addInsumoModal = document.getElementById('addInsumoModal');
+            const editInsumoModal = document.getElementById('editInsumoModal');
+            const addButton = document.getElementById('add');
+            const editButtons = document.querySelectorAll('.edit-button');
+
+            // Function to open a modal
+            const openModal = (modal) => modal.classList.add('active');
+
+            // Function to close a modal
+            const closeModal = (modal) => modal.classList.remove('active');
+
+            // Open "Add" modal
+            if (addButton) {
+                addButton.addEventListener('click', () => openModal(addInsumoModal));
+            }
+
+            // Open "Edit" modal
+            editButtons.forEach(button => {
+                button.addEventListener('click', () => openModal(editInsumoModal));
+            });
+
+            // Close modals using their close buttons
+            [addInsumoModal, editInsumoModal].forEach(modal => {
+                if (modal) {
+                    const closeButtons = modal.querySelectorAll('.close-button');
+                    closeButtons.forEach(button => {
+                        button.addEventListener('click', () => closeModal(modal));
+                    });
+
+                    // Close modal when clicking on the background
+                    modal.addEventListener('click', (event) => {
+                        if (event.target === modal) {
+                            closeModal(modal);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

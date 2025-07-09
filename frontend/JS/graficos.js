@@ -1,6 +1,3 @@
-document.getElementById("add").onclick = function() {
-    window.location.href = "cultivo-agregar.html";
-};
 document.getElementById("download").onclick = function() {
     window.location.href = "cultivo_informe.html";
 };

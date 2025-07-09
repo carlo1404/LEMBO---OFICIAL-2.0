@@ -1,0 +1,190 @@
+/* =================================
+   Modal Styles
+   ================================= */
+
+/* Container for the modal, covers the whole screen */
+.modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0; /* Initially hidden */
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* When the modal is active */
+.modal-container.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* The modal's content box */
+.modal-content {
+    background-color: var(--white);
+    padding: 2rem;
+    border-radius: 0.75rem;
+    width: 90%;
+    max-width: 550px; /* A bit wider for better form layout */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.modal-container.active .modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* Modal header with title and close button */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--gray-40);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--secondary-green);
+}
+
+/* Close button in the header */
+.close-button {
+    font-size: 2rem;
+    font-weight: 300;
+    color: var(--gray-60);
+    cursor: pointer;
+    border: none;
+    background: none;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.close-button:hover {
+    color: var(--black);
+}
+
+/* Modal body for the form */
+.modal-body {
+    max-height: 65vh;
+    overflow-y: auto;
+    padding-right: 1rem; /* Space for scrollbar */
+    margin-right: -1rem; /* Compensate for padding */
+}
+
+/* Form group styling */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--gray-80);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-40);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    color: var(--gray-100);
+    background-color: var(--white);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--green-700);
+    box-shadow: 0 0 0 3px var(--green-100);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Special styling for multi-select */
+.form-group select[multiple] {
+    height: auto;
+    min-height: 120px;
+    background-color: var(--gray-20);
+    padding: 0.5rem;
+}
+
+.form-group select[multiple] option {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.form-group select[multiple] option:checked {
+    background-color: var(--green-600);
+    color: var(--white);
+}
+
+/* Container for form buttons */
+.form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--gray-40);
+}
+
+/* General button styles */
+.btn-primary,
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-primary:active,
+.btn-secondary:active {
+    transform: translateY(1px);
+}
+
+/* Primary button (e.g., "Agregar") */
+.btn-primary {
+    background-color: var(--green-700);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background-color: var(--green-800);
+}
+
+/* Secondary button (e.g., "Cancelar") */
+.btn-secondary {
+    background-color: var(--gray-20);
+    color: var(--gray-80);
+    border: 1px solid var(--gray-40);
+}
+
+.btn-secondary:hover {
+    background-color: var(--gray-40);
+    color: var(--black);
+}

@@ -55,6 +55,7 @@ main {
     background-color: var(--green-600);
     height: 100vh;
     position: fixed;
+    z-index: 9;
 }
 
 .sidebar__logo {
@@ -112,28 +113,80 @@ main {
 
 /* Header */
 .header {
-    width: 100%;
     display: flex;
     justify-content: space-between;
-    padding: 0.625rem 1.25rem;
     align-items: center;
+    padding: 0.3rem 1.5rem;
     background-color: var(--green-600);
+    width: 100%;
+}
+
+.header__left-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.header__menu-item {
+    font-size: 0.95rem;
+    color: var(--white);
+    font-weight: 500;
+}
+
+.header__menu-item:not(:first-child) {
+    color: var(--white);
+    opacity: 0.8;
+}
+
+.header__menu-separator {
+    color: var(--white);
+    opacity: 0.8;
+}
+
+.header__right-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 .header__search-bar {
-    width: 18.75rem;
-    padding: 0.3125rem 0.625rem;
-    border: 1px solid var(--gray-60);
-    border-radius: 0.3125rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+    border-radius: 2rem;
+    background-color: var(--green-700);
+    color: var(--white);
+    width: 250px;
+    transition: all 0.3s ease;
+}
+
+.header__search-bar::placeholder {
+    color: var(--green-200);
+}
+
+.header__search-bar:focus {
+    outline: none;
+    border-color: var(--green-200);
+    background-color: var(--green-500);
+    box-shadow: none;
 }
 
 .header__icon {
-    background: none;
-    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 1.5rem;
-    margin-left: 0.625rem;
+    color: var(--white);
     cursor: pointer;
-    color: var(--black);
+    transition: color 0.3s ease, background-color 0.3s ease;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+}
+
+.header__icon:hover {
+    color: var(--green-600);
+    background-color: var(--white);
 }
 
 /*Sensores*/

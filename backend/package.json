@@ -1,0 +1,24 @@
+{
+  "name": "agricultural-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Agricultural Management System",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.6.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0"
+  },
+  "keywords": ["agriculture", "api", "express", "mysql"],
+  "author": "Your Name",
+  "license": "MIT"
+}

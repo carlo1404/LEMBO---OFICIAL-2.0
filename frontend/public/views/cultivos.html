@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Cultivos</title>
+    <link rel="stylesheet" href="/frontend/public/css/components/tabla-unificada.css">
     <link rel="stylesheet" href="/frontend/public/css/pages/Normalize.css">
     <link rel="stylesheet" href="/frontend/public/css/pages/cultivos.css">
+    <link rel="stylesheet" href="/frontend/public/css/components/modal.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="/frontend/JS/sidebar.js" defer></script>
     <script src="/frontend/JS/scripHTML.js" defer></script>
@@ -41,439 +43,319 @@
                         <th class="content__table-header">Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="content__table-body"></tbody>
+                <tbody class="content__table-body">
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Maíz</td>
-                        <td class="content__table-cell">CUL00001</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">Parcela 5</td>
-                        <td class="content__table-cell">Cereal</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Maíz</td>
+                        <td class="content__table-data">CUL00001</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">Parcela 5</td>
+                        <td class="content__table-data">Cereal</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Papa</td>
-                        <td class="content__table-cell">CUL00001</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">Parcela 3</td>
-                        <td class="content__table-cell">Tubérculo</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Papa</td>
+                        <td class="content__table-data">CUL00001</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">Parcela 3</td>
+                        <td class="content__table-data">Tubérculo</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Cilantro</td>
-                        <td class="content__table-cell">CUL00001</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">invernadero Sur</td>
-                        <td class="content__table-cell">Hierba</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Cilantro</td>
+                        <td class="content__table-data">CUL00001</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">invernadero Sur</td>
+                        <td class="content__table-data">Hierba</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Yuca</td>
-                        <td class="content__table-cell">CUL00001</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">Parcela 1</td>
-                        <td class="content__table-cell">Tubérculo</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Yuca</td>
+                        <td class="content__table-data">CUL00001</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">Parcela 1</td>
+                        <td class="content__table-data">Tubérculo</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Plátano</td>
-                        <td class="content__table-cell">CUL00001</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">Parcela 3</td>
-                        <td class="content__table-cell">Fruta</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Plátano</td>
+                        <td class="content__table-data">CUL00001</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">Parcela 3</td>
+                        <td class="content__table-data">Fruta</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Tomate</td>
-                        <td class="content__table-cell">CUL00004</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">invernadero Norte</td>
-                        <td class="content__table-cell">Vegetal</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Tomate</td>
+                        <td class="content__table-data">CUL00004</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">invernadero Norte</td>
+                        <td class="content__table-data">Vegetal</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Arracacha</td>
-                        <td class="content__table-cell">CUL00003</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">Parcela 2</td>
-                        <td class="content__table-cell">Tubérculo</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Arracacha</td>
+                        <td class="content__table-data">CUL00003</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">Parcela 2</td>
+                        <td class="content__table-data">Tubérculo</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Zanahoria</td>
-                        <td class="content__table-cell">CUL00043</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">invernadero Sur</td>
-                        <td class="content__table-cell">Vegetal</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Zanahoria</td>
+                        <td class="content__table-data">CUL00043</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">invernadero Sur</td>
+                        <td class="content__table-data">Vegetal</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Papa Criolla</td>
-                        <td class="content__table-cell">CUL00034</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">Parcela 4</td>
-                        <td class="content__table-cell">Tubérculo</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Papa Criolla</td>
+                        <td class="content__table-data">CUL00034</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">Parcela 4</td>
+                        <td class="content__table-data">Tubérculo</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Remolacha</td>
-                        <td class="content__table-cell">CUL00005</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">Parcela 5</td>
-                        <td class="content__table-cell">Tubérculo</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Remolacha</td>
+                        <td class="content__table-data">CUL00005</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">Parcela 5</td>
+                        <td class="content__table-data">Tubérculo</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Limón</td>
-                        <td class="content__table-cell">CUL00001</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">Parcela 3</td>
-                        <td class="content__table-cell">Fruta</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Limón</td>
+                        <td class="content__table-data">CUL00001</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">Parcela 3</td>
+                        <td class="content__table-data">Fruta</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Cebolla</td>
-                        <td class="content__table-cell">CUL00044</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">Parcela 3</td>
-                        <td class="content__table-cell">Verdura</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Cebolla</td>
+                        <td class="content__table-data">CUL00044</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">Parcela 3</td>
+                        <td class="content__table-data">Verdura</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Mango</td>
-                        <td class="content__table-cell">CUL00022</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">Parcela 5</td>
-                        <td class="content__table-cell">Fruta</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Mango</td>
+                        <td class="content__table-data">CUL00022</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">Parcela 5</td>
+                        <td class="content__table-data">Fruta</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Banano</td>
-                        <td class="content__table-cell">CUL00008</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">Parcela 5</td>
-                        <td class="content__table-cell">Fruta</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Banano</td>
+                        <td class="content__table-data">CUL00008</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">Parcela 5</td>
+                        <td class="content__table-data">Fruta</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
                     <tr class="content__table-row">
-                        <td class="content__table-cell">Carambolo</td>
-                        <td class="content__table-cell">CUL00066</td>
-                        <td class="content__table-cell">500 uds</td>
-                        <td class="content__table-cell">invernadero Oeste</td>
-                        <td class="content__table-cell">Fruta</td>
-                        <td class="content__table-cell">
-                            <div class="icon-container">
-                                <div class="icon-container__icon icon-container__icon--blue" title="Editar">
+                        <td class="content__table-data">Carambolo</td>
+                        <td class="content__table-data">CUL00066</td>
+                        <td class="content__table-data">500 uds</td>
+                        <td class="content__table-data">invernadero Oeste</td>
+                        <td class="content__table-data">Fruta</td>
+                        <td class="content__table-data">
+                            <div class="content__icon-container">
+                                <div class="content__icon content__icon--blue" title="Editar">
                                     <i class='bx bxs-edit' id="redirectButton"></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--red" title="Eliminar">
+                                <div class="content__icon content__icon--red" title="Eliminar">
                                     <i class='bx bxs-trash'></i>
                                 </div>
-                                <div class="icon-container__icon icon-container__icon--green" id="cropCycleDetails" title="Más información">
+                                <div class="content__icon content__icon--green" id="cropCycleDetails" title="Más información">
                                     <i class='bx bx-plus-circle' id="showCycleDetails"></i>
                                 </div>
-                                <!-- Modal -->
-                                <div class="modal" id="cropCycleModal">
-                                    <div class="modal__overlay"></div>
-                                    <div class="modal__content">
-                                        <span class="modal__close" id="closeModal">&times;</span>
-                                        <div id="modalContent" class="modal__body">
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
@@ -481,17 +363,136 @@
                     <!-- Repeat similar structure for other rows -->
                 </tbody>
             </table>
+
+            <!-- Modal para detalles del ciclo de cultivo -->
+            <div id="cropCycleModal" class="modal-container">
+                <div class="modal-content">
+                    <span class="close-button" id="closeModal">&times;</span>
+                    <div id="modalContent" class="modal-body">
+                        <!-- El contenido se cargará aquí -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal para detalles del ciclo de cultivo -->
+            <div id="cropCycleModal" class="modal-container">
+                <div class="modal-content">
+                    <span class="close-button" id="closeModal">&times;</span>
+                    <div id="modalContent" class="modal-body">
+                        <!-- El contenido se cargará aquí -->
+                    </div>
+                </div>
+            </div>
         </section>
     </main>
-    <script>
-        document.getElementById("redirectButton").onclick = function() {
-            window.location.href = "actualizar_cultivo.html"; // Cambia la ruta si es necesario
-        };
-        document.getElementById("add").onclick = function() {
-            window.location.href = "cultivo-agregar.html"; // Cambia la ruta si es necesario
-        };    
-        document.getElementById("download").onclick = function() {
-            window.location.href = "cultivo_informe.html"; // Cambia la ruta si es necesario
+    <!-- Modal para Agregar Cultivo -->
+    <div id="addCultivoModal" class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Agregar Cultivo</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addCultivoForm">
+                    <div class="form-group">
+                        <label for="tipo">Tipo de Cultivo:</label>
+                        <input type="text" id="tipo" name="tipo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre">Nombre del cultivo:</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id">Identificador del cultivo:</label>
+                        <input type="text" id="id" name="id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="imagen">Fotografía:</label>
+                        <input type="file" id="imagen" name="imagen" accept="image/*" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tamaño">Tamaño:</label>
+                        <input type="number" id="tamaño" name="tamano" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ubicacion">Ubicación:</label>
+                        <select name="ubicacion" id="ubicacion" required>
+                            <option value="">Seleccione una ubicación</option>
+                            <option value="Parcela 3">Parcela 3</option>
+                            <option value="Parcela 5">Parcela 5</option>
+                            <option value="Invernadero Norte">Invernadero Norte</option>
+                            <option value="Invernadero Central">Invernadero Central</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion">Descripción:</label>
+                        <textarea name="descripcion" id="descripcion" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="estado">Estado:</label>
+                        <select name="estado" id="estado" required>
+                            <option value="habilitado">Habilitado</option>
+                            <option value="deshabilitado">Deshabilitado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="insumos">Insumos:</label>
+                        <select name="insumos" id="insumos" multiple required>
+                            <option value="Fertilizantes">Fertilizantes</option>
+                            <option value="Fungicidas">Fungicidas</option>
+                            <option value="Invernaderos">Invernaderos</option>
+                            <option value="Mangas">Mangas</option>
+                            <option value="Mallas protectoras">Mallas protectoras</option>
+                            <option value="Personal de Apoyo">Personal de Apoyo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sensores">Sensores:</label>
+                        <select name="sensores" id="sensores" multiple required>
+                            <option value="Sensor de humedad">Sensor de humedad</option>
+                            <option value="Sensor de temperatura">Sensor de temperatura</option>
+                            <option value="Sensor de luminosidad">Sensor de luminosidad</option>
+                        </select>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn-primary">Agregar</button>
+                        <button type="button" class="btn-secondary close-button">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+        <script>
+        // Lógica para el modal de Agregar Cultivo
+        const addCultivoModal = document.getElementById('addCultivoModal');
+        const addButton = document.getElementById('add');
+        const closeButtons = document.querySelectorAll('#addCultivoModal .close-button');
+
+        if (addButton) {
+            addButton.addEventListener('click', () => {
+                // Mostramos el modal cambiando su display a 'flex' para que se centre
+                addCultivoModal.classList.add('active');
+            });
+        }
+
+        // Añadimos el evento de cierre a todos los botones de cerrar
+        closeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                addCultivoModal.classList.remove('active');
+            });
+        });
+
+        // Cerrar el modal si se hace clic fuera de su contenido
+        window.addEventListener('click', (event) => {
+            if (event.target === addCultivoModal) {
+                addCultivoModal.classList.remove('active');
+            }
+        });
+
+        // La redirección para descargar informes se mantiene
+        document.getElementById("download").onclick = function () {
+            window.location.href = "cultivo_informe.html";
         };
     </script>
 </body>
