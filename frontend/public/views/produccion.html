@@ -6,152 +6,2089 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestión de Producciones Agrícolas</title>
   <link rel="stylesheet" href="/frontend/public/css/components/tabla-unificada.css">
-  <!-- Estilos principales -->
   <link rel="stylesheet" href="/frontend/public/css/pages/Normalize.css">
   <link rel="stylesheet" href="/frontend/public/css/pages/produccion.css">
-  <link rel="stylesheet" href="/frontend/public/css/main.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+  <!-- CDNs para exportación -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 
 <body>
-  <aside class="sidebar"></aside>
-  <div class="produccion">
-    <header class="produccion__header">
-      <h1 class="produccion__title">Gestión de Producciones Agrícolas</h1>
-      <div class="produccion__actions">
-        <button id="crearProduccionBtn" class="produccion__button produccion__button--primary">
-          <i class="fas fa-plus"></i> Crear Producción
-        </button>
-      </div>
-    </header>
-
-    <nav class="produccion__tabs">
-      <button data-tab="listar" class="produccion__tab produccion__tab--active">Listar</button>
-      <button data-tab="reportes" class="produccion__tab">Reportes</button>
-    </nav>
-
-    <main class="produccion__content">
-      <section id="listar" class="produccion__section produccion__section--active">
-        <table class="produccion__table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Cultivo</th>
-              <th>Insumos</th>
-              <th>Responsable</th>
-              <th>Fecha de Inicio</th>
-              <th>Fecha de Fin</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="produccionesTableBody"></tbody>
-        </table>
-      </section>
-
-      <section id="estado" class="produccion__section">
-        <p>Habilitar/Deshabilitar</p>
-      </section>
-
-      <section id="reportes" class="produccion__section">
-        <p>Generar Reportes</p>
-      </section>
-    </main>
+  <!-- Header consistente con otros componentes -->
+  <div class="header">
+    <div class="header__left-section">
+      <span class="header__menu-item">Producciones</span>
+      <span class="header__menu-separator">/</span>
+      <span class="header__menu-item">Gestión de Producciones Agrícolas</span>
+      <span class="header__menu-separator">-</span>
+      <span class="header__menu-item" id="cantidadProducciones">Cantidad de Producciones: 0</span>
+    </div>
+    <div class="header__right-section">
+      <input type="text" class="header__search-bar" id="searchInput" placeholder="Buscar producciones...">
+      <span class="header__icon"><i class='bx bx-message-square-add' id="add" title="Crear Producción"></i></span>
+      <span class="header__icon"><box-icon name='bell' type='solid'></box-icon></span>
+    </div>
   </div>
 
-  <!-- Modal Crear Producción -->
-  <div id="modalCrearProduccion" class="modal">
+  <div class="sidebar"></div>
+  <main class="full-main">
+    <section class="content">
+      <!-- Navegación de tabs -->
+      <nav class="produccion__tabs">
+        <button data-tab="listar" class="produccion__tab produccion__tab--active">Listar</button>
+        <button data-tab="reportes" class="produccion__tab">Reportes</button>
+        <button data-tab="graficos" class="produccion__tab">Gráficos</button>
+      </nav>
+
+      <main class="produccion__content">
+        <!-- Sección Listar -->
+        <section id="listar" class="produccion__section produccion__section--active">
+          <div class="filters-container">
+            <select id="estadoFilter" class="filter-select">
+              <option value="">Todos los estados</option>
+              <option value="habilitado">Habilitado</option>
+              <option value="deshabilitado">Deshabilitado</option>
+            </select>
+          </div>
+
+          <table class="content__table">
+            <thead class="content__table-head">
+              <tr class="content__table-row">
+                <th class="content__table-header">ID</th>
+                <th class="content__table-header">Nombre</th>
+                <th class="content__table-header">Tipo</th>
+                <th class="content__table-header">Ubicación</th>
+                <th class="content__table-header">Cultivo</th>
+                <th class="content__table-header">Responsable</th>
+                <th class="content__table-header">Inversión</th>
+                <th class="content__table-header">Meta</th>
+                <th class="content__table-header">Estado</th>
+                <th class="content__table-header">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="content__table-body" id="produccionesTableBody"></tbody>
+          </table>
+        </section>
+
+        <!-- Sección Reportes -->
+        <section id="reportes" class="produccion__section">
+          <h2>Generar Reportes</h2>
+          <div class="reportes-container">
+            <div class="reporte-filters">
+              <h3>Filtros de Reporte</h3>
+              <div class="filter-group">
+                <label for="reporteEstado">Estado:</label>
+                <select id="reporteEstado">
+                  <option value="">Todos</option>
+                  <option value="habilitado">Habilitado</option>
+                  <option value="deshabilitado">Deshabilitado</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="reporteFechaInicio">Fecha desde:</label>
+                <input type="date" id="reporteFechaInicio">
+              </div>
+              <div class="filter-group">
+                <label for="reporteFechaFin">Fecha hasta:</label>
+                <input type="date" id="reporteFechaFin">
+              </div>
+              <button id="generarReporteBtn" class="produccion__button produccion__button--primary">
+                Generar Reporte
+              </button>
+
+              <div class="export-buttons">
+                <button id="exportarReportePDFBtn" class="produccion__button produccion__button--secondary">
+                  <i class="fas fa-file-pdf"></i> Exportar PDF
+                </button>
+                <button id="exportarReporteExcelBtn" class="produccion__button produccion__button--secondary">
+                  <i class="fas fa-file-excel"></i> Exportar Excel
+                </button>
+              </div>
+            </div>
+
+            <div class="estadisticas-container" id="estadisticasContainer">
+              <!-- Estadísticas se mostrarán aquí -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Sección Gráficos -->
+        <section id="graficos" class="produccion__section">
+          <h2>Gráficos y Estadísticas</h2>
+          <div class="graficos-container">
+            <div class="grafico-item">
+              <h4>Distribución por Estado</h4>
+              <canvas id="graficoEstados"></canvas>
+            </div>
+            <div class="grafico-item">
+              <h4>Distribución por Tipo</h4>
+              <canvas id="graficoTipos"></canvas>
+            </div>
+            <div class="grafico-item">
+              <h4>Inversión vs Meta por Producción</h4>
+              <canvas id="graficoInversionMeta"></canvas>
+            </div>
+            <div class="grafico-item">
+              <h4>Tendencia de Creación</h4>
+              <canvas id="graficoTendencia"></canvas>
+            </div>
+          </div>
+        </section>
+      </main>
+    </section>
+  </main>
+
+  <!-- Modal Crear/Editar Producción -->
+  <div id="modalProduccion" class="modal">
     <div class="modal__content">
       <button class="modal__close">&times;</button>
-      <h2>Crear Producción</h2>
-      <form id="crearProduccionForm" class="modal-form">
+      <h2 id="modalTitle">Crear Producción</h2>
+      <form id="produccionForm" class="modal-form">
+        <input type="hidden" id="produccionId">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nombre">Nombre de la Producción <span class="required">*</span></label>
+            <input type="text" id="nombre" name="nombre" required maxlength="100">
+          </div>
+          <div class="form-group">
+            <label for="tipo">Tipo <span class="required">*</span></label>
+            <input type="text" id="tipo" name="tipo" required maxlength="50">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ubicacion">Ubicación <span class="required">*</span></label>
+            <input type="text" id="ubicacion" name="ubicacion" required maxlength="100">
+          </div>
+          <div class="form-group">
+            <label for="usuario_id">Responsable</label>
+            <select id="usuario_id" name="usuario_id">
+              <option value="">Sin asignar</option>
+            </select>
+          </div>
+        </div>
+
         <div class="form-group">
-          <label for="produccionId">ID Producción</label>
-          <input id="produccionId" disabled>
+          <label for="descripcion">Descripción <span class="required">*</span></label>
+          <textarea id="descripcion" name="descripcion" required rows="3"></textarea>
         </div>
-        <div class="form-group inline-group">
-          <label for="responsable">Responsable</label>
-          <select id="responsable"></select>
-          <button type="button" id="agregarResponsableBtn" class="btn-small"><i class="fas fa-plus"></i></button>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cultivo_id">Cultivo</label>
+            <select id="cultivo_id" name="cultivo_id">
+              <option value="">Seleccionar cultivo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ciclo_id">Ciclo de Cultivo</label>
+            <select id="ciclo_id" name="ciclo_id">
+              <option value="">Seleccionar ciclo</option>
+            </select>
+          </div>
         </div>
+
         <div class="form-group">
-          <label for="nombreProduccion">Nombre de Producción</label>
-          <input id="nombreProduccion" placeholder="Ingrese un nombre">
-          <span id="nombreError" class="error-message"></span>
+          <label for="sensores_ids">Sensores (Ctrl+Click para múltiple)</label>
+          <select id="sensores_ids" name="sensores_ids" multiple size="4">
+          </select>
+          <small>Mantenga Ctrl presionado para seleccionar múltiples sensores</small>
         </div>
-        <div class="form-group inline-group">
-          <label for="cultivo">Cultivo</label>
-          <select id="cultivo"></select>
-          <button type="button" id="agregarCultivoBtn" class="btn-small"><i class="fas fa-plus"></i></button>
-        </div>
-        <div class="form-group inline-group">
-          <label for="cicloCultivo">Ciclo</label>
-          <select id="cicloCultivo"></select>
-          <button type="button" id="agregarCicloBtn" class="btn-small"><i class="fas fa-plus"></i></button>
-        </div>
-        <div class="form-group inline-group">
-          <label for="sensores">Sensores (máx 3)</label>
-          <select id="sensores" multiple size="3"></select>
-          <button type="button" id="agregarSensorBtn" class="btn-small"><i class="fas fa-plus"></i></button>
-          <span id="sensoresError" class="error-message"></span>
-        </div>
-        <div class="form-group inline-group">
-          <label for="insumos">Insumos</label>
-          <select id="insumos" multiple size="3"></select>
-          <button type="button" id="agregarInsumoBtn" class="btn-small"><i class="fas fa-plus"></i></button>
-        </div>
+
         <div class="form-group">
-          <label for="fechaInicio">Fecha Inicio</label>
-          <input id="fechaInicio" type="text" placeholder="DD/MM/YYYY">
+          <label>Consumo de Insumos (define inversión automáticamente)</label>
+          <div id="insumosContainer">
+            <div class="insumo-item">
+              <div class="insumo-column">
+                <label>Insumo:</label>
+                <select class="insumo-select">
+                  <option value="">Seleccionar insumo</option>
+                </select>
+              </div>
+              <div class="insumo-column">
+                <label>Cantidad:</label>
+                <input type="number" class="insumo-cantidad" placeholder="Cantidad" min="1">
+              </div>
+              <div class="insumo-column">
+                <label>Costo:</label>
+                <span class="insumo-costo">$0</span>
+              </div>
+              <div class="insumo-column">
+                <button type="button" class="btn-remove-insumo">×</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" id="addInsumoBtn" class="btn-add">+ Agregar Insumo</button>
         </div>
-        <div class="form-group">
-          <label for="fechaFin">Fecha Fin</label>
-          <input id="fechaFin" type="text" placeholder="DD/MM/YYYY">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fecha_de_inicio">Fecha de Inicio</label>
+            <input type="date" id="fecha_de_inicio" name="fecha_de_inicio">
+          </div>
+          <div class="form-group">
+            <label for="fecha_fin">Fecha de Fin</label>
+            <input type="date" id="fecha_fin" name="fecha_fin">
+          </div>
         </div>
-        <div class="form-group">
-          <label>Inversión</label>
-          <span id="inversionEstimada" class="form-value">$0</span>
-        </div>
-        <div class="form-group">
-          <label>Meta</label>
-          <span id="metaEstimada" class="form-value">$0</span>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Inversión Total (calculada automáticamente)</label>
+            <span id="inversionTotal" class="form-value">$0</span>
+          </div>
+          <div class="form-group">
+            <label>Meta de Ganancia (1.3x inversión)</label>
+            <span id="metaGanancia" class="form-value">$0</span>
+          </div>
         </div>
 
         <div class="modal__actions">
-          <button type="button" id="guardarBorrador" class="produccion__button produccion__button--secondary">
-            Guardar Borrador
+          <button type="button" class="produccion__button produccion__button--secondary" id="cancelarBtn">
+            Cancelar
           </button>
-          <button type="button" id="crearProduccion" class="produccion__button produccion__button--primary" disabled>
-            Crear Producción
+          <button type="submit" class="produccion__button produccion__button--primary">
+            <span id="submitText">Crear Producción</span>
           </button>
         </div>
       </form>
     </div>
   </div>
-  <div class="stats-sidebar">
-    <div class="chart-container">
-        <h3 class="chart-title">Temperatura (°C) - Últimas 24 horas</h3>
-        <canvas id="tempChart"></canvas>
+
+  <!-- Modal Ver Detalles -->
+  <div id="modalDetalles" class="modal">
+    <div class="modal__content">
+      <button class="modal__close">&times;</button>
+      <h2>Detalles de la Producción</h2>
+      <div id="detallesContent" class="detalles-content">
+        <!-- Contenido dinámico -->
+      </div>
+      <div class="modal__actions">
+        <button type="button" class="produccion__button produccion__button--secondary modal__close">
+        </button>
+      </div>
     </div>
-    
-    <div class="chart-container">
-        <h3 class="chart-title">Velocidad del Viento (km/h) - Últimas 24 horas</h3>
-        <canvas id="windChart"></canvas>
-    </div>
-    
-    <div class="chart-container">
-        <h3 class="chart-title">Intensidad Lumínica (lux) - Últimas 24 horas</h3>
-        <canvas id="lightChart"></canvas>
-    </div>
-</div>
+  </div>
+
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/frontend/JS/sidebar.js"></script>
-  <script src="/frontend/JS/produccionForm.js"></script>
-  <script src="/frontend/JS/statsSidebarInit.js"></script>
+
+  <script>
+    // Configuración API
+    const API_URL = "http://localhost:3000/api/producciones";
+    const USUARIOS_API_URL = "http://localhost:3000/api/usuarios";
+    const CULTIVOS_API_URL = "http://localhost:3000/api/cultivos";
+    const CICLOS_API_URL = "http://localhost:3000/api/ciclo-cultivo";
+    const INSUMOS_API_URL = "http://localhost:3000/api/insumos";
+    const SENSORES_API_URL = "http://localhost:3000/api/sensores";
+
+    // Variables globales
+    let todasLasProducciones = [];
+    let produccionesFiltradas = [];
+    let usuarios = [];
+    let cultivos = [];
+    let ciclos = [];
+    let insumos = [];
+    let sensores = [];
+
+    // Variables para reportes
+    let datosReporte = [];
+
+    // Elementos DOM
+    const tableBody = document.getElementById('produccionesTableBody');
+    const searchInput = document.getElementById('searchInput');
+    const estadoFilter = document.getElementById('estadoFilter');
+    const modalProduccion = document.getElementById('modalProduccion');
+    const modalDetalles = document.getElementById('modalDetalles');
+    const produccionForm = document.getElementById('produccionForm');
+    const cantidadProducciones = document.getElementById('cantidadProducciones');
+
+    // Funciones de utilidad
+    function showNotification(message, type = 'info') {
+      alert(message);
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      return new Date(dateString).toLocaleDateString('es-CO');
+    }
+
+    function formatCurrency(amount) {
+      if (!amount) return '$0';
+      return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP'
+      }).format(amount);
+    }
+
+    // Cargar datos relacionados
+    async function cargarDatosRelacionados() {
+      try {
+        const [usuariosRes, cultivosRes, ciclosRes, insumosRes, sensoresRes] = await Promise.all([
+          fetch(USUARIOS_API_URL),
+          fetch(CULTIVOS_API_URL),
+          fetch(CICLOS_API_URL),
+          fetch(INSUMOS_API_URL),
+          fetch(SENSORES_API_URL)
+        ]);
+
+        if (usuariosRes.ok) usuarios = await usuariosRes.json();
+        if (cultivosRes.ok) cultivos = await cultivosRes.json();
+        if (ciclosRes.ok) ciclos = await ciclosRes.json();
+        if (insumosRes.ok) insumos = await insumosRes.json();
+        if (sensoresRes.ok) sensores = await sensoresRes.json();
+
+        llenarSelectores();
+      } catch (error) {
+        console.error('Error cargando datos relacionados:', error);
+      }
+    }
+
+    // Llenar selectores
+    function llenarSelectores() {
+      // Usuarios
+      const usuarioSelect = document.getElementById('usuario_id');
+      if (usuarioSelect) {
+        usuarioSelect.innerHTML = '<option value="">Sin asignar</option>';
+        usuarios.forEach(user => {
+          usuarioSelect.innerHTML += `<option value="${user.id}">${user.nombre}</option>`;
+        });
+      }
+
+      // Cultivos
+      const cultivoSelect = document.getElementById('cultivo_id');
+      if (cultivoSelect) {
+        cultivoSelect.innerHTML = '<option value="">Seleccionar cultivo</option>';
+        cultivos.filter(c => c.estado === 'habilitado').forEach(cultivo => {
+          cultivoSelect.innerHTML += `<option value="${cultivo.id}">${cultivo.nombre}</option>`;
+        });
+      }
+
+      // Ciclos
+      const cicloSelect = document.getElementById('ciclo_id');
+      if (cicloSelect) {
+        cicloSelect.innerHTML = '<option value="">Seleccionar ciclo</option>';
+        ciclos.filter(c => c.estado === 'habilitado').forEach(ciclo => {
+          cicloSelect.innerHTML += `<option value="${ciclo.id}">${ciclo.nombre}</option>`;
+        });
+      }
+
+      // Sensores
+      const sensoresSelect = document.getElementById('sensores_ids');
+      if (sensoresSelect) {
+        sensoresSelect.innerHTML = '';
+        sensores.filter(s => s.estado === 'habilitado').forEach(sensor => {
+          sensoresSelect.innerHTML += `<option value="${sensor.id}">${sensor.nombre_sensor}</option>`;
+        });
+      }
+
+      actualizarSelectoresInsumos();
+    }
+
+    // Actualizar selectores de insumos
+    function actualizarSelectoresInsumos() {
+      const insumoSelects = document.querySelectorAll('.insumo-select');
+      insumoSelects.forEach(select => {
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">Seleccionar insumo</option>';
+        insumos.filter(i => i.estado === 'habilitado' && i.cantidad > 0).forEach(insumo => {
+          select.innerHTML += `<option value="${insumo.id}" data-cantidad="${insumo.cantidad}" data-valor="${insumo.valor}">${insumo.nombre} (Disponible: ${insumo.cantidad}) - ${formatCurrency(insumo.valor)}/unidad</option>`;
+        });
+        if (currentValue) select.value = currentValue;
+      });
+    }
+
+    // Calcular inversión y meta
+    function calcularInversionYMeta() {
+      let inversionTotal = 0;
+
+      document.querySelectorAll('.insumo-item').forEach(item => {
+        const select = item.querySelector('.insumo-select');
+        const cantidadInput = item.querySelector('.insumo-cantidad');
+        const costoSpan = item.querySelector('.insumo-costo');
+
+        if (select && cantidadInput && costoSpan) {
+          if (select.value && cantidadInput.value) {
+            const selectedOption = select.selectedOptions[0];
+            const valorUnitario = parseFloat(selectedOption.dataset.valor) || 0;
+            const cantidad = parseInt(cantidadInput.value) || 0;
+            const costoInsumo = valorUnitario * cantidad;
+
+            costoSpan.textContent = formatCurrency(costoInsumo);
+            inversionTotal += costoInsumo;
+          } else {
+            costoSpan.textContent = '$0';
+          }
+        }
+      });
+
+      const metaGanancia = inversionTotal * 1.3;
+
+      const inversionElement = document.getElementById('inversionTotal');
+      const metaElement = document.getElementById('metaGanancia');
+
+      if (inversionElement) inversionElement.textContent = formatCurrency(inversionTotal);
+      if (metaElement) metaElement.textContent = formatCurrency(metaGanancia);
+    }
+
+    // Cargar producciones
+    async function cargarProducciones() {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error('Error al cargar producciones');
+
+        todasLasProducciones = await response.json();
+        produccionesFiltradas = todasLasProducciones;
+        renderizarTabla();
+      } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error al cargar las producciones', 'error');
+      }
+    }
+
+    // Renderizar tabla
+    function renderizarTabla() {
+      if (!tableBody) return;
+
+      if (!produccionesFiltradas.length) {
+        tableBody.innerHTML = '<tr><td colspan="10" style="text-align: center;">No hay producciones registradas</td></tr>';
+        if (cantidadProducciones) cantidadProducciones.textContent = 'Cantidad de Producciones: 0';
+        return;
+      }
+
+      tableBody.innerHTML = produccionesFiltradas.map(prod => `
+        <tr class="content__table-row">
+          <td class="content__table-data">${prod.id}</td>
+          <td class="content__table-data">${prod.nombre}</td>
+          <td class="content__table-data">${prod.tipo}</td>
+          <td class="content__table-data">${prod.ubicacion}</td>
+          <td class="content__table-data">${prod.cultivo_nombre || 'N/A'}</td>
+          <td class="content__table-data">${prod.usuario_nombre || 'N/A'}</td>
+          <td class="content__table-data">${formatCurrency(prod.inversion)}</td>
+          <td class="content__table-data">${formatCurrency(prod.meta_ganancia)}</td>
+          <td class="content__table-data">
+            <span class="${prod.estado === 'habilitado' ? 'content__status-enabled' : 'content__status-disabled'}"></span>
+            ${prod.estado === 'habilitado' ? 'Activo' : 'Inactivo'}
+          </td>
+          <td class="content__table-data">
+            <div class="content__icon-container">
+              <div class="content__icon content__icon--blue" title="Ver detalles">
+                <i class="bx bx-show view-button" data-id="${prod.id}"></i>
+              </div>
+              <div class="content__icon content__icon--blue" title="Editar">
+                <i class="bx bxs-edit edit-button" data-id="${prod.id}"></i>
+              </div>
+              <div class="content__icon content__icon--red" title="Eliminar">
+                <i class="bx bxs-trash delete-button" data-id="${prod.id}"></i>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      if (cantidadProducciones) {
+        cantidadProducciones.textContent = `Cantidad de Producciones: ${produccionesFiltradas.length}`;
+      }
+    }
+
+    // Filtros
+    function aplicarFiltros() {
+      if (!searchInput) return;
+
+      const searchTerm = searchInput.value.toLowerCase();
+      const estadoFiltro = estadoFilter ? estadoFilter.value : '';
+
+      produccionesFiltradas = todasLasProducciones.filter(prod => {
+        const matchesSearch = !searchTerm ||
+          prod.nombre.toLowerCase().includes(searchTerm) ||
+          prod.tipo.toLowerCase().includes(searchTerm) ||
+          prod.ubicacion.toLowerCase().includes(searchTerm);
+
+        const matchesEstado = !estadoFiltro || prod.estado === estadoFiltro;
+
+        return matchesSearch && matchesEstado;
+      });
+
+      renderizarTabla();
+    }
+
+    // Gestión de tabs
+    function setupTabs() {
+      const tabs = document.querySelectorAll('.produccion__tab');
+      const sections = document.querySelectorAll('.produccion__section');
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetTab = tab.dataset.tab;
+
+          tabs.forEach(t => t.classList.remove('produccion__tab--active'));
+          sections.forEach(s => s.classList.remove('produccion__section--active'));
+
+          tab.classList.add('produccion__tab--active');
+          const targetSection = document.getElementById(targetTab);
+          if (targetSection) {
+            targetSection.classList.add('produccion__section--active');
+          }
+
+          // Si se abre la tab de gráficos, generarlos
+          if (targetTab === 'graficos') {
+            setTimeout(generarGraficos, 100);
+          }
+        });
+      });
+    }
+
+    // Modal functions
+    function abrirModal(modal) {
+      if (modal) {
+        modal.style.display = 'flex';
+      }
+    }
+
+    function cerrarModal(modal) {
+      if (modal) {
+        modal.style.display = 'none';
+      }
+    }
+
+    // Agregar/remover insumos con layout vertical
+    function setupInsumosManagement() {
+      const container = document.getElementById('insumosContainer');
+      const addBtn = document.getElementById('addInsumoBtn');
+
+      if (!container || !addBtn) return;
+
+      function addInsumoListeners(item) {
+        const select = item.querySelector('.insumo-select');
+        const cantidadInput = item.querySelector('.insumo-cantidad');
+        const removeBtn = item.querySelector('.btn-remove-insumo');
+
+        if (select) {
+          select.addEventListener('change', () => {
+            const selectedOption = select.selectedOptions[0];
+            if (selectedOption && selectedOption.dataset.cantidad && cantidadInput) {
+              cantidadInput.max = selectedOption.dataset.cantidad;
+              cantidadInput.placeholder = `Máx: ${selectedOption.dataset.cantidad}`;
+            }
+            calcularInversionYMeta();
+          });
+        }
+
+        if (cantidadInput) {
+          cantidadInput.addEventListener('input', calcularInversionYMeta);
+        }
+
+        if (removeBtn) {
+          removeBtn.addEventListener('click', () => {
+            if (container.children.length > 1) {
+              item.remove();
+              calcularInversionYMeta();
+            }
+          });
+        }
+      }
+
+      const firstItem = container.firstElementChild;
+      if (firstItem) {
+        addInsumoListeners(firstItem);
+      }
+
+      addBtn.addEventListener('click', () => {
+        const insumoItem = document.createElement('div');
+        insumoItem.className = 'insumo-item';
+        insumoItem.innerHTML = `
+          <div class="insumo-column">
+            <label>Insumo:</label>
+            <select class="insumo-select">
+              <option value="">Seleccionar insumo</option>
+            </select>
+          </div>
+          <div class="insumo-column">
+            <label>Cantidad:</label>
+            <input type="number" class="insumo-cantidad" placeholder="Cantidad" min="1">
+          </div>
+          <div class="insumo-column">
+            <label>Costo:</label>
+            <span class="insumo-costo">$0</span>
+          </div>
+          <div class="insumo-column">
+            <button type="button" class="btn-remove-insumo">×</button>
+          </div>
+        `;
+
+        container.appendChild(insumoItem);
+        actualizarSelectoresInsumos();
+        addInsumoListeners(insumoItem);
+      });
+    }
+
+    // Crear producción
+    function crearProduccion() {
+      const modalTitle = document.getElementById('modalTitle');
+      const submitText = document.getElementById('submitText');
+      const produccionIdInput = document.getElementById('produccionId');
+
+      if (modalTitle) modalTitle.textContent = 'Crear Producción';
+      if (submitText) submitText.textContent = 'Crear Producción';
+      if (produccionIdInput) produccionIdInput.value = '';
+
+      if (produccionForm) produccionForm.reset();
+
+      // Limpiar insumos excepto el primero
+      const container = document.getElementById('insumosContainer');
+      if (container) {
+        const items = container.querySelectorAll('.insumo-item');
+        for (let i = items.length - 1; i > 0; i--) {
+          items[i].remove();
+        }
+
+        const inversionElement = document.getElementById('inversionTotal');
+        const metaElement = document.getElementById('metaGanancia');
+        const costoElement = container.querySelector('.insumo-costo');
+
+        if (inversionElement) inversionElement.textContent = '$0';
+        if (metaElement) metaElement.textContent = '$0';
+        if (costoElement) costoElement.textContent = '$0';
+      }
+
+      // Restaurar campos si estaban deshabilitados
+      ['usuario_id', 'cultivo_id', 'ciclo_id', 'sensores_ids'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.disabled = false;
+      });
+
+      const addBtn = document.getElementById('addInsumoBtn');
+      if (addBtn) addBtn.style.display = 'block';
+
+      if (container) container.parentElement.style.display = 'block';
+
+      const inversionContainer = document.getElementById('inversionTotal');
+      if (inversionContainer) inversionContainer.parentElement.parentElement.style.display = 'flex';
+
+      abrirModal(modalProduccion);
+    }
+
+    // Editar producción - IMPLEMENTACIÓN COMPLETA
+    async function editarProduccion(id) {
+      console.log('Editando producción:', id);
+
+      try {
+        const response = await fetch(`${API_URL}/${id}`);
+        if (!response.ok) throw new Error('Error al cargar producción');
+
+        const prod = await response.json();
+        console.log('Datos de producción:', prod);
+
+        const modalTitle = document.getElementById('modalTitle');
+        const submitText = document.getElementById('submitText');
+        const produccionIdInput = document.getElementById('produccionId');
+
+        if (modalTitle) modalTitle.textContent = 'Editar Producción';
+        if (submitText) submitText.textContent = 'Actualizar Producción';
+        if (produccionIdInput) produccionIdInput.value = prod.id;
+
+        // Llenar formulario
+        const campos = ['nombre', 'tipo', 'ubicacion', 'descripcion'];
+        campos.forEach(campo => {
+          const element = document.getElementById(campo);
+          if (element) element.value = prod[campo] || '';
+        });
+
+        // Fechas
+        const fechaInicio = document.getElementById('fecha_de_inicio');
+        const fechaFin = document.getElementById('fecha_fin');
+        if (fechaInicio && prod.fecha_de_inicio) {
+          fechaInicio.value = prod.fecha_de_inicio.split('T')[0];
+        }
+        if (fechaFin && prod.fecha_fin) {
+          fechaFin.value = prod.fecha_fin.split('T')[0];
+        }
+
+        // Deshabilitar campos que no se pueden editar en edición
+        const camposDeshabilitados = ['usuario_id', 'cultivo_id', 'ciclo_id', 'sensores_ids'];
+        camposDeshabilitados.forEach(campo => {
+          const element = document.getElementById(campo);
+          if (element) element.disabled = true;
+        });
+
+        // Ocultar sección de insumos en edición
+        const addBtn = document.getElementById('addInsumoBtn');
+        const container = document.getElementById('insumosContainer');
+        const inversionContainer = document.getElementById('inversionTotal');
+
+        if (addBtn) addBtn.style.display = 'none';
+        if (container) container.parentElement.style.display = 'none';
+        if (inversionContainer) inversionContainer.parentElement.parentElement.style.display = 'none';
+
+        abrirModal(modalProduccion);
+      } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error al cargar los datos de la producción', 'error');
+      }
+    }
+
+    // Ver detalles - IMPLEMENTACIÓN COMPLETA
+    async function verDetalles(id) {
+      console.log('Viendo detalles de producción:', id);
+
+      try {
+        const response = await fetch(`${API_URL}/${id}/detalles`);
+        if (!response.ok) throw new Error('Error al cargar detalles');
+
+        const prod = await response.json();
+        console.log('Detalles de producción:', prod);
+
+        let insumosHtml = '<p>Sin insumos registrados</p>';
+        if (prod.insumos_detalles && prod.insumos_detalles.length > 0) {
+          insumosHtml = prod.insumos_detalles.map(insumo =>
+            `<li>${insumo.nombre} - Tipo: ${insumo.tipo} - Valor: ${formatCurrency(insumo.valor)}</li>`
+          ).join('');
+          insumosHtml = `<ul>${insumosHtml}</ul>`;
+        }
+
+        let sensoresHtml = '<p>Sin sensores asignados</p>';
+        if (prod.sensores_detalles && prod.sensores_detalles.length > 0) {
+          sensoresHtml = prod.sensores_detalles.map(sensor =>
+            `<li>${sensor.nombre_sensor} - Tipo: ${sensor.tipo_sensor}</li>`
+          ).join('');
+          sensoresHtml = `<ul>${sensoresHtml}</ul>`;
+        }
+
+        const detallesContent = document.getElementById('detallesContent');
+        if (detallesContent) {
+          detallesContent.innerHTML = `
+            <div class="detalle-grid">
+              <div class="detalle-item"><strong>ID:</strong> ${prod.id}</div>
+              <div class="detalle-item"><strong>Nombre:</strong> ${prod.nombre}</div>
+              <div class="detalle-item"><strong>Tipo:</strong> ${prod.tipo}</div>
+              <div class="detalle-item"><strong>Ubicación:</strong> ${prod.ubicacion}</div>
+              <div class="detalle-item"><strong>Descripción:</strong> ${prod.descripcion}</div>
+              <div class="detalle-item"><strong>Cultivo:</strong> ${prod.cultivo_nombre || 'N/A'}</div>
+              <div class="detalle-item"><strong>Ciclo:</strong> ${prod.ciclo_nombre || 'N/A'}</div>
+              <div class="detalle-item"><strong>Responsable:</strong> ${prod.usuario_nombre || 'N/A'}</div>
+              <div class="detalle-item"><strong>Fecha Inicio:</strong> ${formatDate(prod.fecha_de_inicio)}</div>
+              <div class="detalle-item"><strong>Fecha Fin:</strong> ${formatDate(prod.fecha_fin)}</div>
+              <div class="detalle-item"><strong>Inversión:</strong> ${formatCurrency(prod.inversion)}</div>
+              <div class="detalle-item"><strong>Meta Ganancia:</strong> ${formatCurrency(prod.meta_ganancia)}</div>
+              <div class="detalle-item"><strong>Estado:</strong> 
+                <span class="${prod.estado === 'habilitado' ? 'content__status-enabled' : 'content__status-disabled'}">
+                  ${prod.estado === 'habilitado' ? 'Activo' : 'Inactivo'}
+                </span>
+              </div>
+              <div class="detalle-item full-width"><strong>Insumos:</strong><br>${insumosHtml}</div>
+              <div class="detalle-item full-width"><strong>Sensores:</strong><br>${sensoresHtml}</div>
+            </div>
+          `;
+        }
+
+        abrirModal(modalDetalles);
+      } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error al cargar los detalles', 'error');
+      }
+    }
+
+    // Eliminar producción
+    async function eliminarProduccion(id) {
+      if (!confirm('¿Está seguro de que desea eliminar esta producción? Esta acción no se puede deshacer.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/${id}`, {
+          method: 'DELETE'
+        });
+
+        if (!response.ok) throw new Error('Error al eliminar');
+
+        showNotification('Producción eliminada exitosamente', 'success');
+        cargarProducciones();
+      } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error al eliminar la producción', 'error');
+      }
+    }
+
+    // Generar estadísticas - IMPLEMENTACIÓN COMPLETA
+    function generarEstadisticas(datos = produccionesFiltradas) {
+      const stats = {
+        total: datos.length,
+        habilitadas: datos.filter(p => p.estado === 'habilitado').length,
+        deshabilitadas: datos.filter(p => p.estado === 'deshabilitado').length,
+        inversionTotal: datos.reduce((sum, p) => sum + (parseFloat(p.inversion) || 0), 0),
+        metaTotal: datos.reduce((sum, p) => sum + (parseFloat(p.meta_ganancia) || 0), 0),
+        tiposCount: {},
+        cultivosCount: {}
+      };
+
+      datos.forEach(prod => {
+        stats.tiposCount[prod.tipo] = (stats.tiposCount[prod.tipo] || 0) + 1;
+        if (prod.cultivo_nombre) {
+          stats.cultivosCount[prod.cultivo_nombre] = (stats.cultivosCount[prod.cultivo_nombre] || 0) + 1;
+        }
+      });
+
+      return stats;
+    }
+
+    // Mostrar estadísticas - IMPLEMENTACIÓN COMPLETA
+    function mostrarEstadisticas(datos = datosReporte.length ? datosReporte : produccionesFiltradas) {
+      const container = document.getElementById('estadisticasContainer');
+      if (!container) return;
+
+      const stats = generarEstadisticas(datos);
+
+      let tiposHtml = '';
+      Object.entries(stats.tiposCount).forEach(([tipo, count]) => {
+        tiposHtml += `<div class="stat-item"><strong>${tipo}:</strong> ${count}</div>`;
+      });
+
+      let cultivosHtml = '';
+      Object.entries(stats.cultivosCount).forEach(([cultivo, count]) => {
+        cultivosHtml += `<div class="stat-item"><strong>${cultivo}:</strong> ${count}</div>`;
+      });
+
+      container.innerHTML = `
+        <h3>Estadísticas ${datos.length !== produccionesFiltradas.length ? '(Filtradas)' : ''}</h3>
+        <div class="stats-grid">
+          <div class="stat-item"><strong>Total Producciones:</strong> ${stats.total}</div>
+          <div class="stat-item"><strong>Activas:</strong> ${stats.habilitadas}</div>
+          <div class="stat-item"><strong>Inactivas:</strong> ${stats.deshabilitadas}</div>
+          <div class="stat-item"><strong>Inversión Total:</strong> ${formatCurrency(stats.inversionTotal)}</div>
+          <div class="stat-item"><strong>Meta Total:</strong> ${formatCurrency(stats.metaTotal)}</div>
+        </div>
+        <h4>Por Tipos</h4>
+        <div class="stats-grid">${tiposHtml}</div>
+        <h4>Por Cultivos</h4>
+        <div class="stats-grid">${cultivosHtml}</div>
+      `;
+    }
+
+    // Generar gráficos - IMPLEMENTACIÓN COMPLETA
+    function generarGraficos() {
+      console.log('Generando gráficos...');
+
+      // Limpiar gráficos existentes
+      const charts = ['graficoEstados', 'graficoTipos', 'graficoInversionMeta', 'graficoTendencia'];
+      charts.forEach(chartId => {
+        const existingChart = Chart.getChart(chartId);
+        if (existingChart) {
+          existingChart.destroy();
+        }
+      });
+
+      const stats = generarEstadisticas(todasLasProducciones);
+
+      // 1. Gráfico de estados
+      const ctxEstados = document.getElementById('graficoEstados');
+      if (ctxEstados) {
+        new Chart(ctxEstados, {
+          type: 'doughnut',
+          data: {
+            labels: ['Activas', 'Inactivas'],
+            datasets: [{
+              data: [stats.habilitadas, stats.deshabilitadas],
+              backgroundColor: ['#28a745', '#dc3545'],
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom' },
+              title: { display: true, text: 'Estado de Producciones' }
+            }
+          }
+        });
+      }
+
+      // 2. Gráfico de tipos
+      const ctxTipos = document.getElementById('graficoTipos');
+      if (ctxTipos && Object.keys(stats.tiposCount).length > 0) {
+        new Chart(ctxTipos, {
+          type: 'pie',
+          data: {
+            labels: Object.keys(stats.tiposCount),
+            datasets: [{
+              data: Object.values(stats.tiposCount),
+              backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom' },
+              title: { display: true, text: 'Distribución por Tipo' }
+            }
+          }
+        });
+      }
+
+      // 3. Gráfico Inversión vs Meta
+      const ctxInversionMeta = document.getElementById('graficoInversionMeta');
+      if (ctxInversionMeta) {
+        const producciones = todasLasProducciones.slice(0, 10); // Top 10
+
+        new Chart(ctxInversionMeta, {
+          type: 'bar',
+          data: {
+            labels: producciones.map(p => p.nombre.length > 15 ? p.nombre.substring(0, 15) + '...' : p.nombre),
+            datasets: [
+              {
+                label: 'Inversión',
+                data: producciones.map(p => p.inversion || 0),
+                backgroundColor: '#36A2EB',
+                borderColor: '#36A2EB',
+                borderWidth: 1
+              },
+              {
+                label: 'Meta',
+                data: producciones.map(p => p.meta_ganancia || 0),
+                backgroundColor: '#4BC0C0',
+                borderColor: '#4BC0C0',
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function (value) {
+                    return formatCurrency(value);
+                  }
+                }
+              }
+            },
+            plugins: {
+              legend: { position: 'top' },
+              title: { display: true, text: 'Inversión vs Meta (Top 10)' }
+            }
+          }
+        });
+      }
+
+      // 4. Gráfico de tendencia
+      const ctxTendencia = document.getElementById('graficoTendencia');
+      if (ctxTendencia) {
+        const meses = {};
+
+        todasLasProducciones.forEach(prod => {
+          if (prod.fecha_creacion) {
+            const fecha = new Date(prod.fecha_creacion);
+            const mes = fecha.toLocaleDateString('es-CO', { year: 'numeric', month: 'short' });
+            meses[mes] = (meses[mes] || 0) + 1;
+          }
+        });
+
+        // Ordenar meses cronológicamente
+        const mesesOrdenados = Object.keys(meses).sort((a, b) => {
+          return new Date(a) - new Date(b);
+        });
+
+        new Chart(ctxTendencia, {
+          type: 'line',
+          data: {
+            labels: mesesOrdenados,
+            datasets: [{
+              label: 'Producciones Creadas',
+              data: mesesOrdenados.map(mes => meses[mes]),
+              borderColor: '#28a745',
+              backgroundColor: 'rgba(40, 167, 69, 0.1)',
+              tension: 0.4,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } },
+            plugins: {
+              legend: { position: 'top' },
+              title: { display: true, text: 'Tendencia de Creación' }
+            }
+          }
+        });
+      }
+
+      console.log('Gráficos generados exitosamente');
+    }
+
+    // Exportar PDF de reporte - IMPLEMENTACIÓN COMPLETA
+    function exportarReportePDF() {
+      const datos = datosReporte.length ? datosReporte : produccionesFiltradas;
+
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Título
+        doc.setFontSize(18);
+        doc.setTextColor(40, 40, 40);
+        doc.text('Reporte de Producciones Agrícolas', 14, 22);
+
+        // Fecha
+        doc.setFontSize(11);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Generado el: ${new Date().toLocaleDateString('es-CO')} ${new Date().toLocaleTimeString('es-CO')}`, 14, 30);
+
+        // Estadísticas
+        const stats = generarEstadisticas(datos);
+        let y = 45;
+
+        doc.setFontSize(14);
+        doc.setTextColor(40, 40, 40);
+        doc.text('Resumen Estadístico:', 14, y);
+        y += 10;
+
+        doc.setFontSize(10);
+        doc.text(`• Total de producciones: ${stats.total}`, 20, y); y += 6;
+        doc.text(`• Producciones activas: ${stats.habilitadas}`, 20, y); y += 6;
+        doc.text(`• Producciones inactivas: ${stats.deshabilitadas}`, 20, y); y += 6;
+        doc.text(`• Inversión total: ${formatCurrency(stats.inversionTotal)}`, 20, y); y += 6;
+        doc.text(`• Meta total: ${formatCurrency(stats.metaTotal)}`, 20, y); y += 15;
+
+        // Tabla de datos
+        const tableData = datos.map(prod => [
+          prod.id,
+          prod.nombre.length > 25 ? prod.nombre.substring(0, 25) + '...' : prod.nombre,
+          prod.tipo,
+          prod.ubicacion.length > 20 ? prod.ubicacion.substring(0, 20) + '...' : prod.ubicacion,
+          prod.cultivo_nombre || 'N/A',
+          formatDate(prod.fecha_de_inicio),
+          formatDate(prod.fecha_fin),
+          formatCurrency(prod.inversion).replace('COP', '$'),
+          prod.estado === 'habilitado' ? 'Activo' : 'Inactivo'
+        ]);
+
+        doc.autoTable({
+          head: [['ID', 'Nombre', 'Tipo', 'Ubicación', 'Cultivo', 'F. Inicio', 'F. Fin', 'Inversión', 'Estado']],
+          body: tableData,
+          startY: y,
+          styles: {
+            fontSize: 8,
+            cellPadding: 3
+          },
+          headStyles: {
+            fillColor: [40, 167, 69],
+            textColor: 255,
+            fontStyle: 'bold'
+          },
+          alternateRowStyles: { fillColor: [245, 245, 245] },
+          columnStyles: {
+            0: { cellWidth: 15 },
+            7: { halign: 'right' }
+          }
+        });
+
+        // Guardar
+        doc.save(`producciones_reporte_${new Date().toISOString().split('T')[0]}.pdf`);
+        showNotification('Reporte PDF exportado exitosamente', 'success');
+      } catch (error) {
+        console.error('Error al exportar PDF:', error);
+        showNotification('Error al exportar PDF. Verifica que las librerías estén cargadas.', 'error');
+      }
+    }
+
+    // Exportar Excel de reporte - IMPLEMENTACIÓN COMPLETA
+    function exportarReporteExcel() {
+      const datos = datosReporte.length ? datosReporte : produccionesFiltradas;
+
+      try {
+        const stats = generarEstadisticas(datos);
+
+        // Hoja de estadísticas
+        const statsData = [
+          ['Reporte de Producciones Agrícolas'],
+          ['Generado el:', new Date().toLocaleDateString('es-CO') + ' ' + new Date().toLocaleTimeString('es-CO')],
+          [''],
+          ['RESUMEN ESTADÍSTICO'],
+          ['Total de producciones', stats.total],
+          ['Producciones activas', stats.habilitadas],
+          ['Producciones inactivas', stats.deshabilitadas],
+          ['Inversión total', stats.inversionTotal],
+          ['Meta total', stats.metaTotal],
+          [''],
+          ['DISTRIBUCIÓN POR TIPOS'],
+          ...Object.entries(stats.tiposCount).map(([tipo, cantidad]) => [tipo, cantidad]),
+          [''],
+          ['DISTRIBUCIÓN POR CULTIVOS'],
+          ...Object.entries(stats.cultivosCount).map(([cultivo, cantidad]) => [cultivo, cantidad])
+        ];
+
+        // Hoja de datos detallados
+        const produccionesData = [
+          ['ID', 'Nombre', 'Tipo', 'Ubicación', 'Descripción', 'Cultivo', 'Ciclo', 'Responsable', 'Fecha Inicio', 'Fecha Fin', 'Inversión', 'Meta Ganancia', 'Estado', 'Fecha Creación'],
+          ...datos.map(prod => [
+            prod.id,
+            prod.nombre,
+            prod.tipo,
+            prod.ubicacion,
+            prod.descripcion,
+            prod.cultivo_nombre || 'N/A',
+            prod.ciclo_nombre || 'N/A',
+            prod.usuario_nombre || 'N/A',
+            formatDate(prod.fecha_de_inicio),
+            formatDate(prod.fecha_fin),
+            prod.inversion || 0,
+            prod.meta_ganancia || 0,
+            prod.estado === 'habilitado' ? 'Activo' : 'Inactivo',
+            formatDate(prod.fecha_creacion)
+          ])
+        ];
+
+        // Crear libro de trabajo
+        const wb = XLSX.utils.book_new();
+
+        // Crear hojas
+        const wsStats = XLSX.utils.aoa_to_sheet(statsData);
+        const wsProducciones = XLSX.utils.aoa_to_sheet(produccionesData);
+
+        // Configurar anchos de columnas
+        wsStats['!cols'] = [{ width: 30 }, { width: 20 }];
+        wsProducciones['!cols'] = [
+          { width: 8 }, { width: 25 }, { width: 15 }, { width: 20 },
+          { width: 30 }, { width: 15 }, { width: 15 }, { width: 20 },
+          { width: 12 }, { width: 12 }, { width: 15 }, { width: 15 },
+          { width: 10 }, { width: 15 }
+        ];
+
+        // Agregar hojas al libro
+        XLSX.utils.book_append_sheet(wb, wsStats, "Estadísticas");
+        XLSX.utils.book_append_sheet(wb, wsProducciones, "Producciones");
+
+        // Descargar archivo
+        XLSX.writeFile(wb, `producciones_reporte_${new Date().toISOString().split('T')[0]}.xlsx`);
+        showNotification('Reporte Excel exportado exitosamente', 'success');
+      } catch (error) {
+        console.error('Error al exportar Excel:', error);
+        showNotification('Error al exportar Excel. Verifica que las librerías estén cargadas.', 'error');
+      }
+    }
+
+    // Event listeners con validación
+    function setupEventListeners() {
+      console.log('Setting up event listeners...');
+
+      // Filtros
+      if (searchInput) {
+        searchInput.addEventListener('input', aplicarFiltros);
+      }
+      if (estadoFilter) {
+        estadoFilter.addEventListener('change', aplicarFiltros);
+      }
+
+      // Botón crear producción
+      const addBtn = document.getElementById('add');
+      if (addBtn) {
+        addBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          crearProduccion();
+        });
+      }
+
+      // Event listeners para acciones en tabla
+      if (tableBody) {
+        tableBody.addEventListener('click', async (e) => {
+          const id = e.target.dataset.id;
+
+          if (e.target.classList.contains('view-button')) {
+            verDetalles(id);
+          } else if (e.target.classList.contains('edit-button')) {
+            editarProduccion(id);
+          } else if (e.target.classList.contains('delete-button')) {
+            eliminarProduccion(id);
+          }
+        });
+      }
+
+      // Reportes
+      const generarReporteBtn = document.getElementById('generarReporteBtn');
+      if (generarReporteBtn) {
+        generarReporteBtn.addEventListener('click', () => {
+          const estadoFiltro = document.getElementById('reporteEstado').value;
+          const fechaInicio = document.getElementById('reporteFechaInicio').value;
+          const fechaFin = document.getElementById('reporteFechaFin').value;
+
+          datosReporte = todasLasProducciones.filter(prod => {
+            let matches = true;
+
+            if (estadoFiltro) {
+              matches = matches && prod.estado === estadoFiltro;
+            }
+
+            if (fechaInicio && prod.fecha_de_inicio) {
+              matches = matches && new Date(prod.fecha_de_inicio) >= new Date(fechaInicio);
+            }
+
+            if (fechaFin && prod.fecha_fin) {
+              matches = matches && new Date(prod.fecha_fin) <= new Date(fechaFin);
+            }
+
+            return matches;
+          });
+
+          mostrarEstadisticas(datosReporte);
+          showNotification(`Reporte generado con ${datosReporte.length} producciones`, 'info');
+        });
+      }
+
+      // Botones de exportar
+      const exportarPDFBtn = document.getElementById('exportarReportePDFBtn');
+      if (exportarPDFBtn) {
+        exportarPDFBtn.addEventListener('click', exportarReportePDF);
+      }
+
+      const exportarExcelBtn = document.getElementById('exportarReporteExcelBtn');
+      if (exportarExcelBtn) {
+        exportarExcelBtn.addEventListener('click', exportarReporteExcel);
+      }
+
+      // Form submit
+      if (produccionForm) {
+        produccionForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          const produccionId = document.getElementById('produccionId').value;
+          const isEdit = !!produccionId;
+
+          if (isEdit) {
+            // LÓGICA PARA EDICIÓN - Solo campos básicos
+            const data = {
+              nombre: document.getElementById('nombre').value,
+              tipo: document.getElementById('tipo').value,
+              ubicacion: document.getElementById('ubicacion').value,
+              descripcion: document.getElementById('descripcion').value,
+              fecha_de_inicio: document.getElementById('fecha_de_inicio').value || null,
+              fecha_fin: document.getElementById('fecha_fin').value || null
+            };
+
+            try {
+              const response = await fetch(`${API_URL}/${produccionId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+              });
+
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error en la actualización');
+              }
+
+              showNotification('Producción actualizada exitosamente', 'success');
+              cerrarModal(modalProduccion);
+              cargarProducciones();
+
+              // Restaurar campos deshabilitados
+              ['usuario_id', 'cultivo_id', 'ciclo_id', 'sensores_ids'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.disabled = false;
+              });
+
+              const addBtn = document.getElementById('addInsumoBtn');
+              const container = document.getElementById('insumosContainer');
+              const inversionContainer = document.getElementById('inversionTotal');
+
+              if (addBtn) addBtn.style.display = 'block';
+              if (container) container.parentElement.style.display = 'block';
+              if (inversionContainer) inversionContainer.parentElement.parentElement.style.display = 'flex';
+
+            } catch (error) {
+              console.error('Error:', error);
+              showNotification('Error: ' + error.message, 'error');
+            }
+          } else {
+            // LÓGICA PARA CREACIÓN - Con validaciones completas
+
+            // 1. Validaciones básicas del formulario
+            const nombre = document.getElementById('nombre').value.trim();
+            const tipo = document.getElementById('tipo').value.trim();
+            const ubicacion = document.getElementById('ubicacion').value.trim();
+            const descripcion = document.getElementById('descripcion').value.trim();
+
+            if (!nombre) {
+              showNotification('El nombre de la producción es requerido', 'error');
+              return;
+            }
+
+            if (!tipo) {
+              showNotification('El tipo de producción es requerido', 'error');
+              return;
+            }
+
+            if (!ubicacion) {
+              showNotification('La ubicación es requerida', 'error');
+              return;
+            }
+
+            if (!descripcion) {
+              showNotification('La descripción es requerida', 'error');
+              return;
+            }
+
+            // 2. Validaciones de fechas
+            const fechaInicio = document.getElementById('fecha_de_inicio').value;
+            const fechaFin = document.getElementById('fecha_fin').value;
+
+            if (fechaInicio && fechaFin) {
+              const inicio = new Date(fechaInicio);
+              const fin = new Date(fechaFin);
+
+              if (inicio >= fin) {
+                showNotification('La fecha de inicio debe ser anterior a la fecha de fin', 'error');
+                return;
+              }
+            }
+
+            // 3. Procesar sensores seleccionados
+            const sensoresSelect = document.getElementById('sensores_ids');
+            const sensoresSeleccionados = Array.from(sensoresSelect.selectedOptions).map(option => parseInt(option.value));
+
+            // 4. Procesar insumos y validar cantidades
+            const insumosItems = document.querySelectorAll('.insumo-item');
+            const insumosConsumo = [];
+
+            for (const item of insumosItems) {
+              const select = item.querySelector('.insumo-select');
+              const cantidadInput = item.querySelector('.insumo-cantidad');
+
+              if (select.value && cantidadInput.value) {
+                const insumoId = parseInt(select.value);
+                const cantidad = parseInt(cantidadInput.value);
+                const selectedOption = select.selectedOptions[0];
+                const disponible = parseInt(selectedOption.dataset.cantidad);
+
+                // Validar cantidad disponible
+                if (cantidad > disponible) {
+                  const nombreInsumo = selectedOption.textContent.split(' (')[0];
+                  showNotification(`Cantidad insuficiente para ${nombreInsumo}. Disponible: ${disponible}, Solicitado: ${cantidad}`, 'error');
+                  return;
+                }
+
+                if (cantidad <= 0) {
+                  showNotification('La cantidad debe ser mayor a 0', 'error');
+                  return;
+                }
+
+                insumosConsumo.push({
+                  id: insumoId,
+                  cantidad: cantidad
+                });
+              }
+            }
+
+            // 5. Construir objeto de datos para enviar
+            const data = {
+              nombre: nombre,
+              tipo: tipo,
+              ubicacion: ubicacion,
+              descripcion: descripcion,
+              fecha_de_inicio: fechaInicio || null,
+              fecha_fin: fechaFin || null
+            };
+
+            // Agregar campos opcionales si tienen valor
+            const usuarioId = document.getElementById('usuario_id').value;
+            if (usuarioId) {
+              data.usuario_id = parseInt(usuarioId);
+            }
+
+            const cultivoId = document.getElementById('cultivo_id').value;
+            if (cultivoId) {
+              data.cultivo_id = parseInt(cultivoId);
+            }
+
+            const cicloId = document.getElementById('ciclo_id').value;
+            if (cicloId) {
+              data.ciclo_id = parseInt(cicloId);
+            }
+
+            if (sensoresSeleccionados.length > 0) {
+              data.sensores_ids = sensoresSeleccionados;
+            }
+
+            if (insumosConsumo.length > 0) {
+              data.insumos_consumo = insumosConsumo;
+            }
+
+            console.log('Datos a enviar:', data);
+
+            // 6. Enviar datos al backend
+            try {
+              const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+              });
+
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al crear la producción');
+              }
+
+              const result = await response.json();
+
+              // 7. Mostrar resultado exitoso
+              showNotification('Producción creada exitosamente', 'success');
+
+              // Mostrar información adicional sobre insumos consumidos
+              if (result.insumos_consumidos && result.insumos_consumidos.length > 0) {
+                const totalInversion = result.inversion_calculada || 0;
+                const totalMeta = result.meta_calculada || 0;
+
+                setTimeout(() => {
+                  showNotification(
+                    `Inversión calculada: ${formatCurrency(totalInversion)} | Meta estimada: ${formatCurrency(totalMeta)}`,
+                    'info'
+                  );
+                }, 1000);
+
+                // Log detallado para debug
+                console.log('Insumos consumidos:', result.insumos_consumidos);
+                console.log('Inversión calculada:', totalInversion);
+                console.log('Meta calculada:', totalMeta);
+              }
+
+              // 8. Cerrar modal y recargar datos
+              cerrarModal(modalProduccion);
+              await cargarProducciones();
+
+              // Recargar datos relacionados por si se actualizaron cantidades de insumos
+              await cargarDatosRelacionados();
+
+            } catch (error) {
+              console.error('Error completo:', error);
+
+              // Manejo específico de errores conocidos
+              let mensajeError = error.message;
+
+              if (mensajeError.includes('cantidad insuficiente')) {
+                // Ya es un mensaje claro del backend
+              } else if (mensajeError.includes('usuario_id inválido')) {
+                mensajeError = 'El usuario seleccionado no es válido o está deshabilitado';
+              } else if (mensajeError.includes('nombre es requerido')) {
+                mensajeError = 'El nombre de la producción es obligatorio';
+              } else if (mensajeError.includes('descripcion es requerida')) {
+                mensajeError = 'La descripción es obligatoria';
+              } else if (mensajeError.includes('fecha de inicio debe ser anterior')) {
+                mensajeError = 'La fecha de inicio debe ser anterior a la fecha de fin';
+              } else if (mensajeError.includes('Error interno del servidor')) {
+                mensajeError = 'Error interno del servidor, intente nuevamente';
+              } else if (!mensajeError || mensajeError === 'Failed to fetch') {
+                mensajeError = 'Error de conexión con el servidor';
+              }
+
+              showNotification('Error: ' + mensajeError, 'error');
+            }
+          }
+        });
+      }
+
+      // Cerrar modales
+      document.querySelectorAll('.modal__close').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const modal = e.target.closest('.modal');
+          cerrarModal(modal);
+
+          // Restaurar estado si es modal de producción
+          if (modal && modal.id === 'modalProduccion') {
+            const camposDeshabilitados = ['usuario_id', 'cultivo_id', 'ciclo_id', 'sensores_ids'];
+            camposDeshabilitados.forEach(campo => {
+              const element = document.getElementById(campo);
+              if (element) element.disabled = false;
+            });
+
+            const addBtn = document.getElementById('addInsumoBtn');
+            const container = document.getElementById('insumosContainer');
+            const inversionContainer = document.getElementById('inversionTotal');
+
+            if (addBtn) addBtn.style.display = 'block';
+            if (container) container.parentElement.style.display = 'block';
+            if (inversionContainer) inversionContainer.parentElement.parentElement.style.display = 'flex';
+          }
+        });
+      });
+
+      const cancelarBtn = document.getElementById('cancelarBtn');
+      if (cancelarBtn) {
+        cancelarBtn.addEventListener('click', () => {
+          cerrarModal(modalProduccion);
+
+          // Restaurar estado
+          const camposDeshabilitados = ['usuario_id', 'cultivo_id', 'ciclo_id', 'sensores_ids'];
+          camposDeshabilitados.forEach(campo => {
+            const element = document.getElementById(campo);
+            if (element) element.disabled = false;
+          });
+
+          const addBtn = document.getElementById('addInsumoBtn');
+          const container = document.getElementById('insumosContainer');
+          const inversionContainer = document.getElementById('inversionTotal');
+
+          if (addBtn) addBtn.style.display = 'block';
+          if (container) container.parentElement.style.display = 'block';
+          if (inversionContainer) inversionContainer.parentElement.parentElement.style.display = 'flex';
+        });
+      }
+
+      // Click fuera del modal
+      window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+          cerrarModal(e.target);
+
+          if (e.target.id === 'modalProduccion') {
+            const camposDeshabilitados = ['usuario_id', 'cultivo_id', 'ciclo_id', 'sensores_ids'];
+            camposDeshabilitados.forEach(campo => {
+              const element = document.getElementById(campo);
+              if (element) element.disabled = false;
+            });
+
+            const addBtn = document.getElementById('addInsumoBtn');
+            const container = document.getElementById('insumosContainer');
+            const inversionContainer = document.getElementById('inversionTotal');
+
+            if (addBtn) addBtn.style.display = 'block';
+            if (container) container.parentElement.style.display = 'block';
+            if (inversionContainer) inversionContainer.parentElement.parentElement.style.display = 'flex';
+          }
+        }
+      });
+    }
+
+    // Inicialización
+    async function init() {
+      console.log('Initializing application...');
+
+      setupTabs();
+      setupEventListeners();
+      setupInsumosManagement();
+
+      await cargarDatosRelacionados();
+      await cargarProducciones();
+
+      mostrarEstadisticas();
+
+      console.log('Application initialized successfully');
+    }
+
+    // Ejecutar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+
+  <style>
+    /* [TODOS LOS ESTILOS ANTERIORES PERMANECEN IGUALES] */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.3rem 1.5rem;
+      background-color: #67BC26;
+      width: 100%;
+      color: white;
+      position: fixed;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .header__left-section {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header__menu-item {
+      font-size: 0.95rem;
+      color: white;
+      font-weight: 500;
+    }
+
+    .header__menu-separator {
+      color: white;
+      opacity: 0.8;
+    }
+
+    .header__right-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header__search-bar {
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      border: 1px solid transparent;
+      border-radius: 2rem;
+      background-color: #2E7D32;
+      color: white;
+      width: 250px;
+      transition: all 0.3s ease;
+    }
+
+    .header__search-bar::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .header__search-bar:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.3);
+      background-color: #67BC26;
+    }
+
+    .header__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+    }
+
+    .header__icon:hover {
+      color: #388E3C;
+      background-color: white;
+    }
+
+    .content__table {
+      margin: 0;
+    }
+
+    main {
+      margin-top: 80px;
+      padding: 20px;
+    }
+
+    .full-main {
+      margin-left: 2rem;
+    }
+
+    .content {
+      max-width: 1400px;
+      margin: 0;
+    }
+
+    /* [RESTO DE ESTILOS IGUALES AL CÓDIGO ANTERIOR] */
+    .insumo-item {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .insumo-column {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .insumo-column label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 5px;
+    }
+
+    .insumo-select,
+    .insumo-cantidad {
+      padding: 8px 10px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .insumo-costo {
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      border: 2px solid #4caf50;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-weight: 700;
+      color: #1b5e20;
+      text-align: center;
+      font-size: 1rem;
+      box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+    }
+
+    .btn-remove-insumo {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      align-self: flex-start;
+      min-width: 40px;
+    }
+
+    .btn-remove-insumo:hover {
+      background-color: #c82333;
+      transform: scale(1.05);
+    }
+
+    .btn-add {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 10px;
+      transition: all 0.3s ease;
+      align-self: flex-start;
+    }
+
+    .btn-add:hover {
+      background-color: #218838;
+      transform: translateY(-1px);
+    }
+
+    .form-value {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #28a745;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    @media (min-width: 768px) {
+      .insumo-item {
+        grid-template-columns: 2fr 1fr 1fr auto;
+        align-items: end;
+        gap: 15px;
+      }
+
+      .btn-remove-insumo {
+        margin-top: 20px;
+      }
+    }
+
+    .filters-container {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .filter-select {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .produccion__tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 25px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .produccion__tab {
+      padding: 12px 24px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #666;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+    }
+
+    .produccion__tab--active {
+      color: #28a745;
+      border-bottom-color: #28a745;
+      font-weight: 600;
+    }
+
+    .produccion__section {
+      display: none;
+    }
+
+    .produccion__section--active {
+      display: block;
+    }
+
+    .reportes-container {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 30px;
+      margin-top: 20px;
+    }
+
+    .reporte-filters {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      height: fit-content;
+    }
+
+    .filter-group {
+      margin-bottom: 15px;
+    }
+
+    .filter-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .filter-group input,
+    .filter-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .export-buttons {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .estadisticas-container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 15px 0;
+    }
+
+    .stat-item {
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #28a745;
+    }
+
+    .graficos-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .grafico-item {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      height: 400px;
+    }
+
+    .grafico-item h4 {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .grafico-item canvas {
+      height: 300px !important;
+    }
+
+    .produccion__content {
+      margin: 0;
+    }
+
+    .produccion__button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .produccion__button--primary {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .produccion__button--primary:hover {
+      background-color: #218838;
+    }
+
+    .produccion__button--secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .produccion__button--secondary:hover {
+      background-color: #545b62;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal__content {
+      background: white;
+      border-radius: 8px;
+      padding: 25px;
+      max-width: 800px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal__close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group label {
+      font-weight: 500;
+      color: #333;
+    }
+
+    .required {
+      color: #dc3545;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .modal__actions {
+      display: flex;
+      gap: 15px;
+      justify-content: flex-end;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .detalles-content {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .detalle-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .detalle-item {
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+    }
+
+    .detalle-item.full-width {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 768px) {
+      .header__search-bar {
+        width: 150px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .reportes-container {
+        grid-template-columns: 1fr;
+      }
+
+      .detalle-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .graficos-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </body>
 
 </html>

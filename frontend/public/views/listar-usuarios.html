@@ -10,6 +10,10 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="/frontend/JS/sidebar.js" defer></script>
     
+    <!-- CDNs para exportación -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="header">
@@ -18,230 +22,42 @@
             <span class="header__menu-separator">/</span>
             <span class="header__menu-item">Lista de Usuarios</span>
             <span class="header__menu-separator">-</span>
-            <span class="header__menu-item">Cantidad de Usuarios: 34</span>
+            <span class="header__menu-item" id="cantidadUsuarios">Cantidad de Usuarios: 0</span>
         </div>
         <div class="header__right-section">
-            <input type="text" class="header__search-bar" placeholder="Buscar">
+            <input type="text" class="header__search-bar" placeholder="Buscar" id="searchInput">
             <span class="header__icon"><i class='bx bx-message-square-add' id="add" title="Agregar"></i></span>
             <span class="header__icon"><i class='bx bxs-download' id="descarga" title="Descargar Informe"></i></span>
+            <span class="header__icon"><i class='bx bxs-file-pdf' id="exportarPDF" title="Exportar PDF"></i></span>
+            <span class="header__icon"><i class='bx bxs-file-excel' id="exportarExcel" title="Exportar Excel"></i></span>
             <span class="header__icon"><box-icon name='bell' type='solid'></box-icon></span>
-            <span class="header__icon"><box-icon name='bell'></box-icon></span>
         </div>
     </div>
     <main>
-        <!-- Aquí va la SIDEBAR -->
-        <div class="sidebar"> </div>
+        <div class="sidebar"></div>
         <section class="content">
-            <table class="content__table">
+            <table class="content__table" id="usuariosTable">
                 <thead class="content__table-head">
                     <tr class="content__table-row">
-                    <th class="content__table-header">Tipo</th>
-                    <th class="content__table-header">Identificador</th>
-                    <th class="content__table-header">Rol</th>
-                    <th class="content__table-header">Estado</th>
-                    <th class="content__table-header">Acciones</th>
+                        <th class="content__table-header">ID</th>
+                        <th class="content__table-header">Nombre</th>
+                        <th class="content__table-header">Tipo Doc.</th>
+                        <th class="content__table-header">Número Doc.</th>
+                        <th class="content__table-header">Teléfono</th>
+                        <th class="content__table-header">Correo</th>
+                        <th class="content__table-header">Rol</th>
+                        <th class="content__table-header">Estado</th>
+                        <th class="content__table-header">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="content__table-body">
-                    <tr class="content__table-row">
-                    <td class="content__table-data">Luciano Anal</td>
-                    <td class="content__table-data">USR76286</td>
-                    <td class="content__table-data">Personal de Apoyo</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
-                    <td class="content__table-data">
-                        <div class="content__icon-container">
-                            <div  class="content__icon content__icon--blue" title="Editar">
-                                <i class='bx bxs-edit edit-button'></i>
-                            </div>
-
-                            <div class="content__icon content__icon--red" title="Eliminar">
-                                <i class='bx bxs-trash'></i>
-                            </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr class="content__table-row">
-                    <td class="content__table-data">Elver Gonzio</td>
-                    <td class="content__table-data">USR76286</td>
-                    <td class="content__table-data">Personal de Apoyo</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
-                    <td class="content__table-data">
-                        <div class="content__icon-container">
-                        <div class="content__icon content__icon--blue" title="Editar">
-                            <i class='bx bxs-edit edit-button'></i>
-                        </div>
-                        <div class="content__icon content__icon--red" title="Eliminar">
-                            <i class='bx bxs-trash'></i>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr class="content__table-row">
-                    <td class="content__table-data">Leslie Caracas</td>
-                    <td class="content__table-data">USR76286</td>
-                    <td class="content__table-data">Administrador</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
-                    <td class="content__table-data">
-                        <div class="content__icon-container">
-                        <div class="content__icon content__icon--blue" title="Editar">
-                            <i class='bx bxs-edit edit-button'></i>
-                        </div>
-                        <div class="content__icon content__icon--red" title="Eliminar">
-                            <i class='bx bxs-trash'></i>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr class="content__table-row">
-                    <td class="content__table-data">Camilo Parra</td>
-                    <td class="content__table-data">USR76286</td>
-                    <td class="content__table-data">Personal de Apoyo</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span></span>&nbsp; Deshabilitado: &nbsp;<span class="status-disabled"></span></td>
-                    <td class="content__table-data">
-                        <div class="content__icon-container">
-                        <div class="content__icon content__icon--blue" title="Editar">
-                            <i class='bx bxs-edit edit-button'></i>
-                        </div>
-                        <div class="content__icon content__icon--red" title="Eliminar">
-                            <i class='bx bxs-trash'></i>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr class="content__table-row">
-                    <td class="content__table-data">Keyshia Subiria</td>
-                    <td class="content__table-data">USR76286</td>
-                    <td class="content__table-data">Visitante</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span></span>&nbsp; Deshabilitado: &nbsp;<span class="status-disabled"></span></td>
-                    <td class="content__table-data">
-                        <div class="content__icon-container">
-                        <div class="content__icon content__icon--blue" title="Editar">
-                            <i class='bx bxs-edit edit-button'></i>
-                        </div>
-                        <div class="content__icon content__icon--red" title="Eliminar">
-                            <i class='bx bxs-trash'></i>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr class="content__table-row">
-                    <td class="content__table-data">Brayan Perro Guzman</td>
-                    <td class="content__table-data">USR76286</td>
-                    <td class="content__table-data">Personal de Apoyo</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span></span>&nbsp; Deshabilitado: &nbsp;<span class="status-disabled"></span></td>
-                    <td class="content__table-data">
-                        <div class="content__icon-container">
-                        <div class="content__icon content__icon--blue" title="Editar">
-                            <i class='bx bxs-edit edit-button'></i>
-                        </div>
-                        <div class="content__icon content__icon--red" title="Eliminar">
-                            <i class='bx bxs-trash'></i>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr class="content__table-row">
-                    <td class="content__table-data">Santiago Cachon L</td>
-                    <td class="content__table-data">USR76286</td>
-                    <td class="content__table-data">Visitante</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
-                    <td class="content__table-data">
-                        <div class="content__icon-container">
-                        <div class="content__icon content__icon--blue" title="Editar">
-                            <i class='bx bxs-edit edit-button'></i>
-                        </div>
-                        <div class="content__icon content__icon--red" title="Eliminar">
-                            <i class='bx bxs-trash'></i>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr class="content__table-row">
-                    <td class="content__table-data">Ana Zorria Riaño</td>
-                    <td class="content__table-data">USR76286</td>
-                    <td class="content__table-data">Personal de Apoyo</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
-                    <td class="content__table-data">
-                        <div class="content__icon-container">
-                        <div class="content__icon content__icon--blue" title="Editar">
-                            <i class='bx bxs-edit edit-button'></i>
-                        </div>
-                        <div class="content__icon content__icon--red" title="Eliminar">
-                            <i class='bx bxs-trash'></i>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr class="content__table-row">
-                    <td class="content__table-data">Justin Bieber</td>
-                    <td class="content__table-data">USR76286</td>
-                    <td class="content__table-data">Personal de Apoyo</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
-                    <td class="content__table-data">
-                        <div class="content__icon-container">
-                        <div class="content__icon content__icon--blue" title="Editar">
-                            <i class='bx bxs-edit edit-button'></i>
-                        </div>
-                        <div class="content__icon content__icon--red" title="Eliminar">
-                            <i class='bx bxs-trash'></i>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr class="content__table-row">
-                    <td class="content__table-data">JH Tyson 777</td>
-                    <td class="content__table-data">USR76286</td>
-                    <td class="content__table-data">Personal de Apoyo</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span></span>&nbsp; Deshabilitado: &nbsp;<span class="status-disabled"></span></td>
-                    <td class="content__table-data">
-                        <div class="content__icon-container">
-                        <div class="content__icon content__icon--blue" title="Editar">
-                            <i class='bx bxs-edit edit-button'></i>
-                        </div>
-                        <div class="content__icon content__icon--red" title="Eliminar">
-                            <i class='bx bxs-trash'></i>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr class="content__table-row">
-                    <td class="content__table-data">Papa Francisco</td>
-                    <td class="content__table-data">USR76286</td>
-                    <td class="content__table-data">Administrador</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
-                    <td class="content__table-data">
-                        <div class="content__icon-container">
-                        <div class="content__icon content__icon--blue" title="Editar">
-                            <i class='bx bxs-edit edit-button'></i>
-                        </div>
-                        <div class="content__icon content__icon--red" title="Eliminar">
-                            <i class='bx bxs-trash'></i>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr class="content__table-row">
-                    <td class="content__table-data">Edward Follone</td>
-                    <td class="content__table-data">USR76286</td>
-                    <td class="content__table-data">Administrador</td>
-                    <td class="content__table-data content__table-data--status">Habilitado: &nbsp;<span class="content__status-enabled"></span>&nbsp; Deshabilitado:&nbsp;<span></span></td>
-                    <td class="content__table-data">
-                        <div class="content__icon-container">
-                        <div class="content__icon content__icon--blue" title="Editar">
-                            <i class='bx bxs-edit edit-button'></i>
-                        </div>
-                        <div class="content__icon content__icon--red" title="Eliminar">
-                            <i class='bx bxs-trash'></i>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
+                    <!-- Los usuarios se cargarán dinámicamente aquí -->
                 </tbody>
             </table>
         </section>
     </main>
 
-        <!-- Modal para Agregar Usuario -->
+    <!-- Modal para Agregar Usuario -->
     <div id="addUsuarioModal" class="modal-container">
         <div class="modal-content">
             <div class="modal-header">
@@ -251,47 +67,44 @@
             <div class="modal-body">
                 <form id="addUsuarioForm">
                     <div class="form-group">
-                        <label for="addNombre">Nombre:</label>
-                        <input type="text" id="addNombre" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="addTipoDocumento">Tipo de documento:</label>
-                        <select id="addTipoDocumento" required>
-                            <option value="CC">Cédula de Ciudadanía</option>
-                            <option value="TI">Tarjeta de identidad</option>
-                            <option value="CE">Cédula de extranjería</option>
-                            <option value="PEP">PEP</option>
-                            <option value="PPT">Permiso Por Protección Temporal</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="addNumeroDocumento">Numero de documento:</label>
-                        <input type="text" id="addNumeroDocumento" required>
+                        <label for="addNombre">Nombre completo:</label>
+                        <input type="text" id="addNombre" name="nombre" required maxlength="100">
                     </div>
                     <div class="form-group form-group--double">
                         <div>
-                            <label for="addCorreo">Correo:</label>
-                            <input type="email" id="addCorreo" required>
+                            <label for="addTipoDocumento">Tipo de documento:</label>
+                            <select id="addTipoDocumento" name="tipo_documento" required>
+                                <option value="">Seleccionar tipo</option>
+                                <option value="cc">Cédula de Ciudadanía</option>
+                                <option value="ti">Tarjeta de Identidad</option>
+                                <option value="ce">Cédula de Extranjería</option>
+                                <option value="pep">PEP</option>
+                                <option value="ppt">Permiso Por Protección Temporal</option>
+                            </select>
                         </div>
                         <div>
-                            <label for="addContraseña">Contraseña:</label>
-                            <input type="password" id="addContraseña" required>
+                            <label for="addNumeroDocumento">Número de documento:</label>
+                            <input type="text" id="addNumeroDocumento" name="numero_documento" required maxlength="20">
+                        </div>
+                    </div>
+                    <div class="form-group form-group--double">
+                        <div>
+                            <label for="addTelefono">Teléfono:</label>
+                            <input type="tel" id="addTelefono" name="telefono" required maxlength="15">
+                        </div>
+                        <div>
+                            <label for="addCorreo">Correo electrónico:</label>
+                            <input type="email" id="addCorreo" name="correo" required maxlength="100">
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="addRol">Rol:</label>
-                        <select id="addRol" required>
-                            <option value="Administrador">Administrador</option>
-                            <option value="Personal de Apoyo">Personal de Apoyo</option>
-                            <option value="Visitante">Visitante</option>
-                            <option value="Usuario">Usuario</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="addEstado">Estado:</label>
-                        <select id="addEstado">
-                            <option value="habilitado">Habilitado</option>
-                            <option value="deshabilitado">Deshabilitado</option>
+                        <select id="addRol" name="rol" required>
+                            <option value="">Seleccionar rol</option>
+                            <option value="superadmin">Super Administrador</option>
+                            <option value="admin">Administrador</option>
+                            <option value="apoyo">Personal de Apoyo</option>
+                            <option value="visitante">Visitante</option>
                         </select>
                     </div>
                     <div class="form-buttons">
@@ -303,7 +116,7 @@
         </div>
     </div>
 
-        <!-- Modal de Edición -->
+    <!-- Modal de Edición -->
     <div id="editUsuarioModal" class="modal-container">
         <div class="modal-content">
             <div class="modal-header">
@@ -312,25 +125,38 @@
             </div>
             <div class="modal-body">
                 <form id="editUsuarioForm">
+                    <input type="hidden" id="editUsuarioId">
                     <div class="form-group">
-                        <label for="editNombre">Nombre:</label>
-                        <input type="text" id="editNombre" required>
+                        <label for="editNombre">Nombre completo:</label>
+                        <input type="text" id="editNombre" name="nombre" required maxlength="100">
                     </div>
-                    <div class="form-group">
-                        <label for="editRol">Rol:</label>
-                        <select id="editRol" required>
-                            <option value="Administrador">Administrador</option>
-                            <option value="Personal de Apoyo">Personal de Apoyo</option>
-                            <option value="Visitante">Visitante</option>
-                            <option value="Usuario">Usuario</option>
-                        </select>
+                    <div class="form-group form-group--double">
+                        <div>
+                            <label for="editTelefono">Teléfono:</label>
+                            <input type="tel" id="editTelefono" name="telefono" required maxlength="15">
+                        </div>
+                        <div>
+                            <label for="editCorreo">Correo electrónico:</label>
+                            <input type="email" id="editCorreo" name="correo" required maxlength="100">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="editEstado">Estado:</label>
-                        <select id="editEstado">
-                            <option value="habilitado">Habilitado</option>
-                            <option value="deshabilitado">Deshabilitado</option>
-                        </select>
+                    <div class="form-group form-group--double">
+                        <div>
+                            <label for="editRol">Rol:</label>
+                            <select id="editRol" name="rol" required>
+                                <option value="superadmin">Super Administrador</option>
+                                <option value="admin">Administrador</option>
+                                <option value="apoyo">Personal de Apoyo</option>
+                                <option value="visitante">Visitante</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="editEstado">Estado:</label>
+                            <select id="editEstado" name="estado" required>
+                                <option value="habilitado">Habilitado</option>
+                                <option value="deshabilitado">Deshabilitado</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-buttons">
                         <button type="submit" class="btn-primary">Guardar Cambios</button>
@@ -341,57 +167,749 @@
         </div>
     </div>
 
+    <!-- Modal de Detalles del Usuario -->
+    <div id="viewUsuarioModal" class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalles del Usuario</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="user-details">
+                    <div class="detail-row">
+                        <strong>ID:</strong>
+                        <span id="viewId"></span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Nombre:</strong>
+                        <span id="viewNombre"></span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Tipo de Documento:</strong>
+                        <span id="viewTipoDocumento"></span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Número de Documento:</strong>
+                        <span id="viewNumeroDocumento"></span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Teléfono:</strong>
+                        <span id="viewTelefono"></span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Correo:</strong>
+                        <span id="viewCorreo"></span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Rol:</strong>
+                        <span id="viewRol"></span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Estado:</strong>
+                        <span id="viewEstado"></span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Fecha de Creación:</strong>
+                        <span id="viewFechaCreacion"></span>
+                    </div>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn-secondary close-button">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Reporte -->
+    <div id="reporteModal" class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Generar Reporte de Usuarios</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="reporte-opciones">
+                    <h3>Opciones de Filtrado</h3>
+                    <div class="form-group form-group--double">
+                        <div>
+                            <label for="filtroRol">Filtrar por Rol:</label>
+                            <select id="filtroRol">
+                                <option value="">Todos los roles</option>
+                                <option value="superadmin">Super Administrador</option>
+                                <option value="admin">Administrador</option>
+                                <option value="apoyo">Personal de Apoyo</option>
+                                <option value="visitante">Visitante</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filtroEstadoReporte">Filtrar por Estado:</label>
+                            <select id="filtroEstadoReporte">
+                                <option value="">Todos los estados</option>
+                                <option value="habilitado">Habilitado</option>
+                                <option value="deshabilitado">Deshabilitado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group form-group--double">
+                        <div>
+                            <label for="fechaInicio">Fecha desde:</label>
+                            <input type="date" id="fechaInicio">
+                        </div>
+                        <div>
+                            <label for="fechaFin">Fecha hasta:</label>
+                            <input type="date" id="fechaFin">
+                        </div>
+                    </div>
+                    
+                    <h3>Estadísticas del Reporte</h3>
+                    <div id="estadisticasReporte" class="estadisticas-container">
+                        <!-- Aquí se mostrarán las estadísticas -->
+                    </div>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn-primary" id="exportarReportePDF">Exportar PDF</button>
+                    <button type="button" class="btn-primary" id="exportarReporteExcel">Exportar Excel</button>
+                    <button type="button" class="btn-secondary close-button">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const addUsuarioModal = document.getElementById('addUsuarioModal');
-            const editUsuarioModal = document.getElementById('editUsuarioModal');
+        const API_URL = "http://localhost:3000/api/usuarios";
+        const tbody = document.querySelector(".content__table-body");
+        const cantidadUsuarios = document.getElementById("cantidadUsuarios");
+        const searchInput = document.getElementById("searchInput");
 
-            const addButton = document.getElementById('add');
-            const editButtons = document.querySelectorAll('.edit-button');
+        // Variables globales para datos
+        let todosLosUsuarios = [];
+        let usuariosFiltrados = [];
 
-            // Función para abrir un modal
-            const openModal = (modal) => modal.classList.add('active');
+        // Mapeo de roles para mostrar
+        const rolesMap = {
+            'superadmin': 'Super Administrador',
+            'admin': 'Administrador',
+            'apoyo': 'Personal de Apoyo',
+            'visitante': 'Visitante'
+        };
 
-            // Función para cerrar un modal
-            const closeModal = (modal) => modal.classList.remove('active');
+        // Mapeo de tipos de documento
+        const tiposDocumentoMap = {
+            'cc': 'Cédula de Ciudadanía',
+            'ti': 'Tarjeta de Identidad',
+            'ce': 'Cédula de Extranjería',
+            'pep': 'PEP',
+            'ppt': 'Permiso Por Protección Temporal'
+        };
 
-            // Abrir modal de "Agregar"
-            if (addButton) {
-                addButton.addEventListener('click', () => openModal(addUsuarioModal));
+        // Funciones de utilidad
+        function showNotification(message, type = 'info') {
+            alert(message);
+        }
+
+        function formatearFecha(fecha) {
+            if (!fecha) return 'N/A';
+            const date = new Date(fecha);
+            return date.toLocaleDateString('es-CO') + ' ' + date.toLocaleTimeString('es-CO', {hour: '2-digit', minute: '2-digit'});
+        }
+
+        function formatearFechaSolo(fecha) {
+            if (!fecha) return 'N/A';
+            const date = new Date(fecha);
+            return date.toLocaleDateString('es-CO');
+        }
+
+        // Función para renderizar usuarios en la tabla
+        function renderizarUsuarios(usuarios) {
+            tbody.innerHTML = "";
+            if (!usuarios || usuarios.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 2rem;">
+                            No hay usuarios registrados
+                        </td>
+                    </tr>
+                `;
+                cantidadUsuarios.textContent = "Cantidad de Usuarios: 0";
+                return;
             }
 
-            // Abrir modal de "Editar"
-            editButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    // Aquí se puede añadir la lógica para cargar los datos del usuario en el formulario
-                    openModal(editUsuarioModal);
-                });
+            usuarios.forEach(usuario => {
+                tbody.innerHTML += `
+                <tr class="content__table-row">
+                    <td class="content__table-data">${usuario.id}</td>
+                    <td class="content__table-data">${usuario.nombre}</td>
+                    <td class="content__table-data">${tiposDocumentoMap[usuario.tipo_documento] || usuario.tipo_documento}</td>
+                    <td class="content__table-data">${usuario.numero_documento}</td>
+                    <td class="content__table-data">${usuario.telefono}</td>
+                    <td class="content__table-data">${usuario.correo}</td>
+                    <td class="content__table-data">${rolesMap[usuario.rol] || usuario.rol}</td>
+                    <td class="content__table-data">
+                        <span class="${usuario.estado === 'habilitado' ? 'status-enabled' : 'status-disabled'}">
+                            ${usuario.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado'}
+                        </span>
+                    </td>
+                    <td class="content__table-data">
+                        <div class="content__icon-container">
+                            <div class="content__icon content__icon--green" title="Ver detalles">
+                                <i class="bx bx-show view-button" data-id="${usuario.id}"></i>
+                            </div>
+                            <div class="content__icon content__icon--blue" title="Editar">
+                                <i class="bx bxs-edit edit-button" data-id="${usuario.id}"></i>
+                            </div>
+                            <div class="content__icon content__icon--red" title="Eliminar">
+                                <i class="bx bxs-trash delete-button" data-id="${usuario.id}"></i>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                `;
             });
+            cantidadUsuarios.textContent = `Cantidad de Usuarios: ${usuarios.length}`;
+        }
 
-            // Cerrar modales con sus botones de cierre o haciendo clic en el fondo
-            [addUsuarioModal, editUsuarioModal].forEach(modal => {
-                if (modal) {
-                    const closeButtons = modal.querySelectorAll('.close-button');
-                    closeButtons.forEach(button => {
-                        button.addEventListener('click', () => closeModal(modal));
-                    });
-
-                    modal.addEventListener('click', (event) => {
-                        if (event.target === modal) {
-                            closeModal(modal);
-                        }
-                    });
+        // Cargar usuarios
+        async function cargarUsuarios() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
                 }
+                const usuarios = await response.json();
+                todosLosUsuarios = usuarios;
+                usuariosFiltrados = usuarios;
+                renderizarUsuarios(usuarios);
+            } catch (error) {
+                console.error('Error al cargar usuarios:', error);
+                showNotification('Error al cargar usuarios: ' + error.message, 'error');
+            }
+        }
+
+        // Función para generar estadísticas
+        function generarEstadisticas(usuarios) {
+            const stats = {
+                total: usuarios.length,
+                habilitados: usuarios.filter(u => u.estado === 'habilitado').length,
+                deshabilitados: usuarios.filter(u => u.estado === 'deshabilitado').length,
+                roles: {},
+                tiposDocumento: {}
+            };
+
+            usuarios.forEach(usuario => {
+                stats.roles[usuario.rol] = (stats.roles[usuario.rol] || 0) + 1;
+                stats.tiposDocumento[usuario.tipo_documento] = (stats.tiposDocumento[usuario.tipo_documento] || 0) + 1;
             });
 
-            // Lógica de redirección existente
-            const descargaButton = document.getElementById("descarga");
-            if (descargaButton) {
-                descargaButton.onclick = function () {
-                    window.location.href = "informe_usuarios.html";
-                };
+            return stats;
+        }
+
+        // Función para mostrar estadísticas en el modal
+        function mostrarEstadisticas(usuarios = usuariosFiltrados) {
+            const stats = generarEstadisticas(usuarios);
+            const container = document.getElementById('estadisticasReporte');
+            
+            let rolesHtml = '';
+            Object.entries(stats.roles).forEach(([rol, cantidad]) => {
+                rolesHtml += `<div class="stat-item"><strong>${rolesMap[rol] || rol}:</strong> ${cantidad}</div>`;
+            });
+
+            let tiposHtml = '';
+            Object.entries(stats.tiposDocumento).forEach(([tipo, cantidad]) => {
+                tiposHtml += `<div class="stat-item"><strong>${tiposDocumentoMap[tipo] || tipo}:</strong> ${cantidad}</div>`;
+            });
+
+            container.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-item"><strong>Total de Usuarios:</strong> ${stats.total}</div>
+                    <div class="stat-item"><strong>Habilitados:</strong> ${stats.habilitados}</div>
+                    <div class="stat-item"><strong>Deshabilitados:</strong> ${stats.deshabilitados}</div>
+                    ${rolesHtml}
+                    ${tiposHtml}
+                </div>
+            `;
+        }
+
+        // Función para filtrar usuarios para el reporte
+        function filtrarUsuariosReporte() {
+            const filtroRol = document.getElementById('filtroRol').value;
+            const filtroEstado = document.getElementById('filtroEstadoReporte').value;
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
+
+            let usuariosFiltrados = todosLosUsuarios;
+
+            if (filtroRol) {
+                usuariosFiltrados = usuariosFiltrados.filter(u => u.rol === filtroRol);
+            }
+            if (filtroEstado) {
+                usuariosFiltrados = usuariosFiltrados.filter(u => u.estado === filtroEstado);
+            }
+            if (fechaInicio) {
+                usuariosFiltrados = usuariosFiltrados.filter(u => 
+                    new Date(u.fecha_creacion) >= new Date(fechaInicio)
+                );
+            }
+            if (fechaFin) {
+                usuariosFiltrados = usuariosFiltrados.filter(u => 
+                    new Date(u.fecha_creacion) <= new Date(fechaFin + ' 23:59:59')
+                );
+            }
+
+            mostrarEstadisticas(usuariosFiltrados);
+            return usuariosFiltrados;
+        }
+
+        // Función para exportar a PDF
+        function exportarPDF(usuarios = usuariosFiltrados) {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.setFontSize(18);
+                doc.text('Reporte de Usuarios', 14, 22);
+                
+                doc.setFontSize(11);
+                doc.text(`Generado el: ${formatearFecha(new Date())}`, 14, 30);
+
+                const stats = generarEstadisticas(usuarios);
+                let y = 40;
+                doc.setFontSize(12);
+                doc.text('Estadísticas:', 14, y);
+                y += 8;
+                doc.setFontSize(10);
+                doc.text(`Total de usuarios: ${stats.total}`, 14, y);
+                y += 6;
+                doc.text(`Habilitados: ${stats.habilitados}`, 14, y);
+                y += 6;
+                doc.text(`Deshabilitados: ${stats.deshabilitados}`, 14, y);
+                y += 10;
+
+                const tableData = usuarios.map(usuario => [
+                    usuario.id,
+                    usuario.nombre,
+                    tiposDocumentoMap[usuario.tipo_documento] || usuario.tipo_documento,
+                    usuario.numero_documento,
+                    usuario.telefono,
+                    usuario.correo,
+                    rolesMap[usuario.rol] || usuario.rol,
+                    usuario.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado'
+                ]);
+
+                doc.autoTable({
+                    head: [['ID', 'Nombre', 'Tipo Doc', 'Número Doc', 'Teléfono', 'Correo', 'Rol', 'Estado']],
+                    body: tableData,
+                    startY: y,
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [41, 128, 185] },
+                    alternateRowStyles: { fillColor: [245, 245, 245] }
+                });
+
+                doc.save(`reporte_usuarios_${new Date().toISOString().split('T')[0]}.pdf`);
+            } catch (error) {
+                console.error('Error al exportar PDF:', error);
+                showNotification('Error al exportar PDF.', 'error');
+            }
+        }
+
+        // Función para exportar a Excel
+        function exportarExcel(usuarios = usuariosFiltrados) {
+            try {
+                const stats = generarEstadisticas(usuarios);
+                
+                const statsData = [
+                    ['Estadísticas del Reporte'],
+                    [''],
+                    ['Total de usuarios', stats.total],
+                    ['Usuarios habilitados', stats.habilitados],
+                    ['Usuarios deshabilitados', stats.deshabilitados],
+                    [''],
+                    ['Distribución por roles:'],
+                    ...Object.entries(stats.roles).map(([rol, cantidad]) => [rolesMap[rol] || rol, cantidad]),
+                    [''],
+                    ['Fecha de generación', formatearFecha(new Date())]
+                ];
+
+                const usuariosData = [
+                    ['ID', 'Nombre', 'Tipo Documento', 'Número Documento', 'Teléfono', 'Correo', 'Rol', 'Estado', 'Fecha Creación'],
+                    ...usuarios.map(usuario => [
+                        usuario.id,
+                        usuario.nombre,
+                        tiposDocumentoMap[usuario.tipo_documento] || usuario.tipo_documento,
+                        usuario.numero_documento,
+                        usuario.telefono,
+                        usuario.correo,
+                        rolesMap[usuario.rol] || usuario.rol,
+                        usuario.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado',
+                        formatearFecha(usuario.fecha_creacion)
+                    ])
+                ];
+
+                const wb = XLSX.utils.book_new();
+                const wsStats = XLSX.utils.aoa_to_sheet(statsData);
+                const wsUsuarios = XLSX.utils.aoa_to_sheet(usuariosData);
+                
+                XLSX.utils.book_append_sheet(wb, wsStats, "Estadísticas");
+                XLSX.utils.book_append_sheet(wb, wsUsuarios, "Usuarios");
+
+                XLSX.writeFile(wb, `reporte_usuarios_${new Date().toISOString().split('T')[0]}.xlsx`);
+            } catch (error) {
+                console.error('Error al exportar Excel:', error);
+                showNotification('Error al exportar Excel.', 'error');
+            }
+        }
+
+        // Inicializar carga de usuarios
+        cargarUsuarios();
+
+        // Buscar usuarios
+        searchInput.addEventListener('input', function(e) {
+            const filtro = e.target.value.toLowerCase();
+            const filtrados = todosLosUsuarios.filter(u => 
+                u.nombre.toLowerCase().includes(filtro) ||
+                u.numero_documento.includes(filtro) ||
+                u.correo.toLowerCase().includes(filtro) ||
+                u.telefono.includes(filtro)
+            );
+            usuariosFiltrados = filtrados;
+            renderizarUsuarios(filtrados);
+        });
+
+        // Modal handlers
+        const addUsuarioModal = document.getElementById('addUsuarioModal');
+        const editUsuarioModal = document.getElementById('editUsuarioModal');
+        const viewUsuarioModal = document.getElementById('viewUsuarioModal');
+        const reporteModal = document.getElementById('reporteModal');
+        const addButton = document.getElementById('add');
+
+        const openModal = (modal) => modal.classList.add('active');
+        const closeModal = (modal) => modal.classList.remove('active');
+
+        // Event listeners
+        addButton.addEventListener('click', () => {
+            document.getElementById('addUsuarioForm').reset();
+            openModal(addUsuarioModal);
+        });
+
+        document.getElementById('descarga').addEventListener('click', function() {
+            mostrarEstadisticas();
+            openModal(reporteModal);
+        });
+
+        // Event listeners para filtros de reporte
+        document.getElementById('filtroRol').addEventListener('change', filtrarUsuariosReporte);
+        document.getElementById('filtroEstadoReporte').addEventListener('change', filtrarUsuariosReporte);
+        document.getElementById('fechaInicio').addEventListener('change', filtrarUsuariosReporte);
+        document.getElementById('fechaFin').addEventListener('change', filtrarUsuariosReporte);
+
+        // Event listeners para exportación
+        document.getElementById('exportarReportePDF').addEventListener('click', function() {
+            const usuariosFiltradosReporte = filtrarUsuariosReporte();
+            exportarPDF(usuariosFiltradosReporte);
+        });
+
+        document.getElementById('exportarReporteExcel').addEventListener('click', function() {
+            const usuariosFiltradosReporte = filtrarUsuariosReporte();
+            exportarExcel(usuariosFiltradosReporte);
+        });
+
+        document.getElementById('exportarPDF').addEventListener('click', function() {
+            exportarPDF(usuariosFiltrados);
+        });
+
+        document.getElementById('exportarExcel').addEventListener('click', function() {
+            exportarExcel(usuariosFiltrados);
+        });
+
+        // Agregar usuario
+        document.getElementById("addUsuarioForm").addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const userData = Object.fromEntries(formData.entries());
+
+            console.log('Enviando datos:', userData);
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(userData)
+                });
+                
+                if (response.ok) {
+                    closeModal(addUsuarioModal);
+                    e.target.reset();
+                    cargarUsuarios();
+                    showNotification('Usuario agregado exitosamente', 'success');
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error del servidor:', errorData);
+                    showNotification('Error al agregar usuario: ' + (errorData.error || 'Error desconocido'), 'error');
+                }
+            } catch (error) {
+                console.error('Error de conexión:', error);
+                showNotification('Error de conexión al agregar usuario', 'error');
             }
         });
+
+        // Event listener para botones de acciones
+        let editandoId = null;
+        tbody.addEventListener('click', async function(e) {
+            const userId = e.target.dataset.id;
+            
+            if (e.target.classList.contains("view-button")) {
+                try {
+                    const response = await fetch(`${API_URL}/${userId}`);
+                    if (!response.ok) throw new Error('Usuario no encontrado');
+                    
+                    const usuario = await response.json();
+                    
+                    document.getElementById("viewId").textContent = usuario.id;
+                    document.getElementById("viewNombre").textContent = usuario.nombre;
+                    document.getElementById("viewTipoDocumento").textContent = tiposDocumentoMap[usuario.tipo_documento] || usuario.tipo_documento;
+                    document.getElementById("viewNumeroDocumento").textContent = usuario.numero_documento;
+                    document.getElementById("viewTelefono").textContent = usuario.telefono;
+                    document.getElementById("viewCorreo").textContent = usuario.correo;
+                    document.getElementById("viewRol").textContent = rolesMap[usuario.rol] || usuario.rol;
+                    document.getElementById("viewEstado").textContent = usuario.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado';
+                    document.getElementById("viewFechaCreacion").textContent = formatearFecha(usuario.fecha_creacion);
+                    
+                    openModal(viewUsuarioModal);
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('Error al cargar detalles del usuario', 'error');
+                }
+            }
+            
+            if (e.target.classList.contains("edit-button")) {
+                editandoId = userId;
+                try {
+                    const response = await fetch(`${API_URL}/${userId}`);
+                    if (!response.ok) throw new Error('Usuario no encontrado');
+                    
+                    const usuario = await response.json();
+                    
+                    document.getElementById("editUsuarioId").value = usuario.id;
+                    document.getElementById("editNombre").value = usuario.nombre;
+                    document.getElementById("editTelefono").value = usuario.telefono;
+                    document.getElementById("editCorreo").value = usuario.correo;
+                    document.getElementById("editRol").value = usuario.rol;
+                    document.getElementById("editEstado").value = usuario.estado;
+                    
+                    openModal(editUsuarioModal);
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('Error al cargar datos del usuario', 'error');
+                }
+            }
+            
+            if (e.target.classList.contains("delete-button")) {
+                if (confirm("¿Está seguro de que desea eliminar este usuario? Esta acción no se puede deshacer.")) {
+                    try {
+                        const response = await fetch(`${API_URL}/${userId}`, {
+                            method: "DELETE"
+                        });
+                        
+                        if (response.ok) {
+                            cargarUsuarios();
+                            showNotification('Usuario eliminado exitosamente', 'success');
+                        } else {
+                            const errorData = await response.json();
+                            showNotification('Error al eliminar usuario: ' + (errorData.error || 'Error desconocido'), 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showNotification('Error al eliminar usuario', 'error');
+                    }
+                }
+            }
+        });
+
+        // Editar usuario
+        document.getElementById("editUsuarioForm").addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const userData = Object.fromEntries(formData.entries());
+            delete userData.id; // No enviar el ID en el body
+
+            console.log('Editando datos:', userData);
+
+            try {
+                const response = await fetch(`${API_URL}/${editandoId}`, {
+                    method: "PUT",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(userData)
+                });
+                
+                if (response.ok) {
+                    closeModal(editUsuarioModal);
+                    e.target.reset();
+                    cargarUsuarios();
+                    showNotification('Usuario actualizado exitosamente', 'success');
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error del servidor:', errorData);
+                    showNotification('Error al actualizar usuario: ' + (errorData.error || 'Error desconocido'), 'error');
+                }
+            } catch (error) {
+                console.error('Error de conexión:', error);
+                showNotification('Error de conexión al actualizar usuario', 'error');
+            }
+        });
+
+        // Cerrar modales
+        [addUsuarioModal, editUsuarioModal, viewUsuarioModal, reporteModal].forEach(modal => {
+            const closeButtons = modal.querySelectorAll('.close-button');
+            closeButtons.forEach(button => {
+                button.addEventListener('click', () => closeModal(modal));
+            });
+            
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeModal(modal);
+                }
+            });
+        });
     </script>
+
+    <style>
+        .user-details {
+            margin: 20px 0;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .content__icon--green {
+            background-color: #28a745;
+            color: white;
+            margin-right: 5px;
+        }
+        
+        .content__icon--green:hover {
+            background-color: #218838;
+        }
+
+        .status-enabled {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-disabled {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .reporte-opciones {
+            margin: 20px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .stat-item {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+
+        .estadisticas-container {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .form-group--double {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .modal-container.active {
+            display: flex;
+        }
+
+        .modal-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+    </style>
 </body>
 </html>
