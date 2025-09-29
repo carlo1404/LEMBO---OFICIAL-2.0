@@ -73,7 +73,7 @@ body {
 
 .form__image-container {
     display: flex;
-    max-width: 1.25rem ; /* Ajusta el ancho máximo según tu preferencia */
+    max-width: 1.25rem ;
     max-height: 3.125rem;
     margin-left: 1.875rem;
     transform: translateY(-1.875rem);
@@ -81,7 +81,7 @@ body {
 
 .form__container {
     display: flex;
-    justify-content: flex-end; /* Alinea los elementos hacia la derecha */
+    justify-content: flex-end;
     align-items: center;
     width: 18.75rem;
 }

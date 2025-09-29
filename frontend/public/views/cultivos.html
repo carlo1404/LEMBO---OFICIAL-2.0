@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,13 +12,17 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/frontend/JS/sidebar.js" defer></script>
-    
+
     <!-- CDNs para exportación -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="/frontend/JS/auth-guard.js"></script>
+    <script src="/frontend/JS/role-manager.js"></script>
 </head>
+
 <body>
+    <img src="/IMG/gov.jpeg" alt="gov" class="gov">
     <div class="header">
         <div class="header__left-section">
             <span class="header__menu-item">Cultivos</span>
@@ -31,14 +36,16 @@
             <span class="header__icon"><i class='bx bx-message-square-add' id="add" title="Agregar"></i></span>
             <span class="header__icon"><i class='bx bxs-download' id="download" title="Descargar Informe"></i></span>
             <span class="header__icon"><i class='bx bxs-file-pdf' id="exportarPDF" title="Exportar PDF"></i></span>
-            <span class="header__icon"><i class='bx bxs-file-excel' id="exportarExcel" title="Exportar Excel"></i></span>
-            <span class="header__icon"><i class='bx bx-bar-chart-alt-2' id="verGraficos" title="Ver Gráficos"></i></span>
+            <span class="header__icon"><i class='bx bxs-file-excel' id="exportarExcel"
+                    title="Exportar Excel"></i></span>
+            <span class="header__icon"><i class='bx bx-bar-chart-alt-2' id="verGraficos"
+                    title="Ver Gráficos"></i></span>
             <span class="header__icon"><box-icon name='bell' type='solid'></box-icon></span>
         </div>
     </div>
     <main>
         <!-- Aquí va la SIDEBAR -->
-        <div class="sidebar"></div>
+        <div class="sidebar" id="sidebar-container"></div>
         <section class="content">
             <table class="content__table" id="cultivosTable">
                 <thead class="content__table-head">
@@ -90,11 +97,13 @@
                     <div class="form-group form-group--double">
                         <div>
                             <label for="addTamano">Tamaño:</label>
-                            <input type="text" id="addTamano" name="tamano" required placeholder="Ej: 500 m², 100 plantas, etc.">
+                            <input type="text" id="addTamano" name="tamano" required
+                                placeholder="Ej: 500 m², 100 plantas, etc.">
                         </div>
                         <div>
                             <label for="addUbicacion">Ubicación:</label>
-                            <input type="text" id="addUbicacion" name="ubicacion" required placeholder="Ej: Invernadero A1, Parcela 3, etc.">
+                            <input type="text" id="addUbicacion" name="ubicacion" required
+                                placeholder="Ej: Invernadero A1, Parcela 3, etc.">
                         </div>
                     </div>
                     <div class="form-group">
@@ -262,7 +271,7 @@
                         <label for="filtroUbicacion">Filtrar por Ubicación:</label>
                         <input type="text" id="filtroUbicacion" placeholder="Buscar por ubicación">
                     </div>
-                    
+
                     <h3>Estadísticas del Reporte</h3>
                     <div id="estadisticasReporte" class="estadisticas-container">
                         <!-- Aquí se mostrarán las estadísticas -->
@@ -309,7 +318,7 @@
             </div>
         </div>
     </div>
-
+    <img src="/IMG/gov.jpeg" alt="gov" class="gov">
     <script>
         const API_URL = "http://localhost:3000/api/cultivos";
         const tbody = document.querySelector(".content__table-body");
@@ -323,7 +332,7 @@
         // Función para formatear fecha
         function formatearFecha(fecha) {
             const date = new Date(fecha);
-            return date.toLocaleDateString('es-CO') + ' ' + date.toLocaleTimeString('es-CO', {hour: '2-digit', minute: '2-digit'});
+            return date.toLocaleDateString('es-CO') + ' ' + date.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
         }
 
         // Función para formatear fecha solo día
@@ -405,7 +414,7 @@
         function mostrarEstadisticas(cultivos = cultivosFiltrados) {
             const stats = generarEstadisticas(cultivos);
             const container = document.getElementById('estadisticasReporte');
-            
+
             let tiposHtml = '';
             Object.entries(stats.tipos).forEach(([tipo, cantidad]) => {
                 tiposHtml += `<div class="stat-item"><strong>${tipo}:</strong> ${cantidad}</div>`;
@@ -414,7 +423,7 @@
             let ubicacionesTop = Object.entries(stats.ubicaciones)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 5);
-            
+
             let ubicacionesHtml = '';
             ubicacionesTop.forEach(([ubicacion, cantidad]) => {
                 ubicacionesHtml += `<div class="stat-item"><strong>${ubicacion}:</strong> ${cantidad}</div>`;
@@ -451,7 +460,7 @@
             }
 
             if (filtroUbicacion) {
-                cultivosFiltrados = cultivosFiltrados.filter(c => 
+                cultivosFiltrados = cultivosFiltrados.filter(c =>
                     c.ubicacion.toLowerCase().includes(filtroUbicacion)
                 );
             }
@@ -479,7 +488,7 @@
                     datasets: [{
                         data: Object.values(stats.tipos),
                         backgroundColor: [
-                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
                             '#9966FF', '#FF9F40', '#C9CBCF', '#8BC34A'
                         ]
                     }]
@@ -524,7 +533,7 @@
             new Chart(ctxUbicaciones, {
                 type: 'bar',
                 data: {
-                    labels: topUbicaciones.map(([ubicacion]) => 
+                    labels: topUbicaciones.map(([ubicacion]) =>
                         ubicacion.length > 15 ? ubicacion.substring(0, 15) + '...' : ubicacion
                     ),
                     datasets: [{
@@ -546,7 +555,7 @@
             // Gráfico de línea de tiempo (cultivos por mes)
             const ctxTiempo = document.getElementById('graficoTiempo').getContext('2d');
             const cultivosPorMes = {};
-            
+
             cultivos.forEach(cultivo => {
                 if (cultivo.fecha_creacion) {
                     const fecha = new Date(cultivo.fecha_creacion);
@@ -593,7 +602,7 @@
                 // Título
                 doc.setFontSize(18);
                 doc.text('Reporte de Cultivos', 14, 22);
-                
+
                 // Fecha de generación
                 doc.setFontSize(11);
                 doc.text(`Generado el: ${new Date().toLocaleDateString('es-CO')} ${new Date().toLocaleTimeString('es-CO')}`, 14, 30);
@@ -643,7 +652,7 @@
         function exportarExcel(cultivos = cultivosFiltrados) {
             try {
                 const stats = generarEstadisticas(cultivos);
-                
+
                 // Crear hoja de estadísticas
                 const statsData = [
                     ['Estadísticas del Reporte de Cultivos'],
@@ -676,11 +685,11 @@
 
                 // Crear libro de trabajo
                 const wb = XLSX.utils.book_new();
-                
+
                 // Agregar hojas
                 const wsStats = XLSX.utils.aoa_to_sheet(statsData);
                 const wsCultivos = XLSX.utils.aoa_to_sheet(cultivosData);
-                
+
                 XLSX.utils.book_append_sheet(wb, wsStats, "Estadísticas");
                 XLSX.utils.book_append_sheet(wb, wsCultivos, "Cultivos");
 
@@ -696,9 +705,9 @@
         cargarCultivos();
 
         // Buscar cultivos
-        searchInput.addEventListener('input', function(e) {
+        searchInput.addEventListener('input', function (e) {
             const filtro = e.target.value.toLowerCase();
-            const filtrados = todosLosCultivos.filter(c => 
+            const filtrados = todosLosCultivos.filter(c =>
                 c.nombre.toLowerCase().includes(filtro) ||
                 c.tipo.toLowerCase().includes(filtro) ||
                 c.ubicacion.toLowerCase().includes(filtro) ||
@@ -725,13 +734,13 @@
         addButton.addEventListener('click', () => openModal(addCultivoModal));
 
         // Abrir modal reporte
-        document.getElementById('download').addEventListener('click', function() {
+        document.getElementById('download').addEventListener('click', function () {
             mostrarEstadisticas();
             openModal(reporteModal);
         });
 
         // Abrir modal gráficos
-        document.getElementById('verGraficos').addEventListener('click', function() {
+        document.getElementById('verGraficos').addEventListener('click', function () {
             openModal(graficosModal);
             setTimeout(() => generarGraficos(), 200); // Delay para que el modal se renderice
         });
@@ -742,29 +751,29 @@
         document.getElementById('filtroUbicacion').addEventListener('input', filtrarCultivosReporte);
 
         // Event listeners para exportación
-        document.getElementById('exportarReportePDF').addEventListener('click', function() {
+        document.getElementById('exportarReportePDF').addEventListener('click', function () {
             const cultivosFiltradosReporte = filtrarCultivosReporte();
             exportarPDF(cultivosFiltradosReporte);
         });
 
-        document.getElementById('exportarReporteExcel').addEventListener('click', function() {
+        document.getElementById('exportarReporteExcel').addEventListener('click', function () {
             const cultivosFiltradosReporte = filtrarCultivosReporte();
             exportarExcel(cultivosFiltradosReporte);
         });
 
         // Exportación directa desde botones del header
-        document.getElementById('exportarPDF').addEventListener('click', function() {
+        document.getElementById('exportarPDF').addEventListener('click', function () {
             exportarPDF(cultivosFiltrados);
         });
 
-        document.getElementById('exportarExcel').addEventListener('click', function() {
+        document.getElementById('exportarExcel').addEventListener('click', function () {
             exportarExcel(cultivosFiltrados);
         });
 
         // Agregar cultivo
-        document.getElementById("addCultivoForm").addEventListener('submit', async function(e) {
+        document.getElementById("addCultivoForm").addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             const cultivoData = {
                 nombre: document.getElementById("addNombre").value,
                 tipo: document.getElementById("addTipo").value,
@@ -778,10 +787,10 @@
             try {
                 const response = await fetch(API_URL, {
                     method: "POST",
-                    headers: {"Content-Type": "application/json"},
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(cultivoData)
                 });
-                
+
                 if (response.ok) {
                     closeModal(addCultivoModal);
                     e.target.reset();
@@ -799,15 +808,15 @@
 
         // Event listener para botones de acciones
         let editandoId = null;
-        tbody.addEventListener('click', async function(e) {
+        tbody.addEventListener('click', async function (e) {
             const cultivoId = e.target.dataset.id;
-            
+
             if (e.target.classList.contains("view-button")) {
                 // Ver detalles
                 try {
                     const response = await fetch(`${API_URL}/${cultivoId}`);
                     const cultivo = await response.json();
-                    
+
                     document.getElementById("viewId").textContent = cultivo.id;
                     document.getElementById("viewNombre").textContent = cultivo.nombre;
                     document.getElementById("viewTipo").textContent = cultivo.tipo;
@@ -817,35 +826,35 @@
                     document.getElementById("viewUsuarioNombre").textContent = cultivo.usuario_nombre || 'No asignado';
                     document.getElementById("viewEstado").textContent = cultivo.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado';
                     document.getElementById("viewFechaCreacion").textContent = cultivo.fecha_creacion ? formatearFecha(cultivo.fecha_creacion) : 'No disponible';
-                    
+
                     openModal(viewCultivoModal);
                 } catch (error) {
                     console.error('Error:', error);
                     alert('Error al cargar detalles del cultivo');
                 }
             }
-            
+
             if (e.target.classList.contains("edit-button")) {
                 // Editar cultivo
                 editandoId = cultivoId;
                 try {
                     const response = await fetch(`${API_URL}/${cultivoId}`);
                     const cultivo = await response.json();
-                    
+
                     document.getElementById("editNombre").value = cultivo.nombre;
                     document.getElementById("editTipo").value = cultivo.tipo;
                     document.getElementById("editTamano").value = cultivo.tamano;
                     document.getElementById("editUbicacion").value = cultivo.ubicacion;
                     document.getElementById("editDescripcion").value = cultivo.descripcion || '';
                     document.getElementById("editEstado").value = cultivo.estado;
-                    
+
                     openModal(editCultivoModal);
                 } catch (error) {
                     console.error('Error:', error);
                     alert('Error al cargar datos del cultivo');
                 }
             }
-            
+
             if (e.target.classList.contains("delete-button")) {
                 // Eliminar cultivo
                 if (confirm("¿Está seguro de que desea eliminar este cultivo?")) {
@@ -853,7 +862,7 @@
                         const response = await fetch(`${API_URL}/${cultivoId}`, {
                             method: "DELETE"
                         });
-                        
+
                         if (response.ok) {
                             cargarCultivos();
                             alert('Cultivo eliminado exitosamente');
@@ -875,9 +884,9 @@
         });
 
         // Editar cultivo
-        document.getElementById("editCultivoForm").addEventListener('submit', async function(e) {
+        document.getElementById("editCultivoForm").addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             const cultivoData = {
                 nombre: document.getElementById("editNombre").value,
                 tipo: document.getElementById("editTipo").value,
@@ -890,10 +899,10 @@
             try {
                 const response = await fetch(`${API_URL}/${editandoId}`, {
                     method: "PUT",
-                    headers: {"Content-Type": "application/json"},
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(cultivoData)
                 });
-                
+
                 if (response.ok) {
                     closeModal(editCultivoModal);
                     e.target.reset();
@@ -915,12 +924,258 @@
             closeButtons.forEach(button => {
                 button.addEventListener('click', () => closeModal(modal));
             });
-            
+
             modal.addEventListener('click', (event) => {
                 if (event.target === modal) {
                     closeModal(modal);
                 }
             });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicializar sistema de roles después de que todo esté cargado
+            setTimeout(initializeRoleBasedUI, 500);
+        });
+
+        function initializeRoleBasedUI() {
+            // Verificar autenticación
+            if (!window.authGuard || !window.authGuard.isAuthenticated()) {
+                window.location.href = '/frontend/public/views/register.html';
+                return;
+            }
+
+            // Crear instancia del gestor de roles
+            const roleManager = new RoleManager();
+            const userRole = roleManager.userRole;
+
+            console.log('Configurando UI para rol:', userRole);
+
+            // Configurar elementos según el rol
+            configureUIByRole(userRole, roleManager);
+        }
+
+        function configureUIByRole(role, roleManager) {
+            // Elementos que se pueden ocultar según el rol
+            const elementsToHide = {
+                // Botones del header
+                addButton: document.getElementById('add'),
+                downloadButton: document.getElementById('download'),
+                exportPDFButton: document.getElementById('exportarPDF'),
+                exportExcelButton: document.getElementById('exportarExcel'),
+
+                // Columna de acciones en la tabla
+                actionsColumn: document.querySelector('.content__table-header:last-child'),
+
+                // Modales
+                addModal: document.getElementById('addCultivoModal'),
+                editModal: document.getElementById('editCultivoModal')
+            };
+
+            // Configuración específica por rol
+            switch (role) {
+                case 'visitante':
+                    hideVisitanteElements(elementsToHide);
+                    break;
+                case 'apoyo':
+                    hideApoyoElements(elementsToHide);
+                    break;
+                case 'admin':
+                    showAllElements(elementsToHide);
+                    break;
+                case 'superadmin':
+                    hideForSuperAdmin(elementsToHide);
+                    break;
+                default:
+                    hideAllElements(elementsToHide);
+            }
+
+            // Actualizar tabla existente para ocultar botones
+            updateExistingTableButtons(role);
+
+            // Override de la función renderizarCultivos para aplicar roles
+            overrideRenderFunction(role);
+        }
+
+        function hideVisitanteElements(elements) {
+            console.log('Configurando UI para VISITANTE');
+
+            // Ocultar botones de creación y exportación
+            hideElement(elements.addButton);
+            hideElement(elements.downloadButton);
+            hideElement(elements.exportPDFButton);
+            hideElement(elements.exportExcelButton);
+
+            // Cambiar título de columna de acciones
+            if (elements.actionsColumn) {
+                elements.actionsColumn.textContent = 'Ver';
+            }
+
+            // Deshabilitar modales de agregar y editar
+            disableModal(elements.addModal);
+            disableModal(elements.editModal);
+        }
+
+        function hideApoyoElements(elements) {
+            console.log('Configurando UI para APOYO');
+
+            // Apoyo no puede ver cultivos según las reglas originales
+            // Pero si llegó aquí, mostrar solo vista
+            hideElement(elements.addButton);
+            hideElement(elements.downloadButton);
+            hideElement(elements.exportPDFButton);
+            hideElement(elements.exportExcelButton);
+
+            if (elements.actionsColumn) {
+                elements.actionsColumn.textContent = 'Ver';
+            }
+
+            disableModal(elements.addModal);
+            disableModal(elements.editModal);
+        }
+
+        function showAllElements(elements) {
+            console.log('Configurando UI para ADMIN - Acceso completo');
+
+            // Admin puede hacer todo
+            showElement(elements.addButton);
+            showElement(elements.downloadButton);
+            showElement(elements.exportPDFButton);
+            showElement(elements.exportExcelButton);
+
+            if (elements.actionsColumn) {
+                elements.actionsColumn.textContent = 'Acciones';
+            }
+        }
+
+        function hideForSuperAdmin(elements) {
+            console.log('Configurando UI para SUPERADMIN');
+
+            // Superadmin solo maneja usuarios, no cultivos
+            hideElement(elements.addButton);
+            hideElement(elements.downloadButton);
+            hideElement(elements.exportPDFButton);
+            hideElement(elements.exportExcelButton);
+
+            if (elements.actionsColumn) {
+                elements.actionsColumn.textContent = 'Ver';
+            }
+
+            disableModal(elements.addModal);
+            disableModal(elements.editModal);
+
+            // Mostrar mensaje informativo
+            showAccessMessage('Los super administradores solo gestionan usuarios.');
+        }
+
+        function hideAllElements(elements) {
+            console.log('Ocultando todos los elementos - Rol no reconocido');
+
+            Object.values(elements).forEach(element => {
+                if (element) hideElement(element);
+            });
+        }
+
+        // Utilidades para mostrar/ocultar elementos
+        function hideElement(element) {
+            if (element) {
+                element.style.display = 'none';
+            }
+        }
+
+        function showElement(element) {
+            if (element) {
+                element.style.display = '';
+            }
+        }
+
+        function disableModal(modal) {
+            if (modal) {
+                modal.style.display = 'none';
+                // Deshabilitar event listeners del modal
+                const form = modal.querySelector('form');
+                if (form) {
+                    form.style.pointerEvents = 'none';
+                }
+            }
+        }
+
+        function showAccessMessage(message) {
+            const headerLeftSection = document.querySelector('.header__left-section');
+            if (headerLeftSection) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'access-message';
+                messageDiv.innerHTML = `
+            <span style="color: #856404; background: #fff3cd; padding: 8px 12px; border-radius: 4px; border: 1px solid #ffeaa7; font-size: 14px;">
+                <i class='bx bx-info-circle'></i> ${message}
+            </span>
+        `;
+                headerLeftSection.appendChild(messageDiv);
+            }
+        }
+
+        // Actualizar botones en filas existentes de la tabla
+        function updateExistingTableButtons(role) {
+            const actionButtons = document.querySelectorAll('.content__table-body .content__icon-container');
+
+            actionButtons.forEach(container => {
+                const editButton = container.querySelector('.edit-button').closest('.content__icon');
+                const deleteButton = container.querySelector('.delete-button').closest('.content__icon');
+
+                // Solo visitantes ven el botón de ver, otros roles según permisos
+                if (role === 'visitante' || role === 'apoyo' || role === 'superadmin') {
+                    hideElement(editButton);
+                    hideElement(deleteButton);
+                } else if (role === 'admin') {
+                    showElement(editButton);
+                    showElement(deleteButton);
+                }
+            });
+        }
+
+        // Override de la función renderizarCultivos para aplicar roles dinámicamente
+        function overrideRenderFunction(role) {
+            // Guardar la función original
+            const originalRenderizar = window.renderizarCultivos;
+
+            // Crear nueva función que aplica roles
+            window.renderizarCultivos = function (cultivos) {
+                // Llamar función original
+                originalRenderizar(cultivos);
+
+                // Aplicar configuración de roles a los nuevos elementos
+                setTimeout(() => updateExistingTableButtons(role), 100);
+            };
+        }
+
+        // Interceptar clicks en botones restringidos
+        document.addEventListener('click', function (e) {
+            const roleManager = new RoleManager();
+            const userRole = roleManager.userRole;
+
+            // Prevenir acciones no permitidas
+            if ((userRole === 'visitante' || userRole === 'apoyo' || userRole === 'superadmin') &&
+                (e.target.classList.contains('edit-button') ||
+                    e.target.classList.contains('delete-button') ||
+                    e.target.id === 'add')) {
+
+                e.preventDefault();
+                e.stopPropagation();
+                alert('No tienes permisos para realizar esta acción.');
+                return false;
+            }
+        });
+
+        // Interceptar envío de formularios restringidos
+        document.addEventListener('submit', function (e) {
+            const roleManager = new RoleManager();
+            const userRole = roleManager.userRole;
+
+            if ((userRole === 'visitante' || userRole === 'apoyo' || userRole === 'superadmin') &&
+                (e.target.id === 'addCultivoForm' || e.target.id === 'editCultivoForm')) {
+
+                e.preventDefault();
+                alert('No tienes permisos para realizar esta acción.');
+                return false;
+            }
         });
     </script>
 
@@ -928,24 +1183,24 @@
         .cultivo-details {
             margin: 20px 0;
         }
-        
+
         .detail-row {
             display: flex;
             justify-content: space-between;
             padding: 10px 0;
             border-bottom: 1px solid #eee;
         }
-        
+
         .detail-row:last-child {
             border-bottom: none;
         }
-        
+
         .content__icon--green {
             background-color: #28a745;
             color: white;
             margin-right: 5px;
         }
-        
+
         .content__icon--green:hover {
             background-color: #218838;
         }
@@ -955,7 +1210,7 @@
             color: white;
             margin-right: 5px;
         }
-        
+
         .content__icon--yellow:hover {
             background-color: #e0a800;
         }
@@ -1042,4 +1297,5 @@
         }
     </style>
 </body>
+
 </html>

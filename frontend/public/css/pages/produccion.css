@@ -45,8 +45,8 @@
     overflow: hidden;
     transition: width 0.3s ease;
     background-color: var(--primary-800);
-    height: 100vh;
-    position: fixed;
+    height: 1000%;
+    position: absolute;
     z-index: 9;
 }
 
@@ -93,7 +93,6 @@
 
 .sidebar:hover {
     width: 12.5rem;
-    /* ancho expandido */
 }
 
 .sidebar:hover .sidebar__nav-label {
@@ -179,7 +178,6 @@
     background-color: var(--white);
 }
 
-/* Stats Sidebar */
 .stats-sidebar {
     background-color: var(--white);
     padding: 1.5rem;
@@ -219,7 +217,6 @@
     font-weight: 600;
 }
 
-/* Base Styles */
 .produccion {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: var(--text-color);
@@ -242,7 +239,6 @@
     color: var(--primary-dark);
 }
 
-/* Tabs */
 .produccion__tabs {
     display: flex;
     border-bottom: 1px solid var(--medium-gray);
@@ -270,7 +266,6 @@
     border-bottom-color: var(--primary-color);
 }
 
-/* Sections */
 .produccion__section {
     display: none;
 }
@@ -279,7 +274,6 @@
     display: block;
 }
 
-/* Filters */
 .produccion__filters {
     display: flex;
     flex-wrap: wrap;
@@ -349,7 +343,6 @@
     min-height: 6.25rem;
 }
 
-/* Buttons */
 .produccion__button {
     padding: 8px 16px;
     border: none;
@@ -409,13 +402,11 @@
     cursor: not-allowed;
 }
 
-/* Select Container */
 .produccion__select-container {
     display: flex;
     gap: 10px;
 }
 
-/* Tables */
 .produccion__table-container {
     overflow-x: auto;
     margin-bottom: 20px;
@@ -449,7 +440,6 @@
     background-color: #e8f5e9;
 }
 
-/* Pagination */
 .produccion__pagination {
     display: flex;
     justify-content: center;
@@ -489,7 +479,6 @@
     border-color: var(--primary-color);
 }
 
-/* Forms */
 .produccion__form {
     display: flex;
     flex-direction: column;
@@ -519,7 +508,6 @@
     display: none;
 }
 
-/* Selected Items */
 .produccion__selected-items {
     display: flex;
     flex-wrap: wrap;
@@ -543,7 +531,6 @@
     font-size: 14px;
 }
 
-/* Empty Message */
 .produccion__empty-message {
     text-align: center;
     color: var(--dark-gray);
@@ -551,7 +538,6 @@
     font-style: italic;
 }
 
-/* Overlay del modal */
 .modal {
     z-index: 9999999999999999999;
     display: none;
@@ -563,7 +549,7 @@
     padding: 1rem;
     z-index: 1000;
 }
-/* Contenido del modal */
+
 .modal__content {
     background: #fff;
     border-radius: 8px;

@@ -11,7 +11,7 @@ const validUnidadMedida = [
   "peso", "volumen", "superficie", "concentración", "litro", "kilo"
 ]
 
-const validEstado = ["habilitado", "deshabilitado"]
+const validEstado = ["habilitado", "deshabilitado"] 
 
 function sanitizeUsuarioId(id) {
   if (id === undefined || id === null || id === '') return null

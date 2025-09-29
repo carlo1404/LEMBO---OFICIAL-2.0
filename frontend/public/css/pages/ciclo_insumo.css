@@ -103,15 +103,12 @@ main {
 
 .sidebar:hover {
     width: 12.5rem;
-    /* ancho expandido */
 }
 
 .sidebar:hover .sidebar__nav-label {
     opacity: 1;
     transform: translateX(0);
 }
-
-
 
 /* Header */
 .header {

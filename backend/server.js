@@ -1,49 +1,36 @@
-const express = require("express")
-const mysql = require("mysql2/promise")
-const cors = require("cors")
-require("dotenv").config()
-
-const app = express()
-const PORT = process.env.PORT || 3000
-
-// Middleware
-app.use(cors())
-app.use(express.json())
+const mysql = require('mysql2/promise');
+require('dotenv').config();
 
 // Database connection
 const dbConfig = {
   host: process.env.DB_HOST || "localhost",
+  port: process.env.DB_PORT || 4400,
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME,
+  database: process.env.DB_NAME || "sistema_gestion_agricola",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-}
+};
 
-const pool = mysql.createPool(dbConfig)
+const pool = mysql.createPool(dbConfig);
 
-// Test database connection
-app.get("/health", async (req, res) => {
-  try {
-    const connection = await pool.getConnection()
-    await connection.ping()
-    connection.release()
-    res.json({ status: "OK", message: "Database connected successfully" })
-  } catch (error) {
-    res.status(500).json({ status: "ERROR", message: error.message })
-  }
-})
-
-// Error handler middleware
-const errorHandler = (error, req, res, next) => {
-  console.error(error)
-  res.status(500).json({
-    error: "Internal server error",
-    message: error.message,
+// Test database connection on startup
+pool.getConnection()
+  .then(connection => {
+    console.log('✅ Database connected successfully');
+    connection.release();
   })
-}
+  .catch(error => {
+    console.error('❌ Database connection failed:', error.message);
+    console.error('🔧 Please ensure MySQL is running and the database "sistema_gestion_agricola" exists');
+    console.error('📋 Database config:', {
+      host: dbConfig.host,
+      port: dbConfig.port,
+      user: dbConfig.user,
+      database: dbConfig.database,
+      password: dbConfig.password ? '[SET]' : '[EMPTY]'
+    });
+  });
 
-app.use(errorHandler)
-
-module.exports = { app, pool }
+module.exports = { pool };

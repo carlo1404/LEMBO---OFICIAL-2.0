@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="/frontend/public/css/components/modal.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="/frontend/JS/sidebar.js" defer></script>
+    <script src="/frontend/JS/auth-guard.js"></script>
+    <script src="/frontend/JS/role-manager.js"></script>
     
     <!-- CDNs para exportación -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -16,6 +18,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
+    <img src="/IMG/gov.jpeg" alt="gov" class="gov">
     <div class="header">
         <div class="header__left-section">
             <span class="header__menu-item">Usuarios</span>
@@ -34,7 +37,7 @@
         </div>
     </div>
     <main>
-        <div class="sidebar"></div>
+        <div class="sidebar" id="sidebar-container"></div>
         <section class="content">
             <table class="content__table" id="usuariosTable">
                 <thead class="content__table-head">
@@ -84,7 +87,7 @@
                         </div>
                         <div>
                             <label for="addNumeroDocumento">Número de documento:</label>
-                            <input type="text" id="addNumeroDocumento" name="numero_documento" required maxlength="20">
+                            <input type="number" id="addNumeroDocumento" name="numero_documento" required maxlength="20">
                         </div>
                     </div>
                     <div class="form-group form-group--double">
@@ -97,15 +100,21 @@
                             <input type="email" id="addCorreo" name="correo" required maxlength="100">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="addRol">Rol:</label>
-                        <select id="addRol" name="rol" required>
-                            <option value="">Seleccionar rol</option>
-                            <option value="superadmin">Super Administrador</option>
-                            <option value="admin">Administrador</option>
-                            <option value="apoyo">Personal de Apoyo</option>
-                            <option value="visitante">Visitante</option>
-                        </select>
+                    <div class="form-group form-group--double">
+                        <div>
+                            <label for="addContraseña">Contraseña:</label>
+                            <input type="password" id="addContraseña" name="contraseña" required minlength="6">
+                        </div>
+                        <div>
+                            <label for="addRol">Rol:</label>
+                            <select id="addRol" name="rol" required>
+                                <option value="">Seleccionar rol</option>
+                                <option value="superadmin">Super Administrador</option>
+                                <option value="admin">Administrador</option>
+                                <option value="apoyo">Personal de Apoyo</option>
+                                <option value="visitante">Visitante</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-buttons">
                         <button type="submit" class="btn-primary">Agregar Usuario</button>
@@ -133,7 +142,7 @@
                     <div class="form-group form-group--double">
                         <div>
                             <label for="editTelefono">Teléfono:</label>
-                            <input type="tel" id="editTelefono" name="telefono" required maxlength="15">
+                            <input type="number" id="editTelefono" name="telefono" required maxlength="15">
                         </div>
                         <div>
                             <label for="editCorreo">Correo electrónico:</label>
@@ -274,7 +283,7 @@
             </div>
         </div>
     </div>
-
+    <img src="/IMG/gov.jpeg" alt="gov" class="gov">
     <script>
         const API_URL = "http://localhost:3000/api/usuarios";
         const tbody = document.querySelector(".content__table-body");
@@ -284,6 +293,7 @@
         // Variables globales para datos
         let todosLosUsuarios = [];
         let usuariosFiltrados = [];
+        let currentUserRole = null; // Variable global para el rol actual
 
         // Mapeo de roles para mostrar
         const rolesMap = {
@@ -319,7 +329,65 @@
             return date.toLocaleDateString('es-CO');
         }
 
-        // Función para renderizar usuarios en la tabla
+        // Función para obtener rol actual dinámicamente
+        function getCurrentUserRole() {
+            if (currentUserRole) return currentUserRole;
+            
+            try {
+                if (window.RoleManager) {
+                    const roleManager = new RoleManager();
+                    currentUserRole = roleManager.userRole;
+                    console.log('Rol obtenido dinámicamente:', currentUserRole);
+                    return currentUserRole;
+                }
+            } catch (error) {
+                console.error('Error obteniendo rol:', error);
+            }
+            
+            return null;
+        }
+
+        // Función para generar botones de acción según el rol - SOLUCION FINAL
+        function generarBotonesAccion(usuario) {
+            const userRole = getCurrentUserRole(); // Obtener rol dinámicamente
+            console.log('Generando botones para rol:', userRole);
+            
+            let botones = `
+                <div class="content__icon content__icon--green" title="Ver detalles">
+                    <i class="bx bx-show view-button" data-id="${usuario.id}"></i>
+                </div>
+            `;
+
+            // Agregar botón de editar según el rol - INCLUIR TODAS LAS VARIANTES
+            if (userRole === 'superadmin' || 
+                userRole === 'admin' || 
+                userRole === 'administrador' || 
+                userRole === 'Admin' || 
+                userRole === 'ADMIN') {
+                console.log('Agregando botón de editar para:', userRole);
+                botones += `
+                    <div class="content__icon content__icon--blue" title="Editar">
+                        <i class="bx bxs-edit edit-button" data-id="${usuario.id}"></i>
+                    </div>
+                `;
+            }
+
+            // Agregar botón de eliminar SOLO para superadmin
+            if (userRole === 'superadmin' || 
+                userRole === 'superAdmin' || 
+                userRole === 'SUPERADMIN') {
+                console.log('Agregando botón de eliminar para superadmin');
+                botones += `
+                    <div class="content__icon content__icon--red" title="Eliminar">
+                        <i class="bx bxs-trash delete-button" data-id="${usuario.id}"></i>
+                    </div>
+                `;
+            }
+
+            return botones;
+        }
+
+        // Función para renderizar usuarios en la tabla - SIMPLIFICADA
         function renderizarUsuarios(usuarios) {
             tbody.innerHTML = "";
             if (!usuarios || usuarios.length === 0) {
@@ -334,7 +402,12 @@
                 return;
             }
 
+            const userRole = getCurrentUserRole();
+            console.log('Renderizando usuarios con rol:', userRole);
+
             usuarios.forEach(usuario => {
+                const botonesAccion = generarBotonesAccion(usuario);
+                
                 tbody.innerHTML += `
                 <tr class="content__table-row">
                     <td class="content__table-data">${usuario.id}</td>
@@ -351,15 +424,7 @@
                     </td>
                     <td class="content__table-data">
                         <div class="content__icon-container">
-                            <div class="content__icon content__icon--green" title="Ver detalles">
-                                <i class="bx bx-show view-button" data-id="${usuario.id}"></i>
-                            </div>
-                            <div class="content__icon content__icon--blue" title="Editar">
-                                <i class="bx bxs-edit edit-button" data-id="${usuario.id}"></i>
-                            </div>
-                            <div class="content__icon content__icon--red" title="Eliminar">
-                                <i class="bx bxs-trash delete-button" data-id="${usuario.id}"></i>
-                            </div>
+                            ${botonesAccion}
                         </div>
                     </td>
                 </tr>
@@ -423,152 +488,33 @@
                     <div class="stat-item"><strong>Total de Usuarios:</strong> ${stats.total}</div>
                     <div class="stat-item"><strong>Habilitados:</strong> ${stats.habilitados}</div>
                     <div class="stat-item"><strong>Deshabilitados:</strong> ${stats.deshabilitados}</div>
-                    ${rolesHtml}
-                    ${tiposHtml}
                 </div>
+                <h4>Por Rol</h4>
+                <div class="stats-grid">${rolesHtml}</div>
+                <h4>Por Tipo de Documento</h4>
+                <div class="stats-grid">${tiposHtml}</div>
             `;
         }
 
-        // Función para filtrar usuarios para el reporte
-        function filtrarUsuariosReporte() {
-            const filtroRol = document.getElementById('filtroRol').value;
-            const filtroEstado = document.getElementById('filtroEstadoReporte').value;
-            const fechaInicio = document.getElementById('fechaInicio').value;
-            const fechaFin = document.getElementById('fechaFin').value;
-
-            let usuariosFiltrados = todosLosUsuarios;
-
-            if (filtroRol) {
-                usuariosFiltrados = usuariosFiltrados.filter(u => u.rol === filtroRol);
-            }
-            if (filtroEstado) {
-                usuariosFiltrados = usuariosFiltrados.filter(u => u.estado === filtroEstado);
-            }
-            if (fechaInicio) {
-                usuariosFiltrados = usuariosFiltrados.filter(u => 
-                    new Date(u.fecha_creacion) >= new Date(fechaInicio)
-                );
-            }
-            if (fechaFin) {
-                usuariosFiltrados = usuariosFiltrados.filter(u => 
-                    new Date(u.fecha_creacion) <= new Date(fechaFin + ' 23:59:59')
-                );
-            }
-
-            mostrarEstadisticas(usuariosFiltrados);
-            return usuariosFiltrados;
+        // Inicializar carga de datos - MEJORADO
+        async function inicializarApp() {
+            // Asegurar que tenemos el rol antes de cargar usuarios
+            await new Promise(resolve => setTimeout(resolve, 400));
+            currentUserRole = getCurrentUserRole();
+            console.log('Rol inicializado:', currentUserRole);
+            
+            await cargarUsuarios();
         }
-
-        // Función para exportar a PDF
-        function exportarPDF(usuarios = usuariosFiltrados) {
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-
-                doc.setFontSize(18);
-                doc.text('Reporte de Usuarios', 14, 22);
-                
-                doc.setFontSize(11);
-                doc.text(`Generado el: ${formatearFecha(new Date())}`, 14, 30);
-
-                const stats = generarEstadisticas(usuarios);
-                let y = 40;
-                doc.setFontSize(12);
-                doc.text('Estadísticas:', 14, y);
-                y += 8;
-                doc.setFontSize(10);
-                doc.text(`Total de usuarios: ${stats.total}`, 14, y);
-                y += 6;
-                doc.text(`Habilitados: ${stats.habilitados}`, 14, y);
-                y += 6;
-                doc.text(`Deshabilitados: ${stats.deshabilitados}`, 14, y);
-                y += 10;
-
-                const tableData = usuarios.map(usuario => [
-                    usuario.id,
-                    usuario.nombre,
-                    tiposDocumentoMap[usuario.tipo_documento] || usuario.tipo_documento,
-                    usuario.numero_documento,
-                    usuario.telefono,
-                    usuario.correo,
-                    rolesMap[usuario.rol] || usuario.rol,
-                    usuario.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado'
-                ]);
-
-                doc.autoTable({
-                    head: [['ID', 'Nombre', 'Tipo Doc', 'Número Doc', 'Teléfono', 'Correo', 'Rol', 'Estado']],
-                    body: tableData,
-                    startY: y,
-                    styles: { fontSize: 8 },
-                    headStyles: { fillColor: [41, 128, 185] },
-                    alternateRowStyles: { fillColor: [245, 245, 245] }
-                });
-
-                doc.save(`reporte_usuarios_${new Date().toISOString().split('T')[0]}.pdf`);
-            } catch (error) {
-                console.error('Error al exportar PDF:', error);
-                showNotification('Error al exportar PDF.', 'error');
-            }
-        }
-
-        // Función para exportar a Excel
-        function exportarExcel(usuarios = usuariosFiltrados) {
-            try {
-                const stats = generarEstadisticas(usuarios);
-                
-                const statsData = [
-                    ['Estadísticas del Reporte'],
-                    [''],
-                    ['Total de usuarios', stats.total],
-                    ['Usuarios habilitados', stats.habilitados],
-                    ['Usuarios deshabilitados', stats.deshabilitados],
-                    [''],
-                    ['Distribución por roles:'],
-                    ...Object.entries(stats.roles).map(([rol, cantidad]) => [rolesMap[rol] || rol, cantidad]),
-                    [''],
-                    ['Fecha de generación', formatearFecha(new Date())]
-                ];
-
-                const usuariosData = [
-                    ['ID', 'Nombre', 'Tipo Documento', 'Número Documento', 'Teléfono', 'Correo', 'Rol', 'Estado', 'Fecha Creación'],
-                    ...usuarios.map(usuario => [
-                        usuario.id,
-                        usuario.nombre,
-                        tiposDocumentoMap[usuario.tipo_documento] || usuario.tipo_documento,
-                        usuario.numero_documento,
-                        usuario.telefono,
-                        usuario.correo,
-                        rolesMap[usuario.rol] || usuario.rol,
-                        usuario.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado',
-                        formatearFecha(usuario.fecha_creacion)
-                    ])
-                ];
-
-                const wb = XLSX.utils.book_new();
-                const wsStats = XLSX.utils.aoa_to_sheet(statsData);
-                const wsUsuarios = XLSX.utils.aoa_to_sheet(usuariosData);
-                
-                XLSX.utils.book_append_sheet(wb, wsStats, "Estadísticas");
-                XLSX.utils.book_append_sheet(wb, wsUsuarios, "Usuarios");
-
-                XLSX.writeFile(wb, `reporte_usuarios_${new Date().toISOString().split('T')[0]}.xlsx`);
-            } catch (error) {
-                console.error('Error al exportar Excel:', error);
-                showNotification('Error al exportar Excel.', 'error');
-            }
-        }
-
-        // Inicializar carga de usuarios
-        cargarUsuarios();
 
         // Buscar usuarios
         searchInput.addEventListener('input', function(e) {
             const filtro = e.target.value.toLowerCase();
             const filtrados = todosLosUsuarios.filter(u => 
                 u.nombre.toLowerCase().includes(filtro) ||
-                u.numero_documento.includes(filtro) ||
                 u.correo.toLowerCase().includes(filtro) ||
-                u.telefono.includes(filtro)
+                u.numero_documento.toLowerCase().includes(filtro) ||
+                u.telefono.toLowerCase().includes(filtro) ||
+                rolesMap[u.rol].toLowerCase().includes(filtro)
             );
             usuariosFiltrados = filtrados;
             renderizarUsuarios(filtrados);
@@ -584,84 +530,56 @@
         const openModal = (modal) => modal.classList.add('active');
         const closeModal = (modal) => modal.classList.remove('active');
 
-        // Event listeners
-        addButton.addEventListener('click', () => {
-            document.getElementById('addUsuarioForm').reset();
-            openModal(addUsuarioModal);
-        });
-
+        addButton.addEventListener('click', () => openModal(addUsuarioModal));
         document.getElementById('descarga').addEventListener('click', function() {
             mostrarEstadisticas();
             openModal(reporteModal);
-        });
-
-        // Event listeners para filtros de reporte
-        document.getElementById('filtroRol').addEventListener('change', filtrarUsuariosReporte);
-        document.getElementById('filtroEstadoReporte').addEventListener('change', filtrarUsuariosReporte);
-        document.getElementById('fechaInicio').addEventListener('change', filtrarUsuariosReporte);
-        document.getElementById('fechaFin').addEventListener('change', filtrarUsuariosReporte);
-
-        // Event listeners para exportación
-        document.getElementById('exportarReportePDF').addEventListener('click', function() {
-            const usuariosFiltradosReporte = filtrarUsuariosReporte();
-            exportarPDF(usuariosFiltradosReporte);
-        });
-
-        document.getElementById('exportarReporteExcel').addEventListener('click', function() {
-            const usuariosFiltradosReporte = filtrarUsuariosReporte();
-            exportarExcel(usuariosFiltradosReporte);
-        });
-
-        document.getElementById('exportarPDF').addEventListener('click', function() {
-            exportarPDF(usuariosFiltrados);
-        });
-
-        document.getElementById('exportarExcel').addEventListener('click', function() {
-            exportarExcel(usuariosFiltrados);
         });
 
         // Agregar usuario
         document.getElementById("addUsuarioForm").addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const formData = new FormData(e.target);
-            const userData = Object.fromEntries(formData.entries());
-
-            console.log('Enviando datos:', userData);
+            const usuarioData = {
+                tipo_documento: document.getElementById("addTipoDocumento").value,
+                numero_documento: document.getElementById("addNumeroDocumento").value,
+                nombre: document.getElementById("addNombre").value,
+                telefono: document.getElementById("addTelefono").value,
+                correo: document.getElementById("addCorreo").value,
+                rol: document.getElementById("addRol").value,
+                contraseña: document.getElementById("addContraseña").value
+            };
 
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(`${API_URL}`, {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify(userData)
+                    body: JSON.stringify(usuarioData)
                 });
                 
                 if (response.ok) {
                     closeModal(addUsuarioModal);
                     e.target.reset();
                     cargarUsuarios();
-                    showNotification('Usuario agregado exitosamente', 'success');
+                    alert('Usuario agregado exitosamente');
                 } else {
                     const errorData = await response.json();
-                    console.error('Error del servidor:', errorData);
-                    showNotification('Error al agregar usuario: ' + (errorData.error || 'Error desconocido'), 'error');
+                    alert('Error al agregar usuario: ' + (errorData.error || 'Error desconocido'));
                 }
             } catch (error) {
-                console.error('Error de conexión:', error);
-                showNotification('Error de conexión al agregar usuario', 'error');
+                console.error('Error:', error);
+                alert('Error al agregar usuario');
             }
         });
 
         // Event listener para botones de acciones
         let editandoId = null;
         tbody.addEventListener('click', async function(e) {
-            const userId = e.target.dataset.id;
+            const usuarioId = e.target.dataset.id;
             
             if (e.target.classList.contains("view-button")) {
                 try {
-                    const response = await fetch(`${API_URL}/${userId}`);
-                    if (!response.ok) throw new Error('Usuario no encontrado');
-                    
+                    const response = await fetch(`${API_URL}/${usuarioId}`);
                     const usuario = await response.json();
                     
                     document.getElementById("viewId").textContent = usuario.id;
@@ -677,16 +595,14 @@
                     openModal(viewUsuarioModal);
                 } catch (error) {
                     console.error('Error:', error);
-                    showNotification('Error al cargar detalles del usuario', 'error');
+                    alert('Error al cargar detalles del usuario');
                 }
             }
             
             if (e.target.classList.contains("edit-button")) {
-                editandoId = userId;
+                editandoId = usuarioId;
                 try {
-                    const response = await fetch(`${API_URL}/${userId}`);
-                    if (!response.ok) throw new Error('Usuario no encontrado');
-                    
+                    const response = await fetch(`${API_URL}/${usuarioId}`);
                     const usuario = await response.json();
                     
                     document.getElementById("editUsuarioId").value = usuario.id;
@@ -699,27 +615,27 @@
                     openModal(editUsuarioModal);
                 } catch (error) {
                     console.error('Error:', error);
-                    showNotification('Error al cargar datos del usuario', 'error');
+                    alert('Error al cargar datos del usuario');
                 }
             }
             
             if (e.target.classList.contains("delete-button")) {
-                if (confirm("¿Está seguro de que desea eliminar este usuario? Esta acción no se puede deshacer.")) {
+                if (confirm("¿Está seguro de que desea eliminar este usuario?")) {
                     try {
-                        const response = await fetch(`${API_URL}/${userId}`, {
+                        const response = await fetch(`${API_URL}/${usuarioId}`, {
                             method: "DELETE"
                         });
                         
                         if (response.ok) {
                             cargarUsuarios();
-                            showNotification('Usuario eliminado exitosamente', 'success');
+                            alert('Usuario eliminado exitosamente');
                         } else {
                             const errorData = await response.json();
-                            showNotification('Error al eliminar usuario: ' + (errorData.error || 'Error desconocido'), 'error');
+                            alert('Error al eliminar usuario: ' + (errorData.error || 'Error desconocido'));
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        showNotification('Error al eliminar usuario', 'error');
+                        alert('Error al eliminar usuario');
                     }
                 }
             }
@@ -729,34 +645,88 @@
         document.getElementById("editUsuarioForm").addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const formData = new FormData(e.target);
-            const userData = Object.fromEntries(formData.entries());
-            delete userData.id; // No enviar el ID en el body
-
-            console.log('Editando datos:', userData);
+            const usuarioData = {
+                nombre: document.getElementById("editNombre").value,
+                telefono: document.getElementById("editTelefono").value,
+                correo: document.getElementById("editCorreo").value,
+                rol: document.getElementById("editRol").value,
+                estado: document.getElementById("editEstado").value
+            };
 
             try {
                 const response = await fetch(`${API_URL}/${editandoId}`, {
                     method: "PUT",
                     headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify(userData)
+                    body: JSON.stringify(usuarioData)
                 });
                 
                 if (response.ok) {
                     closeModal(editUsuarioModal);
                     e.target.reset();
                     cargarUsuarios();
-                    showNotification('Usuario actualizado exitosamente', 'success');
+                    alert('Usuario actualizado exitosamente');
                 } else {
                     const errorData = await response.json();
-                    console.error('Error del servidor:', errorData);
-                    showNotification('Error al actualizar usuario: ' + (errorData.error || 'Error desconocido'), 'error');
+                    alert('Error al actualizar usuario: ' + (errorData.error || 'Error desconocido'));
                 }
             } catch (error) {
-                console.error('Error de conexión:', error);
-                showNotification('Error de conexión al actualizar usuario', 'error');
+                console.error('Error:', error);
+                alert('Error al actualizar usuario');
             }
         });
+
+        // Exportar funciones
+        document.getElementById('exportarPDF').addEventListener('click', function() {
+            exportarPDF(usuariosFiltrados, 'usuarios');
+        });
+
+        document.getElementById('exportarReportePDF').addEventListener('click', function() {
+            exportarPDF(usuariosFiltrados, 'reporte-usuarios');
+        });
+
+        // Función para exportar PDF
+        function exportarPDF(data, filename) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.text('Reporte de Usuarios', 20, 20);
+            
+            const tableData = data.map(usuario => [
+                usuario.id,
+                usuario.nombre,
+                tiposDocumentoMap[usuario.tipo_documento] || usuario.tipo_documento,
+                usuario.numero_documento,
+                usuario.telefono,
+                usuario.correo,
+                rolesMap[usuario.rol] || usuario.rol,
+                usuario.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado'
+            ]);
+            
+            doc.autoTable({
+                head: [['ID', 'Nombre', 'Tipo Doc.', 'Número Doc.', 'Teléfono', 'Correo', 'Rol', 'Estado']],
+                body: tableData,
+                startY: 30
+            });
+            
+            doc.save(`${filename}.pdf`);
+        }
+
+        // Exportar Excel
+        document.getElementById('exportarExcel').addEventListener('click', function() {
+            exportarExcel(usuariosFiltrados, 'usuarios');
+        });
+
+        document.getElementById('exportarReporteExcel').addEventListener('click', function() {
+            exportarExcel(usuariosFiltrados, 'reporte-usuarios');
+        });
+
+        // Función para exportar Excel
+        function exportarExcel(data, filename) {
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Usuarios");
+            XLSX.writeFile(wb, `${filename}.xlsx`);
+        }
 
         // Cerrar modales
         [addUsuarioModal, editUsuarioModal, viewUsuarioModal, reporteModal].forEach(modal => {
@@ -771,6 +741,119 @@
                 }
             });
         });
+
+        // Gestión de roles para Usuarios - MEJORADO
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, inicializando app...'); 
+            setTimeout(initializeUsuariosRoles, 500);
+        });
+
+        function initializeUsuariosRoles() {
+            console.log('Iniciando inicialización de roles...');
+            
+            if (!window.authGuard || !window.authGuard.isAuthenticated()) {
+                console.log('Usuario no autenticado, redirigiendo...');
+                window.location.href = '/frontend/public/views/register.html';
+                return;
+            }
+
+            if (!window.RoleManager) {
+                console.error('RoleManager no está disponible');
+                return;
+            }
+
+            const roleManager = new RoleManager();
+            const userRole = roleManager.userRole;
+            currentUserRole = userRole; // Guardar el rol globalmente
+            
+            console.log('ROL DETECTADO:', userRole);
+            console.log('Configurando Usuarios para rol:', userRole);
+            
+            // Verificar que tenemos el rol antes de configurar
+            if (!userRole) {
+                console.error('No se pudo obtener el rol del usuario');
+                return;
+            }
+            
+            configureUsuariosUI(userRole);
+            
+            // Inicializar la aplicación
+            inicializarApp();
+        }
+
+        function configureUsuariosUI(role) {
+            console.log('Configurando UI para rol:', role);
+            
+            const createButton = document.getElementById('add');
+            const actionsColumn = document.querySelector('.content__table-header:last-child');
+            
+            // Normalizar el rol para manejar diferentes variantes
+            const normalizedRole = role.toLowerCase();
+            
+            switch(normalizedRole) {
+                case 'superadmin':
+                case 'super administrador':
+                    console.log('Configurando para SUPERADMIN - Acceso completo a usuarios');
+                    showCreateButton(createButton);
+                    updateActionsColumn(actionsColumn, 'Acciones');
+                    break;
+                case 'admin':
+                case 'administrador':
+                    console.log('Configurando para ADMIN - Solo editar usuarios');
+                    hideCreateButton(createButton);
+                    updateActionsColumn(actionsColumn, 'Editar');
+                    break;
+                case 'visitante':
+                case 'apoyo':
+                case 'personal de apoyo':
+                    console.log('Configurando para rol restringido - Sin acceso a usuarios');
+                    hideCreateButton(createButton);
+                    updateActionsColumn(actionsColumn, 'Ver');
+                    break;
+                default:
+                    console.log('Configurando para rol desconocido:', role);
+                    hideCreateButton(createButton);
+            }
+            setupUsuariosActionInterceptors(role);
+        }
+
+        function hideCreateButton(button) {
+            if (button) button.style.display = 'none';
+        }
+
+        function showCreateButton(button) {
+            if (button) button.style.display = '';
+        }
+
+        function updateActionsColumn(column, text) {
+            if (column) column.textContent = text;
+        }
+
+        function setupUsuariosActionInterceptors(role) {
+            const normalizedRole = role.toLowerCase();
+            
+            if (normalizedRole === 'visitante' || normalizedRole === 'apoyo' || normalizedRole === 'personal de apoyo') {
+                document.addEventListener('click', function(e) {
+                    if (e.target.id === 'add' || 
+                        e.target.classList.contains('edit-button') || 
+                        e.target.classList.contains('delete-button')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        alert('No tienes permisos para realizar esta acción.');
+                        return false;
+                    }
+                });
+            } else if (normalizedRole === 'admin' || normalizedRole === 'administrador') {
+                document.addEventListener('click', function(e) {
+                    if (e.target.id === 'add' || e.target.classList.contains('delete-button')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        alert('Los administradores no pueden crear o eliminar usuarios.');
+                        return false;
+                    }
+                });
+            }
+        }
     </script>
 
     <style>

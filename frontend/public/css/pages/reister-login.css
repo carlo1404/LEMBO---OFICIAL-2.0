@@ -1,0 +1,357 @@
+/* Extensiones adicionales para el sistema de autenticación */
+
+.auth-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1rem;
+  }
+  
+  /* Estilos para select */
+  .container__input select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1rem;
+    padding-right: 3rem;
+  }
+  
+  /* Estados de validación */
+  .container__input.valid {
+    border: 2px solid var(--Primary-600);
+  }
+  
+  .container__input.invalid {
+    border: 2px solid var(--Orange);
+  }
+  
+  /* Mensaje informativo */
+  .info {
+    background-color: var(--Blue);
+    border-radius: 1rem;
+    margin-top: 1rem;
+    text-align: center;
+    padding: 1rem;
+    color: var(--Negro);
+    text-transform: uppercase;
+  }
+  
+  /* Animaciones */
+  .container__form {
+    animation: fadeIn 0.5s ease-in;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Mejoras responsive */
+  @media (max-width: 480px) {
+    .container__input-box {
+      margin: 0.3rem 0;
+      width: 100%;
+    }
+  
+    .container__input {
+      padding: 1.2rem 3.5rem;
+    }
+  
+    .container__icon {
+      top: 1.5rem;
+      font-size: 1.5rem;
+    }
+  
+    .auth-form {
+      padding: 0;
+    }
+  }
+  :root {
+    /* Prymari color */
+    --Primary-50: #edf7e8;
+    --Primary-100: #dbefb9;
+    --Primary-200: #c9e8b9;
+    --Primary-300: #b7e0a2;
+    --Primary-400: #a5d88b;
+    --Primary-500: #93d074;
+    --Primary-600: #81c85d;
+    --Primary-700: #6fc046;
+    --Primary-800: #5dd12e;
+    --Primary-900: #4bbd17;
+    --Primary-950: #39a900;
+  
+    /* Secundary Color */
+    --Green: #007832;
+    --Blue: #50e5f9;
+    --Orange: #fdc300;
+  
+    /* Color Neutro */
+    --Blanco: #fff;
+    --Negro: #000;
+    --Gris-100: #313131;
+    --Gris-80: #626262;
+    --Gris-60: #949494;
+    --Gris-40: #c5c5c5;
+    --Gris-20: #f6f6f6;
+  }
+  h1 {
+    font-size: 3.2rem;
+  }
+  h2 {
+    font-size: 2.4rem;
+  }
+  h3 {
+    font-size: 2rem;
+  }
+  h4 {
+    font-size: 1.6rem;
+  }
+  h5 {
+    font-size: 1.4rem;
+  }
+  h6 {
+    font-size: 1rem;
+  }
+  
+  * {
+    margin: 0%;
+    padding: 0%;
+    box-sizing: border-box;
+  }
+  
+  /* Cuerpo */
+  body {
+    font-family: Helvetica Neue, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-image: url(/IMG/Fondo-login.jpg);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+  
+  /* Formulario */
+  .container__form {
+    padding: 1rem;
+    display: flex;
+    width: 35.313rem;
+    min-height: 34rem;
+    height: auto;
+    flex-direction: column;
+    box-shadow: 0 0 2rem rgb(0, 0, 0, 0.2);
+    border-radius: 0.6rem;
+    background: var(--Primary-800);
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .container__form,.container__button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Tamaño letra login */
+  .container__title {
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--Blanco);
+    margin-bottom: 2.5rem;
+    text-shadow: 1rem;
+    font-size: 3.2rem;
+  }
+  
+  label,
+  p {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Espacios en el formulario */
+  .container__input {
+    display: flex;
+    padding: 1rem auto;
+    border: none;
+    border-radius: 0.4rem;
+    background-color: var(--Blanco);
+    outline: none;
+    color: var(--Negro);
+    font-size: 1.4rem;
+    gap: 2.4rem;
+    height: 3.7rem;
+  }
+  
+  /* Logo */
+  .container__logo {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 10rem;
+    margin-bottom: 1.5rem;
+    object-fit: contain;
+
+  }
+  
+  /* Estilos para la caja de entrada */
+  .container__input-box {
+    position: relative;
+    width: 27rem;
+    margin: 0.5rem;
+  }
+  .container__logo--img {
+    border-radius: 50%;
+    height: 5.5rem;
+    width: 5.5rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  /* Estilos para los campos de entrada */
+  .container__input-box .container__input {
+    display: flex;
+    width: 100%;
+    padding: 1.5rem 4.5rem 2rem;
+    font-size: 1rem;
+    color: var(--Negro);
+    background-color: var(--Blanco);
+    border: none;
+    border-radius: 0.6rem;
+    outline: none;
+    gap: 2.4rem;
+  }
+  
+  /* Estilo de los íconos */
+  .container__icon {
+    position: absolute;
+    top: 1.8rem;
+    left: 1rem;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    color: var(--Negro);
+  }
+  
+  /* Estilo placeholder */
+  .container__input::placeholder {
+    color: var(--Gris-40);
+  }
+  
+  /* Recordar contraseña */
+  .container__remember-forgot a {
+    text-decoration: none;
+    color: var(--Blanco);
+  }
+  
+  .container__remember-forgot {
+    margin: 1rem;
+  }
+  
+  /* Botón */
+  .container__button {
+    display:flex;
+    position: relative;
+    margin-left: 7rem;
+    background-color: var(--Negro);
+    color: var(--Blanco);
+    cursor: pointer;
+    padding: 0.8rem;
+    width: 16rem;
+    border-radius: 0.6rem;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+
+  .container__logo{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .container__button:hover {
+    background-color: var(--Gris-100);
+    transform: scale(1.05);
+    border: none;
+  }
+  /* Alertas del formulario */
+  .correcto {
+    background-color: var(--Primary-600);
+    border-radius: 1rem;
+    margin-top: 1rem;
+    text-align: center;
+    padding: 1rem;
+    color: var(--Negro);
+    text-transform: uppercase;
+    border-radius: 1rem;
+  }
+  
+  .error {
+    background-color: var(--Orange);
+    border-radius: 1rem;
+    text-align: center;
+    padding: 1rem;
+    margin-top: 1rem;
+    color: var(--Blanco);
+    text-transform: uppercase;
+    border-radius: 1rem;
+  }
+  
+  @media (max-width: 768px) {
+    .container__form {
+      width: 90%;
+      min-height: auto;
+      height: auto;
+      padding: 1.5rem;
+    }
+  
+    .container__title {
+      font-size: 2.5rem;
+    }
+  
+    .container__input-box {
+      width: 100%;
+    }
+  
+    .container__button {
+      width: 100%;
+    }
+  }
+  
+  @media (width < 480px) {
+    .container__form {
+      width: 100%;
+      min-height: auto;
+      height: auto;
+      padding: 1rem;
+    }
+  
+    .container__title {
+      font-size: 2.5rem;
+    }
+  
+    .container__icon::before {
+      display: none;
+    }
+  
+    .container__logo {
+      width: 2rem;
+      height: 2rem;
+    }
+  
+    .container__input-box .container__input {
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+    }
+  
+    .container__button {
+      font-size: 1rem;
+      padding: 0.6rem;
+    }
+  }
+    

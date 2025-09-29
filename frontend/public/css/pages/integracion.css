@@ -203,7 +203,7 @@ h1 {
 }
 
 .chart-container canvas {
-    flex-grow: 1; /* Hace que el canvas ocupe el espacio disponible */
+    flex-grow: 1;
     width: 100% !important;
     height: 100% !important;
 }
@@ -217,7 +217,7 @@ h1 {
 }
 
 /* Estilos responsivos */
-@media (max-width: 75rem) { /* 1200px */
+@media (max-width: 75rem) { 
     body {
         flex-direction: column;
     }
@@ -237,7 +237,7 @@ h1 {
     }
 }
 
-@media (max-width: 48rem) { /* 768px */
+@media (max-width: 48rem) {
     body {
         padding: 0.5rem;
     }
@@ -265,7 +265,7 @@ h1 {
     }
 }
 
-@media (max-width: 26.25rem) { /* 420px */
+@media (max-width: 26.25rem) {
     body {
         padding: 0.25rem;
     }

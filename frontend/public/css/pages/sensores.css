@@ -101,7 +101,6 @@ main {
 
 .sidebar:hover {
     width: 12.5rem;
-    /* ancho expandido */
 }
 
 .sidebar:hover .sidebar__nav-label {

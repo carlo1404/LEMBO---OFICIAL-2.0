@@ -10,6 +10,12 @@ function sanitizeUsuarioId(id) {
   return Number.isInteger(n) ? n : null
 }
 
+function sanitizeCultivoId(id) {
+  if (id === undefined || id === null || id === '') return null
+  const n = Number(id)
+  return Number.isInteger(n) ? n : null
+}
+
 function sendError(res, status, message) {
   console.error("API Error:", message)
   return res.status(status).json({ error: message })
@@ -32,9 +38,12 @@ router.get("/", async (req, res) => {
   try {
     const { pool } = require("../server")
     const [rows] = await pool.execute(`
-      SELECT c.*, u.nombre as usuario_nombre
+      SELECT c.*, 
+             u.nombre as usuario_nombre,
+             cult.nombre as cultivo_nombre
       FROM ciclo_cultivo c
       LEFT JOIN usuarios u ON c.usuario_id = u.id
+      LEFT JOIN cultivos cult ON c.cultivo_id = cult.id
       ORDER BY c.fecha_creacion DESC
     `)
     res.json(rows)
@@ -49,9 +58,12 @@ router.get("/:id", async (req, res) => {
   try {
     const { pool } = require("../server")
     const [rows] = await pool.execute(`
-      SELECT c.*, u.nombre as usuario_nombre
+      SELECT c.*, 
+             u.nombre as usuario_nombre,
+             cult.nombre as cultivo_nombre
       FROM ciclo_cultivo c
       LEFT JOIN usuarios u ON c.usuario_id = u.id
+      LEFT JOIN cultivos cult ON c.cultivo_id = cult.id
       WHERE c.id = ?
     `, [req.params.id])
     
@@ -73,7 +85,8 @@ router.post("/", async (req, res) => {
       periodo_inicio,
       periodo_final,
       novedades,
-      usuario_id
+      usuario_id,
+      cultivo_id
     } = req.body
 
     console.log("POST /ciclo-cultivo body:", req.body)
@@ -96,6 +109,7 @@ router.post("/", async (req, res) => {
     }
 
     const sanitizedUserId = sanitizeUsuarioId(usuario_id)
+    const sanitizedCultivoId = sanitizeCultivoId(cultivo_id)
 
     // Validar usuario si se proporciona
     if (sanitizedUserId !== null) {
@@ -108,17 +122,31 @@ router.post("/", async (req, res) => {
       }
     }
 
+    // Validar cultivo si se proporciona
+    if (sanitizedCultivoId !== null) {
+      const [cultivoCheck] = await pool.execute(
+        "SELECT id FROM cultivos WHERE id = ? AND estado = ?",
+        [sanitizedCultivoId, "habilitado"]
+      )
+      if (!cultivoCheck.length) {
+        return sendError(res, 400, "cultivo_id inválido o cultivo deshabilitado")
+      }
+    }
+
     // Insertar ciclo de cultivo
     const [result] = await pool.execute(`
-      INSERT INTO ciclo_cultivo (nombre, descripcion, periodo_inicio, periodo_final, novedades, usuario_id, estado)
-      VALUES (?, ?, ?, ?, ?, ?, 'habilitado')
-    `, [nombre, descripcion, periodo_inicio, periodo_final, novedades, sanitizedUserId])
+      INSERT INTO ciclo_cultivo (nombre, descripcion, periodo_inicio, periodo_final, novedades, usuario_id, cultivo_id, estado)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'habilitado')
+    `, [nombre, descripcion, periodo_inicio, periodo_final, novedades, sanitizedUserId, sanitizedCultivoId])
 
-    // Obtener ciclo creado con datos de usuario
+    // Obtener ciclo creado con datos de usuario y cultivo
     const [rows] = await pool.execute(`
-      SELECT c.*, u.nombre as usuario_nombre
+      SELECT c.*, 
+             u.nombre as usuario_nombre,
+             cult.nombre as cultivo_nombre
       FROM ciclo_cultivo c
       LEFT JOIN usuarios u ON c.usuario_id = u.id
+      LEFT JOIN cultivos cult ON c.cultivo_id = cult.id
       WHERE c.id = ?
     `, [result.insertId])
 
@@ -140,6 +168,7 @@ router.put("/:id", async (req, res) => {
       periodo_final,
       novedades,
       usuario_id,
+      cultivo_id,
       estado
     } = req.body
 
@@ -170,6 +199,7 @@ router.put("/:id", async (req, res) => {
     }
 
     const sanitizedUserId = sanitizeUsuarioId(usuario_id)
+    const sanitizedCultivoId = sanitizeCultivoId(cultivo_id)
 
     // Validar usuario si se proporciona
     if (sanitizedUserId !== null) {
@@ -182,6 +212,17 @@ router.put("/:id", async (req, res) => {
       }
     }
 
+    // Validar cultivo si se proporciona
+    if (sanitizedCultivoId !== null) {
+      const [cultivoCheck] = await pool.execute(
+        "SELECT id FROM cultivos WHERE id = ? AND estado = ?",
+        [sanitizedCultivoId, "habilitado"]
+      )
+      if (!cultivoCheck.length) {
+        return sendError(res, 400, "cultivo_id inválido o cultivo deshabilitado")
+      }
+    }
+
     // Actualizar ciclo de cultivo
     const [result] = await pool.execute(`
       UPDATE ciclo_cultivo SET
@@ -191,9 +232,10 @@ router.put("/:id", async (req, res) => {
         periodo_final = COALESCE(?, periodo_final),
         novedades = COALESCE(?, novedades),
         usuario_id = COALESCE(?, usuario_id),
+        cultivo_id = COALESCE(?, cultivo_id),
         estado = COALESCE(?, estado)
       WHERE id = ?
-    `, [nombre, descripcion, periodo_inicio, periodo_final, novedades, sanitizedUserId, estado, req.params.id])
+    `, [nombre, descripcion, periodo_inicio, periodo_final, novedades, sanitizedUserId, sanitizedCultivoId, estado, req.params.id])
 
     if (!result.affectedRows) {
       return sendError(res, 404, "Ciclo de cultivo no encontrado")
@@ -201,9 +243,12 @@ router.put("/:id", async (req, res) => {
 
     // Obtener ciclo actualizado
     const [rows] = await pool.execute(`
-      SELECT c.*, u.nombre as usuario_nombre
+      SELECT c.*, 
+             u.nombre as usuario_nombre,
+             cult.nombre as cultivo_nombre
       FROM ciclo_cultivo c
       LEFT JOIN usuarios u ON c.usuario_id = u.id
+      LEFT JOIN cultivos cult ON c.cultivo_id = cult.id
       WHERE c.id = ?
     `, [req.params.id])
 
@@ -253,9 +298,12 @@ router.get("/estado/:estado", async (req, res) => {
     }
 
     const [rows] = await pool.execute(`
-      SELECT c.*, u.nombre as usuario_nombre
+      SELECT c.*, 
+             u.nombre as usuario_nombre,
+             cult.nombre as cultivo_nombre
       FROM ciclo_cultivo c
       LEFT JOIN usuarios u ON c.usuario_id = u.id
+      LEFT JOIN cultivos cult ON c.cultivo_id = cult.id
       WHERE c.estado = ?
       ORDER BY c.fecha_creacion DESC
     `, [estado])
@@ -274,9 +322,12 @@ router.get("/usuario/:userId", async (req, res) => {
     const { userId } = req.params
 
     const [rows] = await pool.execute(`
-      SELECT c.*, u.nombre as usuario_nombre
+      SELECT c.*, 
+             u.nombre as usuario_nombre,
+             cult.nombre as cultivo_nombre
       FROM ciclo_cultivo c
       LEFT JOIN usuarios u ON c.usuario_id = u.id
+      LEFT JOIN cultivos cult ON c.cultivo_id = cult.id
       WHERE c.usuario_id = ?
       ORDER BY c.fecha_creacion DESC
     `, [userId])
@@ -288,6 +339,30 @@ router.get("/usuario/:userId", async (req, res) => {
   }
 })
 
+// GET ciclos por cultivo
+router.get("/cultivo/:cultivoId", async (req, res) => {
+  try {
+    const { pool } = require("../server")
+    const { cultivoId } = req.params
+
+    const [rows] = await pool.execute(`
+      SELECT c.*, 
+             u.nombre as usuario_nombre,
+             cult.nombre as cultivo_nombre
+      FROM ciclo_cultivo c
+      LEFT JOIN usuarios u ON c.usuario_id = u.id
+      LEFT JOIN cultivos cult ON c.cultivo_id = cult.id
+      WHERE c.cultivo_id = ?
+      ORDER BY c.fecha_creacion DESC
+    `, [cultivoId])
+
+    res.json(rows)
+  } catch (err) {
+    console.error("GET /ciclo-cultivo/cultivo ERROR:", err)
+    return sendError(res, 500, "Error interno del servidor")
+  }
+})
+
 // GET ciclos activos (dentro del período actual)
 router.get("/activos/periodo", async (req, res) => {
   try {
@@ -295,9 +370,12 @@ router.get("/activos/periodo", async (req, res) => {
     const hoy = new Date().toISOString().split('T')[0]
 
     const [rows] = await pool.execute(`
-      SELECT c.*, u.nombre as usuario_nombre
+      SELECT c.*, 
+             u.nombre as usuario_nombre,
+             cult.nombre as cultivo_nombre
       FROM ciclo_cultivo c
       LEFT JOIN usuarios u ON c.usuario_id = u.id
+      LEFT JOIN cultivos cult ON c.cultivo_id = cult.id
       WHERE c.estado = 'habilitado' 
         AND c.periodo_inicio <= ? 
         AND c.periodo_final >= ?

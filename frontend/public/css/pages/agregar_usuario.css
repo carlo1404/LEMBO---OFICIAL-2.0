@@ -49,10 +49,10 @@ body {
 }
 
 .form-container {
-    width: 25rem; /* Mantienes el ancho si lo deseas */
+    width: 25rem; 
     background-color: var(--white);
     border-radius: 0.625rem;
-    padding: 0.75rem 1.25rem; /* Disminuye el padding superior e inferior */
+    padding: 0.75rem 1.25rem; 
 }
 
 
@@ -87,7 +87,7 @@ body {
     border: 0.063rem solid var(--gray-60);
     border-radius: 0.3125rem;
     outline: none;
-    margin-bottom: 0.75rem; /* Reducido de 1.5rem a 0.75rem */
+    margin-bottom: 0.75rem;
 }
 textarea{
     padding: 0.625rem;
@@ -103,9 +103,9 @@ textarea{
 
 textarea {
     padding: 0.625rem;
-    width: 100%; /* Para que se adapte al contenedor */
+    width: 100%;
     resize: none;
-    height: 2.5rem; /* Ajusta este valor según lo que necesites */
+    height: 2.5rem;
 }
 button {
     width: 100%;

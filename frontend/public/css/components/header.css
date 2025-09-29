@@ -12,7 +12,7 @@ body {
     line-height: 1.5;
 }
 
-/* Header & Navigation */
+/* Header & Navegacion */
 .header {
     background-color: var(--white);
     box-shadow: 0 0.2rem 0.4rem rgba(0,0,0,0.1);
@@ -61,7 +61,7 @@ body {
     color: var(--primary-950);
 }
 
-/* Responsive Design */
+/* MQ */
 @media (width < 768px) {
     .nav__list {
         display: none;

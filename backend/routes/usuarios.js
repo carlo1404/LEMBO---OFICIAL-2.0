@@ -6,6 +6,7 @@ const validTipoDocumento = ["ti", "cc", "ppt", "ce", "pep"]
 const validRol = ["superadmin", "admin", "apoyo", "visitante"]
 const validEstado = ["habilitado", "deshabilitado"]
 
+
 function sendError(res, status, message) {
   console.error("API Error:", message)
   return res.status(status).json({ error: message })
@@ -199,4 +200,54 @@ router.delete("/:id", async (req, res) => {
   }
 })
 
+router.post("/login", async (req, res) => {
+  try {
+    const { pool } = require("../server")
+    const { correo, contraseña } = req.body
+
+    console.log("POST /auth/login body:", { correo, contraseña: "***" })
+
+    // Validaciones de campos requeridos
+    if (!correo) return sendError(res, 400, "correo es requerido")
+    if (!contraseña) return sendError(res, 400, "contraseña es requerida")
+
+    // Validar formato de correo básico
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(correo)) {
+      return sendError(res, 400, "Formato de correo inválido")
+    }
+
+    // Buscar usuario por correo
+    const [rows] = await pool.execute(
+      "SELECT * FROM usuarios WHERE correo = ? AND estado = 'habilitado'", 
+      [correo]
+    )
+    
+    if (rows.length === 0) {
+      return sendError(res, 401, "Credenciales incorrectas o usuario deshabilitado")
+    }
+
+    const usuario = rows[0]
+
+    // Verificar contraseña
+    const isValidPassword = contraseña == usuario.contrasena
+    
+    if (!isValidPassword) {
+      return sendError(res, 401, "Credenciales incorrectas")
+    }
+
+    // Respuesta exitosa sin incluir la contraseña
+    const { contraseña: _, ...usuarioSinPassword } = usuario
+    
+    res.json({
+      success: true,
+      message: "Login exitoso",
+      usuario: usuarioSinPassword
+    })
+    
+  } catch (error) {
+    console.error("POST /auth/login ERROR:", error)
+    return sendError(res, 500, "Error interno del servidor")
+  }
+})
 module.exports = router

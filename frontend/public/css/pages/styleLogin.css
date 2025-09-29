@@ -207,7 +207,6 @@ p {
     border-radius: 1rem;
 }
 
-/* Responsivo para tablets */
 @media (max-width: 768px) {
     .container__form {
         width: 90%;
@@ -228,7 +227,6 @@ p {
     }
 }
 
-/* Responsivo para móviles (pantallas pequeñas) */
 @media (width < 480px) {
     .container__form {
         width: 100%;

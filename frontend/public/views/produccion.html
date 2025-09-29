@@ -20,6 +20,7 @@
 
 <body>
   <!-- Header consistente con otros componentes -->
+  <img src="/IMG/gov.jpeg" alt="gov" class="gov">
   <div class="header">
     <div class="header__left-section">
       <span class="header__menu-item">Producciones</span>
@@ -35,7 +36,7 @@
     </div>
   </div>
 
-  <div class="sidebar"></div>
+  <div class="sidebar" id="sidebar-container"></div>
   <main class="full-main">
     <section class="content">
       <!-- Navegación de tabs -->
@@ -100,7 +101,6 @@
               <button id="generarReporteBtn" class="produccion__button produccion__button--primary">
                 Generar Reporte
               </button>
-
               <div class="export-buttons">
                 <button id="exportarReportePDFBtn" class="produccion__button produccion__button--secondary">
                   <i class="fas fa-file-pdf"></i> Exportar PDF
@@ -202,7 +202,8 @@
           <small>Mantenga Ctrl presionado para seleccionar múltiples sensores</small>
         </div>
 
-        <div class="form-group">
+        <!-- SECCIÓN DE INSUMOS PARA CREAR Y EDITAR -->
+        <div class="form-group" id="insumosSection">
           <label>Consumo de Insumos (define inversión automáticamente)</label>
           <div id="insumosContainer">
             <div class="insumo-item">
@@ -239,7 +240,16 @@
           </div>
         </div>
 
-        <div class="form-row">
+        <!-- CAMPO ESTADO SOLO PARA EDICIÓN -->
+        <div id="estadoContainer" class="form-group" style="display: none;">
+          <label for="estado">Estado</label>
+          <select id="estado" name="estado">
+            <option value="habilitado">Habilitado</option>
+            <option value="deshabilitado">Deshabilitado</option>
+          </select>
+        </div>
+
+        <div class="form-row" id="inversionContainer">
           <div class="form-group">
             <label>Inversión Total (calculada automáticamente)</label>
             <span id="inversionTotal" class="form-value">$0</span>
@@ -272,15 +282,17 @@
       </div>
       <div class="modal__actions">
         <button type="button" class="produccion__button produccion__button--secondary modal__close">
+          Cerrar
         </button>
       </div>
     </div>
   </div>
-
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/frontend/JS/sidebar.js"></script>
+  <script src="/frontend/JS/auth-guard.js"></script>
+  <script src="/frontend/JS/role-manager.js"></script>
 
   <script>
     // Configuración API
@@ -302,6 +314,10 @@
 
     // Variables para reportes
     let datosReporte = [];
+
+    // Variables para edición
+    let insumosOriginalesEdicion = [];
+    let modoEdicion = false;
 
     // Elementos DOM
     const tableBody = document.getElementById('produccionesTableBody');
@@ -631,15 +647,81 @@
       });
     }
 
+    // Cargar insumos en edición
+    async function cargarInsumosEnEdicion(produccionId) {
+      try {
+        const response = await fetch(`${API_URL}/${produccionId}/detalles`);
+        if (!response.ok) return;
+
+        const prod = await response.json();
+        
+        if (prod.insumos_detalles && prod.insumos_detalles.length > 0) {
+          // Limpiar container
+          const container = document.getElementById('insumosContainer');
+          container.innerHTML = '';
+
+          // Crear elementos para cada insumo
+          prod.insumos_detalles.forEach((insumo, index) => {
+            const insumoItem = document.createElement('div');
+            insumoItem.className = 'insumo-item';
+            insumoItem.innerHTML = `
+              <div class="insumo-column">
+                <label>Insumo:</label>
+                <select class="insumo-select" disabled>
+                  <option value="${insumo.id}" selected>${insumo.nombre}</option>
+                </select>
+              </div>
+              <div class="insumo-column">
+                <label>Cantidad Original:</label>
+                <input type="number" class="insumo-cantidad" value="N/A" readonly>
+              </div>
+              <div class="insumo-column">
+                <label>Costo:</label>
+                <span class="insumo-costo">${formatCurrency(insumo.valor)}</span>
+              </div>
+              <div class="insumo-column">
+                <span class="insumo-readonly">Solo lectura</span>
+              </div>
+            `;
+            container.appendChild(insumoItem);
+          });
+
+          // Mostrar mensaje informativo
+          const mensaje = document.createElement('div');
+          mensaje.className = 'insumo-info';
+          mensaje.innerHTML = `
+            <p style="color: #666; font-style: italic; margin-top: 10px;">
+              <i class="fas fa-info-circle"></i> 
+              Los insumos no pueden modificarse después de crear la producción. 
+              La inversión se calculó automáticamente al momento de la creación.
+            </p>
+          `;
+          container.parentElement.appendChild(mensaje);
+
+          insumosOriginalesEdicion = prod.insumos_detalles;
+        }
+      } catch (error) {
+        console.error('Error cargando insumos en edición:', error);
+      }
+    }
+
     // Crear producción
     function crearProduccion() {
+      modoEdicion = false;
+      
       const modalTitle = document.getElementById('modalTitle');
       const submitText = document.getElementById('submitText');
       const produccionIdInput = document.getElementById('produccionId');
+      const estadoContainer = document.getElementById('estadoContainer');
+      const insumosSection = document.getElementById('insumosSection');
+      const inversionContainer = document.getElementById('inversionContainer');
 
       if (modalTitle) modalTitle.textContent = 'Crear Producción';
       if (submitText) submitText.textContent = 'Crear Producción';
       if (produccionIdInput) produccionIdInput.value = '';
+      if (estadoContainer) estadoContainer.style.display = 'none';
+      if (insumosSection) insumosSection.style.display = 'block';
+      if (inversionContainer) inversionContainer.style.display = 'flex';
 
       if (produccionForm) produccionForm.reset();
 
@@ -658,28 +740,37 @@
         if (inversionElement) inversionElement.textContent = '$0';
         if (metaElement) metaElement.textContent = '$0';
         if (costoElement) costoElement.textContent = '$0';
+
+        // Restaurar primer insumo
+        const firstItem = container.firstElementChild;
+        if (firstItem) {
+          const select = firstItem.querySelector('.insumo-select');
+          const input = firstItem.querySelector('.insumo-cantidad');
+          if (select) select.disabled = false;
+          if (input) {
+            input.disabled = false;
+            input.readonly = false;
+            input.value = '';
+          }
+        }
       }
 
-      // Restaurar campos si estaban deshabilitados
-      ['usuario_id', 'cultivo_id', 'ciclo_id', 'sensores_ids'].forEach(id => {
-        const element = document.getElementById(id);
-        if (element) element.disabled = false;
-      });
+      // Limpiar mensaje de info si existe
+      const infoMsg = document.querySelector('.insumo-info');
+      if (infoMsg) infoMsg.remove();
 
+      // Habilitar botón de agregar insumos
       const addBtn = document.getElementById('addInsumoBtn');
       if (addBtn) addBtn.style.display = 'block';
 
-      if (container) container.parentElement.style.display = 'block';
-
-      const inversionContainer = document.getElementById('inversionTotal');
-      if (inversionContainer) inversionContainer.parentElement.parentElement.style.display = 'flex';
-
+      actualizarSelectoresInsumos();
       abrirModal(modalProduccion);
     }
 
-    // Editar producción - IMPLEMENTACIÓN COMPLETA
+    // Editar producción - CON INSUMOS INCLUIDOS
     async function editarProduccion(id) {
       console.log('Editando producción:', id);
+      modoEdicion = true;
 
       try {
         const response = await fetch(`${API_URL}/${id}`);
@@ -691,17 +782,34 @@
         const modalTitle = document.getElementById('modalTitle');
         const submitText = document.getElementById('submitText');
         const produccionIdInput = document.getElementById('produccionId');
+        const estadoContainer = document.getElementById('estadoContainer');
+        const insumosSection = document.getElementById('insumosSection');
+        const inversionContainer = document.getElementById('inversionContainer');
 
         if (modalTitle) modalTitle.textContent = 'Editar Producción';
         if (submitText) submitText.textContent = 'Actualizar Producción';
         if (produccionIdInput) produccionIdInput.value = prod.id;
+        if (estadoContainer) estadoContainer.style.display = 'block';
+        if (insumosSection) insumosSection.style.display = 'block';
+        if (inversionContainer) inversionContainer.style.display = 'flex';
 
-        // Llenar formulario
+        // Llenar formulario completo
         const campos = ['nombre', 'tipo', 'ubicacion', 'descripcion'];
         campos.forEach(campo => {
           const element = document.getElementById(campo);
           if (element) element.value = prod[campo] || '';
         });
+
+        // Campos de selección
+        const usuarioSelect = document.getElementById('usuario_id');
+        const cultivoSelect = document.getElementById('cultivo_id');
+        const cicloSelect = document.getElementById('ciclo_id');
+        const estadoSelect = document.getElementById('estado');
+
+        if (usuarioSelect) usuarioSelect.value = prod.usuario_id || '';
+        if (cultivoSelect) cultivoSelect.value = prod.cultivo_id || '';
+        if (cicloSelect) cicloSelect.value = prod.ciclo_id || '';
+        if (estadoSelect) estadoSelect.value = prod.estado || 'habilitado';
 
         // Fechas
         const fechaInicio = document.getElementById('fecha_de_inicio');
@@ -713,21 +821,31 @@
           fechaFin.value = prod.fecha_fin.split('T')[0];
         }
 
-        // Deshabilitar campos que no se pueden editar en edición
-        const camposDeshabilitados = ['usuario_id', 'cultivo_id', 'ciclo_id', 'sensores_ids'];
-        camposDeshabilitados.forEach(campo => {
-          const element = document.getElementById(campo);
-          if (element) element.disabled = true;
-        });
+        // Sensores - cargar los seleccionados
+        const sensoresSelect = document.getElementById('sensores_ids');
+        if (sensoresSelect && prod.sensores_ids) {
+          try {
+            const sensoresIds = JSON.parse(prod.sensores_ids);
+            Array.from(sensoresSelect.options).forEach(option => {
+              option.selected = sensoresIds.includes(parseInt(option.value));
+            });
+          } catch (e) {
+            console.error('Error parsing sensores_ids:', e);
+          }
+        }
 
-        // Ocultar sección de insumos en edición
+        // Cargar insumos con información de solo lectura
+        await cargarInsumosEnEdicion(id);
+
+        // Ocultar botón de agregar insumos en edición
         const addBtn = document.getElementById('addInsumoBtn');
-        const container = document.getElementById('insumosContainer');
-        const inversionContainer = document.getElementById('inversionTotal');
-
         if (addBtn) addBtn.style.display = 'none';
-        if (container) container.parentElement.style.display = 'none';
-        if (inversionContainer) inversionContainer.parentElement.parentElement.style.display = 'none';
+
+        // Mostrar inversión y meta actuales
+        const inversionElement = document.getElementById('inversionTotal');
+        const metaElement = document.getElementById('metaGanancia');
+        if (inversionElement) inversionElement.textContent = formatCurrency(prod.inversion);
+        if (metaElement) metaElement.textContent = formatCurrency(prod.meta_ganancia);
 
         abrirModal(modalProduccion);
       } catch (error) {
@@ -1258,7 +1376,7 @@
         exportarExcelBtn.addEventListener('click', exportarReporteExcel);
       }
 
-      // Form submit
+      // Form submit - LÓGICA MEJORADA PARA CREAR Y EDITAR
       if (produccionForm) {
         produccionForm.addEventListener('submit', async (e) => {
           e.preventDefault();
@@ -1267,15 +1385,30 @@
           const isEdit = !!produccionId;
 
           if (isEdit) {
-            // LÓGICA PARA EDICIÓN - Solo campos básicos
+            // LÓGICA PARA EDICIÓN - TODOS LOS CAMPOS EXCEPTO INSUMOS
             const data = {
               nombre: document.getElementById('nombre').value,
               tipo: document.getElementById('tipo').value,
               ubicacion: document.getElementById('ubicacion').value,
               descripcion: document.getElementById('descripcion').value,
+              usuario_id: document.getElementById('usuario_id').value || null,
+              cultivo_id: document.getElementById('cultivo_id').value || null,
+              ciclo_id: document.getElementById('ciclo_id').value || null,
               fecha_de_inicio: document.getElementById('fecha_de_inicio').value || null,
-              fecha_fin: document.getElementById('fecha_fin').value || null
+              fecha_fin: document.getElementById('fecha_fin').value || null,
+              estado: document.getElementById('estado').value
             };
+
+            // Sensores
+            const sensoresSelect = document.getElementById('sensores_ids');
+            const sensoresSeleccionados = Array.from(sensoresSelect.selectedOptions).map(option => parseInt(option.value));
+            if (sensoresSeleccionados.length > 0) {
+              data.sensores_ids = sensoresSeleccionados;
+            }
+
+            // Mantener inversión y meta originales (no se recalculan en edición)
+            const inversionOriginal = document.getElementById('inversionTotal').textContent;
+            const metaOriginal = document.getElementById('metaGanancia').textContent;
 
             try {
               const response = await fetch(`${API_URL}/${produccionId}`, {
@@ -1292,20 +1425,6 @@
               showNotification('Producción actualizada exitosamente', 'success');
               cerrarModal(modalProduccion);
               cargarProducciones();
-
-              // Restaurar campos deshabilitados
-              ['usuario_id', 'cultivo_id', 'ciclo_id', 'sensores_ids'].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) element.disabled = false;
-              });
-
-              const addBtn = document.getElementById('addInsumoBtn');
-              const container = document.getElementById('insumosContainer');
-              const inversionContainer = document.getElementById('inversionTotal');
-
-              if (addBtn) addBtn.style.display = 'block';
-              if (container) container.parentElement.style.display = 'block';
-              if (inversionContainer) inversionContainer.parentElement.parentElement.style.display = 'flex';
 
             } catch (error) {
               console.error('Error:', error);
@@ -1506,21 +1625,13 @@
           const modal = e.target.closest('.modal');
           cerrarModal(modal);
 
-          // Restaurar estado si es modal de producción
+          // Limpiar información de edición si es modal de producción
           if (modal && modal.id === 'modalProduccion') {
-            const camposDeshabilitados = ['usuario_id', 'cultivo_id', 'ciclo_id', 'sensores_ids'];
-            camposDeshabilitados.forEach(campo => {
-              const element = document.getElementById(campo);
-              if (element) element.disabled = false;
-            });
-
-            const addBtn = document.getElementById('addInsumoBtn');
-            const container = document.getElementById('insumosContainer');
-            const inversionContainer = document.getElementById('inversionTotal');
-
-            if (addBtn) addBtn.style.display = 'block';
-            if (container) container.parentElement.style.display = 'block';
-            if (inversionContainer) inversionContainer.parentElement.parentElement.style.display = 'flex';
+            const infoMsg = document.querySelector('.insumo-info');
+            if (infoMsg) infoMsg.remove();
+            
+            modoEdicion = false;
+            insumosOriginalesEdicion = [];
           }
         });
       });
@@ -1529,21 +1640,13 @@
       if (cancelarBtn) {
         cancelarBtn.addEventListener('click', () => {
           cerrarModal(modalProduccion);
-
-          // Restaurar estado
-          const camposDeshabilitados = ['usuario_id', 'cultivo_id', 'ciclo_id', 'sensores_ids'];
-          camposDeshabilitados.forEach(campo => {
-            const element = document.getElementById(campo);
-            if (element) element.disabled = false;
-          });
-
-          const addBtn = document.getElementById('addInsumoBtn');
-          const container = document.getElementById('insumosContainer');
-          const inversionContainer = document.getElementById('inversionTotal');
-
-          if (addBtn) addBtn.style.display = 'block';
-          if (container) container.parentElement.style.display = 'block';
-          if (inversionContainer) inversionContainer.parentElement.parentElement.style.display = 'flex';
+          
+          // Limpiar información de edición
+          const infoMsg = document.querySelector('.insumo-info');
+          if (infoMsg) infoMsg.remove();
+          
+          modoEdicion = false;
+          insumosOriginalesEdicion = [];
         });
       }
 
@@ -1553,19 +1656,11 @@
           cerrarModal(e.target);
 
           if (e.target.id === 'modalProduccion') {
-            const camposDeshabilitados = ['usuario_id', 'cultivo_id', 'ciclo_id', 'sensores_ids'];
-            camposDeshabilitados.forEach(campo => {
-              const element = document.getElementById(campo);
-              if (element) element.disabled = false;
-            });
-
-            const addBtn = document.getElementById('addInsumoBtn');
-            const container = document.getElementById('insumosContainer');
-            const inversionContainer = document.getElementById('inversionTotal');
-
-            if (addBtn) addBtn.style.display = 'block';
-            if (container) container.parentElement.style.display = 'block';
-            if (inversionContainer) inversionContainer.parentElement.parentElement.style.display = 'flex';
+            const infoMsg = document.querySelector('.insumo-info');
+            if (infoMsg) infoMsg.remove();
+            
+            modoEdicion = false;
+            insumosOriginalesEdicion = [];
           }
         }
       });
@@ -1587,26 +1682,163 @@
       console.log('Application initialized successfully');
     }
 
+    // Gestión de roles para Producciones - NUEVA IMPLEMENTACIÓN
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(initializeProduccionesRoles, 600);
+    });
+
+    function initializeProduccionesRoles() {
+      if (!window.authGuard || !window.authGuard.isAuthenticated()) {
+        window.location.href = '/frontend/public/views/register.html';
+        return;
+      }
+
+      const roleManager = new RoleManager();
+      const userRole = roleManager.userRole;
+      
+      console.log('Configurando Producciones para rol:', userRole);
+      configureProduccionesUI(userRole);
+    }
+
+    function configureProduccionesUI(role) {
+      const createButton = document.getElementById('add');
+      const actionsColumn = document.querySelector('.content__table-header:last-child');
+      
+      switch(role) {
+        case 'admin':
+          console.log('Configurando para ADMIN - Acceso completo');
+          showCreateButton(createButton);
+          updateActionsColumn(actionsColumn, 'Acciones');
+          showActionButtons(['edit', 'delete']);
+          break;
+        case 'apoyo':
+          console.log('Configurando para APOYO - Solo crear y editar');
+          showCreateButton(createButton);
+          updateActionsColumn(actionsColumn, 'Editar');
+          hideActionButtons(['delete']);
+          showActionButtons(['edit']);
+          break;
+        case 'visitante':
+        case 'superadmin':
+          console.log('Configurando para rol restringido - Solo lectura');
+          hideCreateButton(createButton);
+          updateActionsColumn(actionsColumn, 'Ver');
+          hideActionButtons(['edit', 'delete']);
+          break;
+        default:
+          hideCreateButton(createButton);
+          hideActionButtons(['edit', 'delete']);
+      }
+      setupProduccionesActionInterceptors(role);
+    }
+
+    function hideCreateButton(button) {
+      if (button) button.style.display = 'none';
+    }
+
+    function showCreateButton(button) {
+      if (button) button.style.display = '';
+    }
+
+    function updateActionsColumn(column, text) {
+      if (column) column.textContent = text;
+    }
+
+    function hideActionButtons(buttonTypes) {
+      buttonTypes.forEach(type => {
+        const buttons = document.querySelectorAll(`.${type}-button`);
+        buttons.forEach(button => {
+          const icon = button.closest('.content__icon');
+          if (icon) icon.style.display = 'none';
+        });
+      });
+    }
+
+    function showActionButtons(buttonTypes) {
+      buttonTypes.forEach(type => {
+        const buttons = document.querySelectorAll(`.${type}-button`);
+        buttons.forEach(button => {
+          const icon = button.closest('.content__icon');
+          if (icon) icon.style.display = '';
+        });
+      });
+    }
+
+    function setupProduccionesActionInterceptors(role) {
+      if (role === 'visitante' || role === 'superadmin') {
+        document.addEventListener('click', function(e) {
+          if (e.target.id === 'add' || 
+              e.target.classList.contains('edit-button') || 
+              e.target.classList.contains('delete-button')) {
+            e.preventDefault();
+            e.stopPropagation();
+            alert('No tienes permisos para realizar esta acción.');
+            return false;
+          }
+        });
+      } else if (role === 'apoyo') {
+        document.addEventListener('click', function(e) {
+          if (e.target.classList.contains('delete-button')) {
+            e.preventDefault();
+            e.stopPropagation();
+            alert('El personal de apoyo no puede eliminar producciones.');
+            return false;
+          }
+        });
+      }
+    }
+
     // Ejecutar cuando el DOM esté listo
     document.addEventListener('DOMContentLoaded', init);
   </script>
 
   <style>
-    /* [TODOS LOS ESTILOS ANTERIORES PERMANECEN IGUALES] */
+    /* Variables CSS actualizadas */
+    :root {
+      --green-50: #e8f5e9;
+      --green-100: #c8e6c9;
+      --green-500: #4CAF50;
+      --green-600: #388E3C;
+      --green-700: #2E7D32;
+      --green-800: #1B5E20;
+      --blue-500: #2196F3;
+      --red-500: #F44336;
+      --yellow-500: #FFC107;
+      --green-accent: #8BC34A;
+      --gray-50: #f5f5f5;
+      --gray-100: #e0e0e0;
+      --gray-500: #757575;
+      --gray-900: #212121;
+      --primary-color: var(--green-500);
+      --primary-dark: var(--green-600);
+      --border-radius: 0.25rem;
+      --box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.1);
+      --transition: all 0.3s ease;
+    }
+
+    /* Header con imagen del gobierno */
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1.3rem 1.5rem;
-      background-color: #67BC26;
+      padding: 0.3rem 1.5rem;
+      background-color: var(--green-600);
       width: 100%;
       color: white;
-      position: fixed;
+      position: relative;
       top: 0;
       z-index: 100;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
+    .gov {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    margin-bottom: -0.5rem;
+    z-index: 1000;
+}
     .header__left-section {
       display: flex;
       align-items: center;
@@ -1635,7 +1867,7 @@
       font-size: 0.9rem;
       border: 1px solid transparent;
       border-radius: 2rem;
-      background-color: #2E7D32;
+      background-color: var(--green-700);
       color: white;
       width: 250px;
       transition: all 0.3s ease;
@@ -1648,7 +1880,7 @@
     .header__search-bar:focus {
       outline: none;
       border-color: rgba(255, 255, 255, 0.3);
-      background-color: #67BC26;
+      background-color: var(--green-500);
     }
 
     .header__icon {
@@ -1665,16 +1897,12 @@
     }
 
     .header__icon:hover {
-      color: #388E3C;
+      color: var(--green-600);
       background-color: white;
     }
 
-    .content__table {
-      margin: 0;
-    }
-
+    /* Main layout */
     main {
-      margin-top: 80px;
       padding: 20px;
     }
 
@@ -1687,129 +1915,7 @@
       margin: 0;
     }
 
-    /* [RESTO DE ESTILOS IGUALES AL CÓDIGO ANTERIOR] */
-    .insumo-item {
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 15px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    .insumo-column {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .insumo-column label {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #495057;
-      margin-bottom: 5px;
-    }
-
-    .insumo-select,
-    .insumo-cantidad {
-      padding: 8px 10px;
-      border: 1px solid #ced4da;
-      border-radius: 4px;
-      font-size: 0.9rem;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .insumo-costo {
-      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-      border: 2px solid #4caf50;
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-weight: 700;
-      color: #1b5e20;
-      text-align: center;
-      font-size: 1rem;
-      box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
-    }
-
-    .btn-remove-insumo {
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 12px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-      transition: all 0.3s ease;
-      align-self: flex-start;
-      min-width: 40px;
-    }
-
-    .btn-remove-insumo:hover {
-      background-color: #c82333;
-      transform: scale(1.05);
-    }
-
-    .btn-add {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 600;
-      margin-top: 10px;
-      transition: all 0.3s ease;
-      align-self: flex-start;
-    }
-
-    .btn-add:hover {
-      background-color: #218838;
-      transform: translateY(-1px);
-    }
-
-    .form-value {
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #28a745;
-      padding: 10px;
-      background: #f8f9fa;
-      border-radius: 4px;
-      display: inline-block;
-    }
-
-    @media (min-width: 768px) {
-      .insumo-item {
-        grid-template-columns: 2fr 1fr 1fr auto;
-        align-items: end;
-        gap: 15px;
-      }
-
-      .btn-remove-insumo {
-        margin-top: 20px;
-      }
-    }
-
-    .filters-container {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
-      padding: 15px;
-      background-color: #f8f9fa;
-      border-radius: 8px;
-    }
-
-    .filter-select {
-      padding: 8px 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
+    /* Tabs */
     .produccion__tabs {
       display: flex;
       gap: 5px;
@@ -1829,8 +1935,8 @@
     }
 
     .produccion__tab--active {
-      color: #28a745;
-      border-bottom-color: #28a745;
+      color: var(--green-600);
+      border-bottom-color: var(--green-600);
       font-weight: 600;
     }
 
@@ -1842,6 +1948,24 @@
       display: block;
     }
 
+    /* Filters */
+    .filters-container {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .filter-select {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    /* Reportes */
     .reportes-container {
       display: grid;
       grid-template-columns: 300px 1fr;
@@ -1899,9 +2023,10 @@
       padding: 15px;
       background: #f8f9fa;
       border-radius: 8px;
-      border-left: 4px solid #28a745;
+      border-left: 4px solid var(--green-600);
     }
 
+    /* Gráficos */
     .graficos-container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -1927,10 +2052,7 @@
       height: 300px !important;
     }
 
-    .produccion__content {
-      margin: 0;
-    }
-
+    /* Botones */
     .produccion__button {
       padding: 8px 16px;
       border: none;
@@ -1945,12 +2067,12 @@
     }
 
     .produccion__button--primary {
-      background-color: #28a745;
+      background-color: var(--green-600);
       color: white;
     }
 
     .produccion__button--primary:hover {
-      background-color: #218838;
+      background-color: var(--green-700);
     }
 
     .produccion__button--secondary {
@@ -1962,6 +2084,7 @@
       background-color: #545b62;
     }
 
+    /* Modal */
     .modal {
       display: none;
       position: fixed;
@@ -2046,6 +2169,156 @@
       border-top: 1px solid #eee;
     }
 
+    /* Insumos mejorado */
+    .insumo-item {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .insumo-column {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .insumo-column label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 5px;
+    }
+
+    .insumo-select,
+    .insumo-cantidad {
+      padding: 8px 10px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .insumo-costo {
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      border: 2px solid #4caf50;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-weight: 700;
+      color: #1b5e20;
+      text-align: center;
+      font-size: 1rem;
+      box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+    }
+
+    .insumo-readonly {
+      background: #e9ecef;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      padding: 8px 12px;
+      color: #6c757d;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .btn-remove-insumo {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      align-self: flex-start;
+      min-width: 40px;
+    }
+
+    .btn-remove-insumo:hover {
+      background-color: #c82333;
+      transform: scale(1.05);
+    }
+
+    .btn-add {
+      background-color: var(--green-600);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 10px;
+      transition: all 0.3s ease;
+      align-self: flex-start;
+    }
+
+    .btn-add:hover {
+      background-color: var(--green-700);
+      transform: translateY(-1px);
+    }
+
+    .form-value {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--green-600);
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .insumo-info {
+      background: #e7f3ff;
+      border: 1px solid #b6d7ff;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+
+    .insumo-info i {
+      color: #0056b3;
+      margin-right: 8px;
+    }
+
+    @media (min-width: 768px) {
+      .insumo-item {
+        grid-template-columns: 2fr 1fr 1fr auto;
+        align-items: end;
+        gap: 15px;
+      }
+
+      .btn-remove-insumo {
+        margin-top: 20px;
+      }
+    }
+
+    /* Status */
+    .content__status-enabled {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      background-color: var(--green-600);
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+
+    .content__status-disabled {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      background-color: #dc3545;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+
+    /* Detalles */
     .detalles-content {
       max-height: 400px;
       overflow-y: auto;
@@ -2067,6 +2340,7 @@
       grid-column: 1 / -1;
     }
 
+    /* Responsive */
     @media (max-width: 768px) {
       .header__search-bar {
         width: 150px;

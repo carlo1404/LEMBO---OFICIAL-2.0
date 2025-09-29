@@ -10,6 +10,8 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/frontend/JS/sidebar.js" defer></script>
+    <script src="/frontend/JS/auth-guard.js"></script>
+    <script src="/frontend/JS/role-manager.js"></script>
     
     <!-- CDNs para exportación -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -17,6 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
+    <img src="/IMG/gov.jpeg" alt="gov" class="gov">
     <div class="header">
         <div class="header__left-section">
             <span class="header__menu-item">Insumos</span>
@@ -37,7 +40,7 @@
     </div>
     <main>
         <!-- Aquí va la SIDEBAR -->
-        <div class="sidebar"></div>
+        <div class="sidebar" id="sidebar-container"></div>
         <section class="content">
             <table class="content__table" id="insumosTable">
                 <thead class="content__table-head">
@@ -55,13 +58,13 @@
                     </tr>
                 </thead>
                 <tbody class="content__table-body">
-                    <!-- Los insumos se cargarán dinámicamente aquí -->
+                    <!-- Los insumos se cargarán aquí -->
                 </tbody>
             </table>
         </section>
     </main>
 
-    <!-- Modal para Agregar Insumo -->
+    <!-- Modal Agregar Insumo -->
     <div id="addInsumoModal" class="modal-container">
         <div class="modal-content">
             <div class="modal-header">
@@ -349,7 +352,7 @@
             </div>
         </div>
     </div>
-
+    <img src="/IMG/gov.jpeg" alt="gov" class="gov">
     <script>
         const API_URL = "http://localhost:3000/api/insumos";
         const tbody = document.querySelector(".content__table-body");
@@ -360,7 +363,6 @@
         let todosLosInsumos = [];
         let insumosFiltrados = [];
 
-        // Mapeo de unidades para mostrar en la tabla
         const unidadesMapDisplay = {
             'peso': 'Gramos',
             'kilo': 'Kilos',
@@ -370,7 +372,6 @@
             'concentración': 'Unidades'
         };
 
-        // Mapeo de unidades para los selectores (frontend → backend)
         const unidadesMapFrontend = {
             'gramo': 'Gramos',
             'kilo': 'Kilos',
@@ -382,7 +383,6 @@
 
         // Función para mostrar notificaciones
         function mostrarNotificacion(mensaje, tipo = 'info') {
-            // Por ahora usamos alert, pero puedes mejorar esto con una librería de notificaciones
             if (tipo === 'error') {
                 alert('Error: ' + mensaje);
             } else if (tipo === 'success') {
@@ -491,7 +491,7 @@
                 
                 // Mostrar mensaje en la tabla si hay error
                 if (tbody) {
-                    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 20px; color: red;">Error al cargar insumos</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 20px; color: red;">Error al cargar los insumos</td></tr>';
                 }
             }
         }
@@ -502,31 +502,32 @@
                 total: insumos.length,
                 habilitados: insumos.filter(i => i.estado === 'habilitado').length,
                 deshabilitados: insumos.filter(i => i.estado === 'deshabilitado').length,
+                valorTotal: insumos.reduce((acc, i) => acc + calcularValorTotal(i.cantidad, i.valor), 0),
                 tipos: {},
-                valorTotalInventario: 0,
-                cantidadTotalInventario: 0
+                unidades: {}
             };
 
-            // Contar por tipos y calcular valores
             insumos.forEach(insumo => {
                 stats.tipos[insumo.tipo] = (stats.tipos[insumo.tipo] || 0) + 1;
-                stats.valorTotalInventario += calcularValorTotal(insumo.cantidad, insumo.valor);
-                stats.cantidadTotalInventario += parseFloat(insumo.cantidad);
+                stats.unidades[insumo.unidad_medida] = (stats.unidades[insumo.unidad_medida] || 0) + 1;
             });
 
             return stats;
         }
 
-        // Función para mostrar estadísticas en el modal
+        // Función para mostrar estadísticas
         function mostrarEstadisticas(insumos = insumosFiltrados) {
             const stats = generarEstadisticas(insumos);
             const container = document.getElementById('estadisticasReporte');
             
-            if (!container) return;
-            
             let tiposHtml = '';
             Object.entries(stats.tipos).forEach(([tipo, cantidad]) => {
                 tiposHtml += `<div class="stat-item"><strong>${tipo}:</strong> ${cantidad}</div>`;
+            });
+
+            let unidadesHtml = '';
+            Object.entries(stats.unidades).forEach(([unidad, cantidad]) => {
+                unidadesHtml += `<div class="stat-item"><strong>${unidad}:</strong> ${cantidad}</div>`;
             });
 
             container.innerHTML = `
@@ -534,38 +535,196 @@
                     <div class="stat-item"><strong>Total de Insumos:</strong> ${stats.total}</div>
                     <div class="stat-item"><strong>Habilitados:</strong> ${stats.habilitados}</div>
                     <div class="stat-item"><strong>Deshabilitados:</strong> ${stats.deshabilitados}</div>
-                    <div class="stat-item"><strong>Valor Total Inventario:</strong> ${formatearMoneda(stats.valorTotalInventario)}</div>
-                    <div class="stat-item"><strong>Cantidad Total:</strong> ${stats.cantidadTotalInventario.toFixed(2)}</div>
-                    ${tiposHtml}
+                    <div class="stat-item"><strong>Valor Total:</strong> ${formatearMoneda(stats.valorTotal)}</div>
                 </div>
+                <h4>Por Tipo</h4>
+                <div class="stats-grid">${tiposHtml}</div>
+                <h4>Por Unidad de Medida</h4>
+                <div class="stats-grid">${unidadesHtml}</div>
             `;
         }
 
-        // Función para filtrar insumos para el reporte
-        function filtrarInsumosReporte() {
-            const filtroTipo = document.getElementById('filtroTipo').value;
-            const filtroEstado = document.getElementById('filtroEstado').value;
-            const filtroValorMin = parseFloat(document.getElementById('filtroValorMin').value) || 0;
-            const filtroValorMax = parseFloat(document.getElementById('filtroValorMax').value) || Infinity;
+        // Inicializar carga de datos
+        window.addEventListener('DOMContentLoaded', cargarInsumos);
 
-            let insumosFiltradosReporte = todosLosInsumos;
+        // Buscar insumos
+        searchInput.addEventListener('input', function(e) {
+            const filtro = e.target.value.toLowerCase();
+            const filtrados = todosLosInsumos.filter(i => 
+                i.nombre.toLowerCase().includes(filtro) ||
+                i.tipo.toLowerCase().includes(filtro) ||
+                i.unidad_medida.toLowerCase().includes(filtro) ||
+                (i.descripcion && i.descripcion.toLowerCase().includes(filtro))
+            );
+            insumosFiltrados = filtrados;
+            renderizarInsumos(filtrados);
+        });
 
-            if (filtroTipo) {
-                insumosFiltradosReporte = insumosFiltradosReporte.filter(i => i.tipo === filtroTipo);
+        // Modal handlers
+        const addInsumoModal = document.getElementById('addInsumoModal');
+        const editInsumoModal = document.getElementById('editInsumoModal');
+        const viewInsumoModal = document.getElementById('viewInsumoModal');
+        const reporteModal = document.getElementById('reporteModal');
+        const graficosModal = document.getElementById('graficosModal');
+        const addButton = document.getElementById('add');
+
+        const openModal = (modal) => modal.classList.add('active');
+        const closeModal = (modal) => modal.classList.remove('active');
+
+        addButton.addEventListener('click', () => openModal(addInsumoModal));
+        document.getElementById('download').addEventListener('click', function() {
+            mostrarEstadisticas();
+            openModal(reporteModal);
+        });
+        document.getElementById('verGraficos').addEventListener('click', function() {
+            openModal(graficosModal);
+            setTimeout(() => generarGraficos(), 200);
+        });
+
+        // Agregar insumo
+        document.getElementById("addInsumoForm").addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const insumoData = {
+                nombre: document.getElementById("addNombre").value,
+                tipo: document.getElementById("addTipo").value,
+                unidad_medida: document.getElementById("addUnidadMedida").value,
+                cantidad: document.getElementById("addCantidad").value,
+                valor: document.getElementById("addValor").value,
+                descripcion: document.getElementById("addDescripcion").value,
+                estado: document.getElementById("addEstado").value,
+                usuario_id: 1 // ID del usuario logueado
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(insumoData)
+                });
+                
+                if (response.ok) {
+                    closeModal(addInsumoModal);
+                    e.target.reset();
+                    cargarInsumos();
+                    mostrarNotificacion('Insumo agregado exitosamente', 'success');
+                } else {
+                    const errorData = await response.json();
+                    mostrarNotificacion('Error al agregar insumo: ' + (errorData.message || 'Error desconocido'), 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('Error al agregar insumo', 'error');
             }
+        });
 
-            if (filtroEstado) {
-                insumosFiltradosReporte = insumosFiltradosReporte.filter(i => i.estado === filtroEstado);
+        // Event listener para botones de acciones
+        let editandoId = null;
+        tbody.addEventListener('click', async function(e) {
+            const insumoId = e.target.dataset.id;
+            
+            if (e.target.classList.contains("view-button")) {
+                try {
+                    const response = await fetch(`${API_URL}/${insumoId}`);
+                    const insumo = await response.json();
+                    
+                    document.getElementById("viewId").textContent = insumo.id;
+                    document.getElementById("viewNombre").textContent = insumo.nombre;
+                    document.getElementById("viewTipo").textContent = insumo.tipo;
+                    document.getElementById("viewUnidadMedida").textContent = unidadesMapDisplay[insumo.unidad_medida] || insumo.unidad_medida;
+                    document.getElementById("viewCantidad").textContent = insumo.cantidad;
+                    document.getElementById("viewValor").textContent = formatearMoneda(insumo.valor);
+                    document.getElementById("viewValorTotal").textContent = formatearMoneda(calcularValorTotal(insumo.cantidad, insumo.valor));
+                    document.getElementById("viewDescripcion").textContent = insumo.descripcion || 'Sin descripción';
+                    document.getElementById("viewUsuarioNombre").textContent = insumo.usuario_nombre || 'No asignado';
+                    document.getElementById("viewEstado").textContent = insumo.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado';
+                    document.getElementById("viewFechaCreacion").textContent = formatearFecha(insumo.fecha_creacion);
+                    
+                    openModal(viewInsumoModal);
+                } catch (error) {
+                    console.error('Error:', error);
+                    mostrarNotificacion('Error al cargar detalles del insumo', 'error');
+                }
             }
+            
+            if (e.target.classList.contains("edit-button")) {
+                editandoId = insumoId;
+                try {
+                    const response = await fetch(`${API_URL}/${insumoId}`);
+                    const insumo = await response.json();
+                    
+                    document.getElementById("editNombre").value = insumo.nombre;
+                    document.getElementById("editTipo").value = insumo.tipo;
+                    document.getElementById("editUnidadMedida").value = insumo.unidad_medida;
+                    document.getElementById("editCantidad").value = insumo.cantidad;
+                    document.getElementById("editValor").value = insumo.valor;
+                    document.getElementById("editDescripcion").value = insumo.descripcion || '';
+                    document.getElementById("editEstado").value = insumo.estado;
+                    
+                    openModal(editInsumoModal);
+                } catch (error) {
+                    console.error('Error:', error);
+                    mostrarNotificacion('Error al cargar datos del insumo', 'error');
+                }
+            }
+            
+            if (e.target.classList.contains("delete-button")) {
+                if (confirm("¿Está seguro de que desea eliminar este insumo?")) {
+                    try {
+                        const response = await fetch(`${API_URL}/${insumoId}`, {
+                            method: "DELETE"
+                        });
+                        
+                        if (response.ok) {
+                            cargarInsumos();
+                            mostrarNotificacion('Insumo eliminado exitosamente', 'success');
+                        } else {
+                            const errorData = await response.json();
+                            mostrarNotificacion('Error al eliminar insumo: ' + (errorData.message || 'Error desconocido'), 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        mostrarNotificacion('Error al eliminar insumo', 'error');
+                    }
+                }
+            }
+        });
 
-            insumosFiltradosReporte = insumosFiltradosReporte.filter(i => {
-                const valor = parseFloat(i.valor);
-                return valor >= filtroValorMin && valor <= filtroValorMax;
-            });
+        // Editar insumo
+        document.getElementById("editInsumoForm").addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const insumoData = {
+                nombre: document.getElementById("editNombre").value,
+                tipo: document.getElementById("editTipo").value,
+                unidad_medida: document.getElementById("editUnidadMedida").value,
+                cantidad: document.getElementById("editCantidad").value,
+                valor: document.getElementById("editValor").value,
+                descripcion: document.getElementById("editDescripcion").value,
+                estado: document.getElementById("editEstado").value
+            };
 
-            mostrarEstadisticas(insumosFiltradosReporte);
-            return insumosFiltradosReporte;
-        }
+            try {
+                const response = await fetch(`${API_URL}/${editandoId}`, {
+                    method: "PUT",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(insumoData)
+                });
+                
+                if (response.ok) {
+                    closeModal(editInsumoModal);
+                    e.target.reset();
+                    cargarInsumos();
+                    mostrarNotificacion('Insumo actualizado exitosamente', 'success');
+                } else {
+                    const errorData = await response.json();
+                    mostrarNotificacion('Error al actualizar insumo: ' + (errorData.message || 'Error desconocido'), 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('Error al actualizar insumo', 'error');
+            }
+        });
 
         // Función para generar gráficos
         function generarGraficos(insumos = todosLosInsumos) {
@@ -577,601 +736,223 @@
             Chart.getChart('graficoEstados')?.destroy();
 
             // Gráfico de tipos
-            const ctxTipos = document.getElementById('graficoTipos');
-            if (ctxTipos) {
-                new Chart(ctxTipos, {
-                    type: 'pie',
-                    data: {
-                        labels: Object.keys(stats.tipos),
-                        datasets: [{
-                            data: Object.values(stats.tipos),
-                            backgroundColor: [
-                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
-                                '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF', 
-                                '#4BC0C0', '#FF6384'
-                            ]
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
+            const ctxTipos = document.getElementById('graficoTipos').getContext('2d');
+            new Chart(ctxTipos, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(stats.tipos),
+                    datasets: [{
+                        data: Object.values(stats.tipos),
+                        backgroundColor: [
+                            '#ff6384', '#36a2eb', '#cc65fe', '#ffce56', '#4bc0c0',
+                            '#ff9f40', '#ff6384', '#c9cbcf', '#4bc0c0', '#ff9f40'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
                         }
                     }
-                });
-            }
-
-            // Gráfico de valores (Top 10)
-            const ctxValores = document.getElementById('graficoValores');
-            if (ctxValores) {
-                const valoresPorInsumo = insumos.map(i => ({
-                    nombre: i.nombre.substring(0, 20) + (i.nombre.length > 20 ? '...' : ''),
-                    valor: calcularValorTotal(i.cantidad, i.valor)
-                })).sort((a, b) => b.valor - a.valor).slice(0, 10);
-
-                new Chart(ctxValores, {
-                    type: 'bar',
-                    data: {
-                        labels: valoresPorInsumo.map(i => i.nombre),
-                        datasets: [{
-                            label: 'Valor Total',
-                            data: valoresPorInsumo.map(i => i.valor),
-                            backgroundColor: '#36A2EB'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return formatearMoneda(value);
-                                    }
-                                }
-                            }
-                        },
-                        plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return 'Valor: ' + formatearMoneda(context.parsed.y);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+                }
+            });
 
             // Gráfico de estados
-            const ctxEstados = document.getElementById('graficoEstados');
-            if (ctxEstados) {
-                new Chart(ctxEstados, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Habilitados', 'Deshabilitados'],
-                        datasets: [{
-                            data: [stats.habilitados, stats.deshabilitados],
-                            backgroundColor: ['#28a745', '#dc3545']
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
-                        }
-                    }
-                });
-            }
-        }
-
-        // Función para exportar a PDF
-        function exportarPDF(insumos = insumosFiltrados) {
-            try {
-                const { jsPDF } = window.jspdf;
-                if (!jsPDF) {
-                    throw new Error('jsPDF no está disponible');
-                }
-
-                const doc = new jsPDF();
-
-                // Título
-                doc.setFontSize(18);
-                doc.text('Reporte de Insumos', 14, 22);
-                
-                // Fecha de generación
-                doc.setFontSize(11);
-                doc.text(`Generado el: ${new Date().toLocaleDateString('es-CO')} ${new Date().toLocaleTimeString('es-CO')}`, 14, 30);
-
-                // Estadísticas
-                const stats = generarEstadisticas(insumos);
-                let y = 40;
-                doc.setFontSize(12);
-                doc.text('Estadísticas:', 14, y);
-                y += 8;
-                doc.setFontSize(10);
-                doc.text(`Total de insumos: ${stats.total}`, 14, y);
-                y += 6;
-                doc.text(`Valor total inventario: ${formatearMoneda(stats.valorTotalInventario)}`, 14, y);
-                y += 6;
-                doc.text(`Habilitados: ${stats.habilitados}`, 14, y);
-                y += 6;
-                doc.text(`Deshabilitados: ${stats.deshabilitados}`, 14, y);
-                y += 10;
-
-                // Tabla
-                const tableData = insumos.map(insumo => [
-                    insumo.id,
-                    insumo.nombre.substring(0, 25),
-                    insumo.tipo,
-                    unidadesMapDisplay[insumo.unidad_medida] || insumo.unidad_medida,
-                    insumo.cantidad,
-                    formatearMoneda(insumo.valor),
-                    formatearMoneda(calcularValorTotal(insumo.cantidad, insumo.valor)),
-                    insumo.estado === 'habilitado' ? 'Hab.' : 'Des.',
-                    insumo.usuario_nombre || 'N/A'
-                ]);
-
-                doc.autoTable({
-                    head: [['ID', 'Nombre', 'Tipo', 'Unidad', 'Cant.', 'V. Unit.', 'V. Total', 'Estado', 'Usuario']],
-                    body: tableData,
-                    startY: y,
-                    styles: { fontSize: 7 },
-                    headStyles: { fillColor: [41, 128, 185] },
-                    alternateRowStyles: { fillColor: [245, 245, 245] }
-                });
-
-                doc.save(`reporte_insumos_${new Date().toISOString().split('T')[0]}.pdf`);
-                mostrarNotificacion('Reporte PDF exportado exitosamente', 'success');
-            } catch (error) {
-                console.error('Error al exportar PDF:', error);
-                mostrarNotificacion('Error al exportar PDF: ' + error.message, 'error');
-            }
-        }
-
-        // Función para exportar a Excel
-        function exportarExcel(insumos = insumosFiltrados) {
-            try {
-                if (!window.XLSX) {
-                    throw new Error('XLSX library no está disponible');
-                }
-
-                const stats = generarEstadisticas(insumos);
-                
-                // Crear hoja de estadísticas
-                const statsData = [
-                    ['Estadísticas del Reporte de Insumos'],
-                    [''],
-                    ['Total de insumos', stats.total],
-                    ['Valor total inventario', stats.valorTotalInventario],
-                    ['Cantidad total inventario', stats.cantidadTotalInventario],
-                    ['Insumos habilitados', stats.habilitados],
-                    ['Insumos deshabilitados', stats.deshabilitados],
-                    [''],
-                    ['Distribución por tipos:'],
-                    ...Object.entries(stats.tipos).map(([tipo, cantidad]) => [tipo, cantidad]),
-                    [''],
-                    ['Fecha de generación', new Date().toLocaleDateString('es-CO') + ' ' + new Date().toLocaleTimeString('es-CO')]
-                ];
-
-                // Crear hoja de datos
-                const insumosData = [
-                    ['ID', 'Nombre', 'Tipo', 'Unidad Medida', 'Cantidad', 'Valor Unitario', 'Valor Total', 'Descripción', 'Usuario Responsable', 'Estado', 'Fecha Creación'],
-                    ...insumos.map(insumo => [
-                        insumo.id,
-                        insumo.nombre,
-                        insumo.tipo,
-                        unidadesMapDisplay[insumo.unidad_medida] || insumo.unidad_medida,
-                        insumo.cantidad,
-                        parseFloat(insumo.valor),
-                        calcularValorTotal(insumo.cantidad, insumo.valor),
-                        insumo.descripcion || '',
-                        insumo.usuario_nombre || 'No asignado',
-                        insumo.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado',
-                        insumo.fecha_creacion ? formatearFecha(insumo.fecha_creacion) : ''
-                    ])
-                ];
-
-                // Crear libro de trabajo
-                const wb = XLSX.utils.book_new();
-                
-                // Agregar hojas
-                const wsStats = XLSX.utils.aoa_to_sheet(statsData);
-                const wsInsumos = XLSX.utils.aoa_to_sheet(insumosData);
-                
-                XLSX.utils.book_append_sheet(wb, wsStats, "Estadísticas");
-                XLSX.utils.book_append_sheet(wb, wsInsumos, "Insumos");
-
-                // Descargar archivo
-                XLSX.writeFile(wb, `reporte_insumos_${new Date().toISOString().split('T')[0]}.xlsx`);
-                mostrarNotificacion('Reporte Excel exportado exitosamente', 'success');
-            } catch (error) {
-                console.error('Error al exportar Excel:', error);
-                mostrarNotificacion('Error al exportar Excel: ' + error.message, 'error');
-            }
-        }
-
-        // Modal handlers
-        const addInsumoModal = document.getElementById('addInsumoModal');
-        const editInsumoModal = document.getElementById('editInsumoModal');
-        const viewInsumoModal = document.getElementById('viewInsumoModal');
-        const reporteModal = document.getElementById('reporteModal');
-        const graficosModal = document.getElementById('graficosModal');
-        const addButton = document.getElementById('add');
-
-        // Función para abrir modal
-        const openModal = (modal) => {
-            if (modal) {
-                modal.classList.add('active');
-            }
-        };
-
-        const closeModal = (modal) => {
-            if (modal) {
-                modal.classList.remove('active');
-            }
-        };
-
-        // Inicialización cuando se carga el DOM
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM cargado, iniciando aplicación...');
-            
-            // Cargar insumos al inicio
-            cargarInsumos();
-
-            // Event listeners para búsqueda
-            if (searchInput) {
-                searchInput.addEventListener('input', function(e) {
-                    const filtro = e.target.value.toLowerCase();
-                    const filtrados = todosLosInsumos.filter(i => 
-                        i.nombre.toLowerCase().includes(filtro) ||
-                        i.tipo.toLowerCase().includes(filtro) ||
-                        i.descripcion?.toLowerCase().includes(filtro) ||
-                        i.usuario_nombre?.toLowerCase().includes(filtro)
-                    );
-                    insumosFiltrados = filtrados;
-                    renderizarInsumos(filtrados);
-                });
-            }
-
-            // Event listener para abrir modal agregar
-            if (addButton) {
-                addButton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('Abriendo modal agregar');
-                    openModal(addInsumoModal);
-                });
-            }
-
-            // Event listeners para otros botones del header
-            const downloadBtn = document.getElementById('download');
-            if (downloadBtn) {
-                downloadBtn.addEventListener('click', function() {
-                    mostrarEstadisticas();
-                    openModal(reporteModal);
-                });
-            }
-
-            const verGraficosBtn = document.getElementById('verGraficos');
-            if (verGraficosBtn) {
-                verGraficosBtn.addEventListener('click', function() {
-                    openModal(graficosModal);
-                    setTimeout(() => generarGraficos(), 200);
-                });
-            }
-
-            const exportarPDFBtn = document.getElementById('exportarPDF');
-            if (exportarPDFBtn) {
-                exportarPDFBtn.addEventListener('click', function() {
-                    exportarPDF(insumosFiltrados);
-                });
-            }
-
-            const exportarExcelBtn = document.getElementById('exportarExcel');
-            if (exportarExcelBtn) {
-                exportarExcelBtn.addEventListener('click', function() {
-                    exportarExcel(insumosFiltrados);
-                });
-            }
-
-            // Event listeners para filtros de reporte
-            const filtros = ['filtroTipo', 'filtroEstado', 'filtroValorMin', 'filtroValorMax'];
-            filtros.forEach(filtroId => {
-                const elemento = document.getElementById(filtroId);
-                if (elemento) {
-                    elemento.addEventListener('change', filtrarInsumosReporte);
-                    elemento.addEventListener('input', filtrarInsumosReporte);
+            const ctxEstados = document.getElementById('graficoEstados').getContext('2d');
+            new Chart(ctxEstados, {
+                type: 'pie',
+                data: {
+                    labels: ['Habilitados', 'Deshabilitados'],
+                    datasets: [{
+                        data: [stats.habilitados, stats.deshabilitados],
+                        backgroundColor: ['#28a745', '#dc3545']
+                    }]
                 }
             });
+        }
 
-            // Event listeners para exportación desde modal de reportes
-            const exportarReportePDFBtn = document.getElementById('exportarReportePDF');
-            if (exportarReportePDFBtn) {
-                exportarReportePDFBtn.addEventListener('click', function() {
-                    const insumosFiltradosReporte = filtrarInsumosReporte();
-                    exportarPDF(insumosFiltradosReporte);
-                });
-            }
-
-            const exportarReporteExcelBtn = document.getElementById('exportarReporteExcelBtn');
-            if (exportarReporteExcelBtn) {
-                exportarReporteExcelBtn.addEventListener('click', function() {
-                    const insumosFiltradosReporte = filtrarInsumosReporte();
-                    exportarExcel(insumosFiltradosReporte);
-                });
-            }
-
-            // Form submit para agregar insumo - FUNCIONALIDAD PRINCIPAL CORREGIDA
-            const addInsumoForm = document.getElementById("addInsumoForm");
-            if (addInsumoForm) {
-                addInsumoForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    console.log('Enviando formulario de agregar insumo...');
-                    
-                    // Validar campos requeridos
-                    const nombre = document.getElementById("addNombre").value.trim();
-                    const tipo = document.getElementById("addTipo").value;
-                    const unidadMedida = document.getElementById("addUnidadMedida").value;
-                    const cantidad = document.getElementById("addCantidad").value;
-                    const valor = document.getElementById("addValor").value;
-
-                    if (!nombre || !tipo || !unidadMedida || !cantidad || !valor) {
-                        mostrarNotificacion('Por favor complete todos los campos requeridos', 'error');
-                        return;
-                    }
-
-                    // Validar valores numéricos
-                    const cantidadNum = parseInt(cantidad);
-                    const valorNum = parseFloat(valor);
-
-                    if (isNaN(cantidadNum) || cantidadNum < 0) {
-                        mostrarNotificacion('La cantidad debe ser un número entero positivo', 'error');
-                        return;
-                    }
-
-                    if (isNaN(valorNum) || valorNum < 0) {
-                        mostrarNotificacion('El valor debe ser un número positivo', 'error');
-                        return;
-                    }
-                    
-                    const insumoData = {
-                        nombre: nombre,
-                        tipo: tipo,
-                        unidad_medida: unidadMedida,
-                        cantidad: cantidadNum,
-                        valor: valorNum,
-                        descripcion: document.getElementById("addDescripcion").value.trim() || null,
-                        estado: document.getElementById("addEstado").value || 'habilitado',
-                        usuario_id: null // Sin usuario asignado por defecto
-                    };
-
-                    console.log('Datos a enviar:', insumoData);
-
-                    try {
-                        const response = await fetch(API_URL, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify(insumoData)
-                        });
-                        
-                        console.log('Response status:', response.status);
-                        
-                        if (response.ok) {
-                            const result = await response.json();
-                            console.log('Insumo creado:', result);
-                            
-                            closeModal(addInsumoModal);
-                            addInsumoForm.reset();
-                            await cargarInsumos(); // Recargar la tabla
-                            mostrarNotificacion('Insumo agregado exitosamente', 'success');
-                        } else {
-                            const errorData = await response.json();
-                            console.error('Error response:', errorData);
-                            mostrarNotificacion('Error al agregar insumo: ' + (errorData.error || 'Error desconocido'), 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error de red:', error);
-                        mostrarNotificacion('Error de conexión: ' + error.message, 'error');
-                    }
-                });
-            }
-
-            // Event listener para botones de acciones en la tabla
-            let editandoId = null;
-            if (tbody) {
-                tbody.addEventListener('click', async function(e) {
-                    const insumoId = e.target.dataset.id;
-                    
-                    if (e.target.classList.contains("view-button")) {
-                        // Ver detalles
-                        try {
-                            const response = await fetch(`${API_URL}/${insumoId}`);
-                            if (!response.ok) throw new Error('Error al cargar detalles');
-                            
-                            const insumo = await response.json();
-                            
-                            document.getElementById("viewId").textContent = insumo.id;
-                            document.getElementById("viewNombre").textContent = insumo.nombre;
-                            document.getElementById("viewTipo").textContent = insumo.tipo;
-                            document.getElementById("viewUnidadMedida").textContent = unidadesMapDisplay[insumo.unidad_medida] || insumo.unidad_medida;
-                            document.getElementById("viewCantidad").textContent = insumo.cantidad;
-                            document.getElementById("viewValor").textContent = formatearMoneda(insumo.valor);
-                            document.getElementById("viewValorTotal").textContent = formatearMoneda(calcularValorTotal(insumo.cantidad, insumo.valor));
-                            document.getElementById("viewDescripcion").textContent = insumo.descripcion || 'Sin descripción';
-                            document.getElementById("viewUsuarioNombre").textContent = insumo.usuario_nombre || 'No asignado';
-                            document.getElementById("viewEstado").textContent = insumo.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado';
-                            document.getElementById("viewFechaCreacion").textContent = formatearFecha(insumo.fecha_creacion);
-                            
-                            openModal(viewInsumoModal);
-                        } catch (error) {
-                            console.error('Error:', error);
-                            mostrarNotificacion('Error al cargar detalles del insumo', 'error');
-                        }
-                    }
-                    
-                    if (e.target.classList.contains("edit-button")) {
-                        // Editar insumo
-                        editandoId = insumoId;
-                        try {
-                            const response = await fetch(`${API_URL}/${insumoId}`);
-                            if (!response.ok) throw new Error('Error al cargar datos');
-                            
-                            const insumo = await response.json();
-                            
-                            document.getElementById("editNombre").value = insumo.nombre;
-                            document.getElementById("editTipo").value = insumo.tipo;
-                            
-                            // Mapear unidad de medida de BD a frontend para edición
-                            const unidadFrontend = Object.keys(unidadesMapDisplay).find(key => 
-                                unidadesMapDisplay[key] === (unidadesMapDisplay[insumo.unidad_medida] || insumo.unidad_medida)
-                            );
-                            
-                            // Mapeo inverso más específico para edición
-                            const unidadParaEdit = {
-                                'peso': 'gramo',
-                                'kilo': 'kilo', 
-                                'superficie': 'metro',
-                                'volumen': 'metro_cubico',
-                                'litro': 'litro',
-                                'concentración': 'unidad'
-                            };
-                            
-                            document.getElementById("editUnidadMedida").value = unidadParaEdit[insumo.unidad_medida] || 'unidad';
-                            document.getElementById("editCantidad").value = insumo.cantidad;
-                            document.getElementById("editValor").value = insumo.valor;
-                            document.getElementById("editDescripcion").value = insumo.descripcion || '';
-                            document.getElementById("editEstado").value = insumo.estado;
-                            
-                            openModal(editInsumoModal);
-                        } catch (error) {
-                            console.error('Error:', error);
-                            mostrarNotificacion('Error al cargar datos del insumo', 'error');
-                        }
-                    }
-                    
-                    if (e.target.classList.contains("delete-button")) {
-                        // Eliminar insumo
-                        if (confirm("¿Está seguro de que desea eliminar este insumo?")) {
-                            try {
-                                const response = await fetch(`${API_URL}/${insumoId}`, {
-                                    method: "DELETE"
-                                });
-                                
-                                if (response.ok) {
-                                    await cargarInsumos();
-                                    mostrarNotificacion('Insumo eliminado exitosamente', 'success');
-                                } else {
-                                    const errorData = await response.json();
-                                    mostrarNotificacion('Error al eliminar insumo: ' + (errorData.error || 'Error desconocido'), 'error');
-                                }
-                            } catch (error) {
-                                console.error('Error:', error);
-                                mostrarNotificacion('Error al eliminar insumo', 'error');
-                            }
-                        }
-                    }
-                });
-            }
-
-            // Form submit para editar insumo
-            const editInsumoForm = document.getElementById("editInsumoForm");
-            if (editInsumoForm) {
-                editInsumoForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    
-                    if (!editandoId) {
-                        mostrarNotificacion('Error: No se ha seleccionado un insumo para editar', 'error');
-                        return;
-                    }
-                    
-                    const insumoData = {
-                        nombre: document.getElementById("editNombre").value.trim(),
-                        tipo: document.getElementById("editTipo").value,
-                        unidad_medida: document.getElementById("editUnidadMedida").value,
-                        cantidad: parseInt(document.getElementById("editCantidad").value),
-                        valor: parseFloat(document.getElementById("editValor").value),
-                        descripcion: document.getElementById("editDescripcion").value.trim() || null,
-                        estado: document.getElementById("editEstado").value
-                    };
-
-                    console.log('Editando insumo:', editandoId, 'Datos:', insumoData);
-
-                    try {
-                        const response = await fetch(`${API_URL}/${editandoId}`, {
-                            method: "PUT",
-                            headers: {"Content-Type": "application/json"},
-                            body: JSON.stringify(insumoData)
-                        });
-                        
-                        if (response.ok) {
-                            closeModal(editInsumoModal);
-                            editInsumoForm.reset();
-                            editandoId = null;
-                            await cargarInsumos();
-                            mostrarNotificacion('Insumo actualizado exitosamente', 'success');
-                        } else {
-                            const errorData = await response.json();
-                            mostrarNotificacion('Error al actualizar insumo: ' + (errorData.error || 'Error desconocido'), 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        mostrarNotificacion('Error al actualizar insumo', 'error');
-                    }
-                });
-            }
-
-            // Event listeners para cerrar modales
-            const modales = [addInsumoModal, editInsumoModal, viewInsumoModal, reporteModal, graficosModal];
-            modales.forEach(modal => {
-                if (!modal) return;
-                
-                const closeButtons = modal.querySelectorAll('.close-button');
-                closeButtons.forEach(button => {
-                    button.addEventListener('click', () => closeModal(modal));
-                });
-                
-                modal.addEventListener('click', (event) => {
-                    if (event.target === modal) {
-                        closeModal(modal);
-                    }
-                });
-            });
-
-            console.log('Inicialización completada');
+        // Exportar funciones
+        document.getElementById('exportarPDF').addEventListener('click', function() {
+            exportarPDF(insumosFiltrados, 'insumos');
         });
+
+        document.getElementById('exportarReportePDF').addEventListener('click', function() {
+            exportarPDF(insumosFiltrados, 'reporte-insumos');
+        });
+
+        // Función para exportar PDF
+        function exportarPDF(data, filename) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.text('Reporte de Insumos', 20, 20);
+            
+            const tableData = data.map(insumo => [
+                insumo.nombre,
+                insumo.id,
+                insumo.tipo,
+                unidadesMapDisplay[insumo.unidad_medida] || insumo.unidad_medida,
+                insumo.cantidad,
+                formatearMoneda(insumo.valor),
+                formatearMoneda(calcularValorTotal(insumo.cantidad, insumo.valor)),
+                insumo.usuario_nombre || 'No asignado',
+                insumo.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado'
+            ]);
+            
+            doc.autoTable({
+                head: [['Nombre', 'ID', 'Tipo', 'Unidad', 'Cantidad', 'Valor Unit.', 'Valor Total', 'Usuario', 'Estado']],
+                body: tableData,
+                startY: 30
+            });
+            
+            doc.save(`${filename}.pdf`);
+        }
+
+        // Exportar Excel
+        document.getElementById('exportarExcel').addEventListener('click', function() {
+            exportarExcel(insumosFiltrados, 'insumos');
+        });
+
+        document.getElementById('exportarReporteExcel').addEventListener('click', function() {
+            exportarExcel(insumosFiltrados, 'reporte-insumos');
+        });
+
+        // Función para exportar Excel
+        function exportarExcel(data, filename) {
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Insumos");
+            XLSX.writeFile(wb, `${filename}.xlsx`);
+        }
+
+        // Cerrar modales
+        [addInsumoModal, editInsumoModal, viewInsumoModal, reporteModal, graficosModal].forEach(modal => {
+            const closeButtons = modal.querySelectorAll('.close-button');
+            closeButtons.forEach(button => {
+                button.addEventListener('click', () => closeModal(modal));
+            });
+            
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeModal(modal);
+                }
+            });
+        });
+
+        // Gestión de roles para Insumos
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initializeInsumosRoles, 600);
+        });
+
+        function initializeInsumosRoles() {
+            if (!window.authGuard || !window.authGuard.isAuthenticated()) {
+                window.location.href = '/frontend/public/views/register.html';
+                return;
+            }
+
+            const roleManager = new RoleManager();
+            const userRole = roleManager.userRole;
+            
+            console.log('Configurando Insumos para rol:', userRole);
+            configureInsumosUI(userRole);
+        }
+
+        function configureInsumosUI(role) {
+            const createButton = document.getElementById('add');
+            const actionsColumn = document.querySelector('.content__table-header:last-child');
+            
+            switch(role) {
+                case 'admin':
+                    console.log('Configurando para ADMIN - Acceso completo');
+                    showCreateButton(createButton);
+                    updateActionsColumn(actionsColumn, 'Acciones');
+                    showActionButtons(['edit', 'delete']);
+                    break;
+                case 'visitante':
+                case 'apoyo':
+                case 'superadmin':
+                    console.log('Configurando para rol restringido - Solo lectura');
+                    hideCreateButton(createButton);
+                    updateActionsColumn(actionsColumn, 'Ver');
+                    hideActionButtons(['edit', 'delete']);
+                    break;
+                default:
+                    hideCreateButton(createButton);
+                    hideActionButtons(['edit', 'delete']);
+            }
+            setupInsumosActionInterceptors(role);
+        }
+
+        function hideCreateButton(button) {
+            if (button) button.style.display = 'none';
+        }
+
+        function showCreateButton(button) {
+            if (button) button.style.display = '';
+        }
+
+        function updateActionsColumn(column, text) {
+            if (column) column.textContent = text;
+        }
+
+        function hideActionButtons(buttonTypes) {
+            buttonTypes.forEach(type => {
+                const buttons = document.querySelectorAll(`.${type}-button`);
+                buttons.forEach(button => {
+                    const icon = button.closest('.content__icon');
+                    if (icon) icon.style.display = 'none';
+                });
+            });
+        }
+
+        function showActionButtons(buttonTypes) {
+            buttonTypes.forEach(type => {
+                const buttons = document.querySelectorAll(`.${type}-button`);
+                buttons.forEach(button => {
+                    const icon = button.closest('.content__icon');
+                    if (icon) icon.style.display = '';
+                });
+            });
+        }
+
+        function setupInsumosActionInterceptors(role) {
+            if (role !== 'admin') {
+                document.addEventListener('click', function(e) {
+                    if (e.target.id === 'add' || 
+                        e.target.classList.contains('edit-button') || 
+                        e.target.classList.contains('delete-button')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        alert('No tienes permisos para realizar esta acción.');
+                        return false;
+                    }
+                });
+                
+                document.addEventListener('submit', function(e) {
+                    if (e.target.id === 'addInsumoForm' || e.target.id === 'editInsumoForm') {
+                        e.preventDefault();
+                        alert('No tienes permisos para realizar esta acción.');
+                        return false;
+                    }
+                });
+            }
+        }
     </script>
 
     <style>
-        .insumo-details {
-            margin: 20px 0;
+        .loading-container, .error-container {
+            text-align: center;
+            padding: 2rem;
+            margin: 1rem 0;
         }
-        
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .detail-row:last-child {
-            border-bottom: none;
-        }
-        
-        .content__icon--green {
-            background-color: #28a745;
-            color: white;
-            margin-right: 5px;
-        }
-        
-        .content__icon--green:hover {
-            background-color: #218838;
+
+        .error-container {
+            background-color: #fee;
+            border: 1px solid #fcc;
+            border-radius: 4px;
+            color: #c33;
         }
 
         .status-enabled {
@@ -1184,57 +965,29 @@
             font-weight: bold;
         }
 
-        .reporte-opciones {
+        .insumo-details {
             margin: 20px 0;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 10px;
-            margin: 15px 0;
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
         }
 
-        .stat-item {
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            border-left: 4px solid #007bff;
+        .detail-row:last-child {
+            border-bottom: none;
         }
 
-        .estadisticas-container {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
+        .content__icon--green {
+            background-color: #28a745;
+            color: white;
+            margin-right: 5px;
         }
 
-        .modal-content--large {
-            max-width: 90%;
-            width: 1200px;
-        }
-
-        .graficos-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .grafico-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-        }
-
-        .grafico-item h4 {
-            text-align: center;
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        .grafico-item canvas {
-            max-height: 300px;
+        .content__icon--green:hover {
+            background-color: #218838;
         }
 
         .form-group--double {
@@ -1243,13 +996,11 @@
             gap: 15px;
         }
         
-        /* Estilos para campos requeridos */
         .form-group label span[style*="color: red"] {
             color: #dc3545 !important;
             font-weight: bold;
         }
         
-        /* Estilos mejorados para modales */
         .modal-container {
             display: none;
             position: fixed;
@@ -1275,6 +1026,11 @@
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content--large {
+            max-width: 90%;
+            width: 1200px;
         }
 
         .modal-header {
@@ -1382,6 +1138,50 @@
 
         .btn-secondary:hover {
             background-color: #545b62;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .stat-item {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+
+        .estadisticas-container {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .graficos-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .grafico-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .grafico-item h4 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .grafico-item canvas {
+            max-height: 300px;
         }
     </style>
 </body>

@@ -1,7 +1,6 @@
 const express = require("express")
 const router = express.Router()
 
-// Valores válidos según enums de Prisma
 const validEstado = ["habilitado", "deshabilitado"]
 
 function sendError(res, status, message) {
@@ -9,7 +8,6 @@ function sendError(res, status, message) {
   return res.status(status).json({ error: message })
 }
 
-// GET todas las producciones (habilitadas y deshabilitadas)
 router.get("/", async (req, res) => {
   try {
     const { pool } = require("../server")
@@ -222,93 +220,133 @@ router.post("/", async (req, res) => {
   }
 })
 
-// PUT actualizar producción (CORREGIDO)
 router.put("/:id", async (req, res) => {
   try {
-    const { pool } = require("../server")
-    const { 
-      nombre, 
-      tipo, 
-      ubicacion, 
-      descripcion, 
-      fecha_de_inicio, 
+    const { pool } = require("../server");
+    const {
+      nombre,
+      tipo,
+      ubicacion,
+      descripcion,
+      usuario_id,
+      cultivo_id,
+      ciclo_id,
+      insumos_consumo,
+      sensores_ids,
+      fecha_de_inicio,
       fecha_fin,
-      estado 
-    } = req.body
+      estado
+    } = req.body;
 
-    console.log("PUT /producciones body:", req.body)
-    console.log("PUT /producciones ID:", req.params.id)
+    // Validar existencia
+    const [exists] = await pool.execute(
+      "SELECT id FROM producciones WHERE id = ?",
+      [req.params.id]
+    );
+    if (!exists.length) {
+      return sendError(res, 404, "Producción no encontrada");
+    }
 
     // Validaciones básicas
     if (nombre && nombre.length > 100) {
-      return sendError(res, 400, "nombre no puede exceder 100 caracteres")
+      return sendError(res, 400, "nombre no puede exceder 100 caracteres");
     }
     if (tipo && tipo.length > 50) {
-      return sendError(res, 400, "tipo no puede exceder 50 caracteres")
+      return sendError(res, 400, "tipo no puede exceder 50 caracteres");
     }
     if (ubicacion && ubicacion.length > 100) {
-      return sendError(res, 400, "ubicacion no puede exceder 100 caracteres")
+      return sendError(res, 400, "ubicacion no puede exceder 100 caracteres");
     }
-
-    // Validar estado si se proporciona
+    if (descripcion && descripcion.length > 500) {
+      return sendError(res, 400, "descripcion no puede exceder 500 caracteres");
+    }
     if (estado && !validEstado.includes(estado)) {
-      return sendError(res, 400, `estado inválido. Valores permitidos: ${validEstado.join(", ")}`)
+      return sendError(res, 400, `estado inválido. Valores permitidos: ${validEstado.join(", ")}`);
     }
-
-    // Validar fechas
     if (fecha_de_inicio && fecha_fin && new Date(fecha_de_inicio) >= new Date(fecha_fin)) {
-      return sendError(res, 400, "La fecha de inicio debe ser anterior a la fecha de fin")
+      return sendError(res, 400, "La fecha de inicio debe ser anterior a la fecha de fin");
     }
 
-    // Verificar que la producción existe
-    const [existingProd] = await pool.execute("SELECT id FROM producciones WHERE id = ?", [req.params.id])
-    if (existingProd.length === 0) {
-      return sendError(res, 404, "Producción no encontrada")
+    // Sanitizar IDs
+    const uId = usuario_id ?? null;
+    const cId = cultivo_id ?? null;
+    const ccId = ciclo_id ?? null;
+
+    // Serializar arrays
+    const insumosJson = Array.isArray(insumos_consumo)
+      ? JSON.stringify(insumos_consumo.map(i => i.id))
+      : null;
+    const sensoresJson = Array.isArray(sensores_ids)
+      ? JSON.stringify(sensores_ids)
+      : null;
+
+    // Recalcular inversión y meta si cambian insumos
+    let inversion = null, meta = null;
+    if (insumos_consumo) {
+      // se omite recálculo aquí; asume frontend envía inversion y meta
+      inversion = req.body.inversion ?? null;
+      meta = req.body.meta_ganancia ?? null;
     }
 
+    // Update query
     const [result] = await pool.execute(`
-      UPDATE producciones 
-      SET nombre = COALESCE(?, nombre),
-          tipo = COALESCE(?, tipo),
-          ubicacion = COALESCE(?, ubicacion),
-          descripcion = COALESCE(?, descripcion),
-          fecha_de_inicio = COALESCE(?, fecha_de_inicio),
-          fecha_fin = COALESCE(?, fecha_fin),
-          estado = COALESCE(?, estado)
+      UPDATE producciones SET
+        nombre               = COALESCE(?, nombre),
+        tipo                 = COALESCE(?, tipo),
+        ubicacion            = COALESCE(?, ubicacion),
+        descripcion          = COALESCE(?, descripcion),
+        usuario_id           = COALESCE(?, usuario_id),
+        cultivo_id           = COALESCE(?, cultivo_id),
+        ciclo_id             = COALESCE(?, ciclo_id),
+        insumos_ids          = COALESCE(?, insumos_ids),
+        sensores_ids         = COALESCE(?, sensores_ids),
+        fecha_de_inicio      = COALESCE(?, fecha_de_inicio),
+        fecha_fin            = COALESCE(?, fecha_fin),
+        inversion            = COALESCE(?, inversion),
+        meta_ganancia        = COALESCE(?, meta_ganancia),
+        estado               = COALESCE(?, estado)
       WHERE id = ?
     `, [
-      nombre || null,
-      tipo || null,
-      ubicacion || null,
-      descripcion || null,
-      fecha_de_inicio || null,
-      fecha_fin || null,
-      estado || null,
-      req.params.id,
-    ])
+      nombre,
+      tipo,
+      ubicacion,
+      descripcion,
+      uId,
+      cId,
+      ccId,
+      insumosJson,
+      sensoresJson,
+      fecha_de_inicio,
+      fecha_fin,
+      inversion,
+      meta,
+      estado,
+      req.params.id
+    ]);
 
-    if (result.affectedRows === 0) {
-      return sendError(res, 404, "Producción no encontrada")
+    if (!result.affectedRows) {
+      return sendError(res, 404, "Producción no encontrada");
     }
 
+    // Retornar producción actualizada
     const [updated] = await pool.execute(`
-      SELECT p.*, 
-             u.nombre as usuario_nombre,
-             c.nombre as cultivo_nombre,
-             cc.nombre as ciclo_nombre
-      FROM producciones p 
-      LEFT JOIN usuarios u ON p.usuario_id = u.id 
+      SELECT p.*,
+             u.nombre AS usuario_nombre,
+             c.nombre AS cultivo_nombre,
+             cc.nombre AS ciclo_nombre
+      FROM producciones p
+      LEFT JOIN usuarios u ON p.usuario_id = u.id
       LEFT JOIN cultivos c ON p.cultivo_id = c.id
       LEFT JOIN ciclo_cultivo cc ON p.ciclo_id = cc.id
       WHERE p.id = ?
-    `, [req.params.id])
+    `, [req.params.id]);
 
-    res.json(updated[0])
+    res.json(updated[0]);
   } catch (error) {
-    console.error("PUT /producciones ERROR:", error)
-    return sendError(res, 500, "Error interno del servidor")
+    console.error("PUT /producciones ERROR:", error);
+    return sendError(res, 500, "Error interno del servidor");
   }
-})
+});
 
 // DELETE eliminar producción (físicamente)
 router.delete("/:id", async (req, res) => {

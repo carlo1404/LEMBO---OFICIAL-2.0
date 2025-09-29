@@ -30,7 +30,6 @@
     height: calc(100% - 2rem) !important;
 }
 
-/* Removemos los media queries anteriores ya que queremos tamaños fijos */
 @media (max-width: 1200px) {
     .stats-sidebar {
         justify-content: flex-start;

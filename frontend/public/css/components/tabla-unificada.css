@@ -1,7 +1,3 @@
-/* ===================================
-   VARIABLES DE COLOR Y FUENTE
-   =================================== */
-
 :root {
 	/* Primary color*/
 	--primary-950: #4db100;
@@ -141,10 +137,6 @@
 	background: rgba(255, 255, 255, 0.3);
 }
 
-/* ===================================
-   CUERPO DE LA TABLA
-   =================================== */
-
 .content__table-body {
 	background: var(--primary-800);
 }
@@ -195,17 +187,12 @@
 	color: var(--primary-950);
 }
 
-/* ===================================
-   COLUMNA DE ESTADO
-   =================================== */
-
 .content__table-data--status {
 	font-weight: 500;
 	color: var(--gray-700);
 	font-size: calc(var(--fs-xxxs) * 0.95);
 }
 
-/* Estados habilitado/deshabilitado */
 .content__status-enabled {
 	display: inline-block;
 	width: 12px;
@@ -281,10 +268,6 @@
 	}
 }
 
-/* ===================================
-   CONTENEDOR DE ICONOS
-   =================================== */
-
 .content__icon-container {
 	display: flex;
 	gap: 8px;
@@ -336,10 +319,6 @@
 	transform: scale(0.95);
 }
 
-/* ===================================
-   VARIANTES DE ICONOS
-   =================================== */
-
 .content__icon--blue {
 	background: var(--white);
 	color: var(--primary-800);
@@ -372,21 +351,16 @@
 	transform: translateY(-2px);
 }
 
-/* ===================================
-   MEJORAS VISUALES ESPECÍFICAS
-   =================================== */
-
 /* Estilo para IDs de sensores */
 .content__table-data:nth-child(2) {
-	font-family: "Courier New", monospace;
+	display: flex;
+	font-family: var(--fs-md);
 	font-size: calc(var(--fs-xxxs) * 0.9);
-	color: var(--primary-50);
-	background: var(--gray-100);
+	color: black;
+	font-weight: bold;
 	padding: 6px 12px;
-	border-radius: 6px;
-	display: inline-block;
-	border: 1px solid var(--gray-200);
-	font-weight: 500;
+	align-items: center;
+	justify-content: center;
 }
 
 /* Estilo para la columna de tiempo/duración */
@@ -396,9 +370,6 @@
 	font-variant-numeric: tabular-nums;
 }
 
-/* ===================================
-   BORDES Y SEPARADORES
-   =================================== */
 
 .content__table-data {
 	border-right: 1px solid var(--primary-300);
@@ -407,10 +378,6 @@
 .content__table-data:last-child {
 	border-right: none;
 }
-
-/* ===================================
-   RESPONSIVE DESIGN
-   =================================== */
 
 /* Tablet */
 @media (max-width: 1024px) {
@@ -492,10 +459,6 @@
 	}
 }
 
-/* ===================================
-   SCROLL HORIZONTAL
-   =================================== */
-
 .content__table-wrapper {
 	overflow-x: auto;
 	border-radius: 12px;
@@ -521,10 +484,6 @@
 .content__table-wrapper::-webkit-scrollbar-thumb:hover {
 	background: var(--primary-700);
 }
-
-/* ===================================
-   ESTADOS ESPECIALES
-   =================================== */
 
 /* Estado de carga */
 .content__table--loading {
@@ -557,10 +516,6 @@
 		transform: translateX(100%);
 	}
 }
-
-/* ===================================
-   ACCESIBILIDAD
-   =================================== */
 
 /* Mejor contraste */
 @media (prefers-contrast: high) {
@@ -598,11 +553,6 @@
 	}
 }
 
-/* ===================================
-   FORZAR VISIBILIDAD DEL HEADER
-   =================================== */
-
-/* Asegurar que el header siempre sea visible */
 thead.content__table-head {
 	background: var(--primary-950) !important;
 	display: table-header-group !important;
@@ -619,10 +569,6 @@ thead.content__table-head th.content__table-header {
 	text-transform: uppercase !important;
 	border-bottom: 3px solid var(--primary-900) !important;
 }
-
-/* ===================================
-   UTILIDADES
-   =================================== */
 
 .content__table-data--center {
 	text-align: center;
@@ -645,10 +591,6 @@ thead.content__table-head th.content__table-header {
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-
-/* ===================================
-   IMPRESIÓN
-   =================================== */
 
 @media print {
 	.content__table {

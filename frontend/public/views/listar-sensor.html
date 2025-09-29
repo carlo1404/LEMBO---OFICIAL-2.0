@@ -10,6 +10,8 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/frontend/JS/sidebar.js" defer></script>
+    <script src="/frontend/JS/auth-guard.js"></script>
+    <script src="/frontend/JS/role-manager.js"></script>
     
     <!-- CDNs para exportación -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -17,6 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
+    <img src="/IMG/gov.jpeg" alt="gov" class="gov">
     <div class="header">
         <div class="header__left-section">
             <span class="header__menu-item">Sensores</span>
@@ -36,7 +39,7 @@
         </div>
     </div>
     <main>
-        <div class="sidebar"></div>
+        <div class="sidebar" id="sidebar-container"></div>
         <section class="content">
             <div id="loading" class="loading-container" style="display: none;">
                 <p>Cargando sensores...</p>
@@ -66,7 +69,7 @@
         </section>
     </main>
 
-    <!-- Modal para Agregar Sensor -->
+    <!-- Modal Agregar Sensor -->
     <div id="addSensorModal" class="modal-container">
         <div class="modal-content">
             <div class="modal-header">
@@ -331,7 +334,7 @@
             </div>
         </div>
     </div>
-
+    <img src="/IMG/gov.jpeg" alt="gov" class="gov">
     <script>
         const API_URL = "http://localhost:3000/api/sensores";
         const USUARIOS_API_URL = "http://localhost:3000/api/usuarios";
@@ -345,6 +348,20 @@
         let todosLosSensores = [];
         let sensoresFiltrados = [];
         let usuarios = [];
+
+        // Función para mostrar/ocultar loading
+        function showLoading(show) {
+            if (loadingElement) {
+                loadingElement.style.display = show ? 'block' : 'none';
+            }
+        }
+
+        // Función para mostrar/ocultar error
+        function showError(show) {
+            if (errorElement) {
+                errorElement.style.display = show ? 'block' : 'none';
+            }
+        }
 
         // Función para formatear fecha
         function formatearFecha(fecha) {
@@ -486,234 +503,19 @@
                     <div class="stat-item"><strong>Total de Sensores:</strong> ${stats.total}</div>
                     <div class="stat-item"><strong>Habilitados:</strong> ${stats.habilitados}</div>
                     <div class="stat-item"><strong>Deshabilitados:</strong> ${stats.deshabilitados}</div>
-                    ${tiposHtml}
-                    ${unidadesHtml}
                 </div>
+                <h4>Por Tipo</h4>
+                <div class="stats-grid">${tiposHtml}</div>
+                <h4>Por Unidad de Medida</h4>
+                <div class="stats-grid">${unidadesHtml}</div>
             `;
         }
 
-        // Función para filtrar sensores
-        function filtrarSensoresReporte() {
-            const filtroTipo = document.getElementById('filtroTipoSensor').value;
-            const filtroEstado = document.getElementById('filtroEstado').value;
-            const filtroUnidad = document.getElementById('filtroUnidadMedida').value;
-
-            let sensoresFiltrados = todosLosSensores;
-
-            if (filtroTipo) {
-                sensoresFiltrados = sensoresFiltrados.filter(s => s.tipo_sensor === filtroTipo);
-            }
-            if (filtroEstado) {
-                sensoresFiltrados = sensoresFiltrados.filter(s => s.estado === filtroEstado);
-            }
-            if (filtroUnidad) {
-                sensoresFiltrados = sensoresFiltrados.filter(s => s.unidad_medida === filtroUnidad);
-            }
-
-            mostrarEstadisticas(sensoresFiltrados);
-            return sensoresFiltrados;
-        }
-
-        // Función para generar gráficos
-        function generarGraficos(sensores = todosLosSensores) {
-            const stats = generarEstadisticas(sensores);
-
-            Chart.getChart('graficoTipos')?.destroy();
-            Chart.getChart('graficoEstados')?.destroy();
-            Chart.getChart('graficoUnidades')?.destroy();
-            Chart.getChart('graficoTiempos')?.destroy();
-
-            // Gráfico de tipos
-            const ctxTipos = document.getElementById('graficoTipos').getContext('2d');
-            new Chart(ctxTipos, {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(stats.tipos),
-                    datasets: [{
-                        data: Object.values(stats.tipos),
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-
-            // Gráfico de estados
-            const ctxEstados = document.getElementById('graficoEstados').getContext('2d');
-            new Chart(ctxEstados, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Habilitados', 'Deshabilitados'],
-                    datasets: [{
-                        data: [stats.habilitados, stats.deshabilitados],
-                        backgroundColor: ['#28a745', '#dc3545']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-
-            // Gráfico de unidades
-            const ctxUnidades = document.getElementById('graficoUnidades').getContext('2d');
-            new Chart(ctxUnidades, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(stats.unidades),
-                    datasets: [{
-                        label: 'Cantidad de Sensores',
-                        data: Object.values(stats.unidades),
-                        backgroundColor: '#4BC0C0'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-
-            // Gráfico de tiempos
-            const ctxTiempos = document.getElementById('graficoTiempos').getContext('2d');
-            new Chart(ctxTiempos, {
-                type: 'polarArea',
-                data: {
-                    labels: Object.keys(stats.tiempos),
-                    datasets: [{
-                        data: Object.values(stats.tiempos),
-                        backgroundColor: ['#9966FF', '#FF9F40', '#C9CBCF']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-        }
-
-        // Función para exportar PDF
-        function exportarPDF(sensores = sensoresFiltrados) {
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-
-                doc.setFontSize(18);
-                doc.text('Reporte de Sensores', 14, 22);
-                
-                doc.setFontSize(11);
-                doc.text(`Generado el: ${new Date().toLocaleDateString('es-CO')} ${new Date().toLocaleTimeString('es-CO')}`, 14, 30);
-
-                const stats = generarEstadisticas(sensores);
-                let y = 40;
-                doc.setFontSize(12);
-                doc.text('Estadísticas:', 14, y);
-                y += 8;
-                doc.setFontSize(10);
-                doc.text(`Total de sensores: ${stats.total}`, 14, y);
-                y += 6;
-                doc.text(`Habilitados: ${stats.habilitados}`, 14, y);
-                y += 6;
-                doc.text(`Deshabilitados: ${stats.deshabilitados}`, 14, y);
-                y += 10;
-
-                const tableData = sensores.map(sensor => [
-                    sensor.id,
-                    sensor.nombre_sensor.substring(0, 25),
-                    sensor.tipo_sensor,
-                    sensor.unidad_medida,
-                    sensor.tiempo_escaneo,
-                    sensor.usuario_nombre || 'N/A',
-                    sensor.estado === 'habilitado' ? 'Hab.' : 'Des.'
-                ]);
-
-                doc.autoTable({
-                    head: [['ID', 'Nombre', 'Tipo', 'Unidad', 'Tiempo', 'Usuario', 'Estado']],
-                    body: tableData,
-                    startY: y,
-                    styles: { fontSize: 8 },
-                    headStyles: { fillColor: [41, 128, 185] },
-                    alternateRowStyles: { fillColor: [245, 245, 245] }
-                });
-
-                doc.save(`reporte_sensores_${new Date().toISOString().split('T')[0]}.pdf`);
-            } catch (error) {
-                console.error('Error al exportar PDF:', error);
-                alert('Error al exportar PDF.');
-            }
-        }
-
-        // Función para exportar Excel
-        function exportarExcel(sensores = sensoresFiltrados) {
-            try {
-                const stats = generarEstadisticas(sensores);
-                
-                const statsData = [
-                    ['Estadísticas del Reporte de Sensores'],
-                    [''],
-                    ['Total de sensores', stats.total],
-                    ['Sensores habilitados', stats.habilitados],
-                    ['Sensores deshabilitados', stats.deshabilitados],
-                    [''],
-                    ['Distribución por tipos:'],
-                    ...Object.entries(stats.tipos).map(([tipo, cantidad]) => [tipo, cantidad]),
-                    [''],
-                    ['Distribución por unidades:'],
-                    ...Object.entries(stats.unidades).map(([unidad, cantidad]) => [unidad, cantidad]),
-                    [''],
-                    ['Fecha de generación', new Date().toLocaleDateString('es-CO') + ' ' + new Date().toLocaleTimeString('es-CO')]
-                ];
-
-                const sensoresData = [
-                    ['ID', 'Nombre del Sensor', 'Tipo', 'Unidad de Medida', 'Tiempo de Escaneo', 'Descripción', 'Usuario Responsable', 'Estado', 'Fecha Creación'],
-                    ...sensores.map(sensor => [
-                        sensor.id,
-                        sensor.nombre_sensor,
-                        sensor.tipo_sensor,
-                        sensor.unidad_medida,
-                        sensor.tiempo_escaneo,
-                        sensor.descripcion || '',
-                        sensor.usuario_nombre || 'Sin asignar',
-                        sensor.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado',
-                        sensor.fecha_creacion ? formatearFecha(sensor.fecha_creacion) : ''
-                    ])
-                ];
-
-                const wb = XLSX.utils.book_new();
-                const wsStats = XLSX.utils.aoa_to_sheet(statsData);
-                const wsSensores = XLSX.utils.aoa_to_sheet(sensoresData);
-                
-                XLSX.utils.book_append_sheet(wb, wsStats, "Estadísticas");
-                XLSX.utils.book_append_sheet(wb, wsSensores, "Sensores");
-
-                XLSX.writeFile(wb, `reporte_sensores_${new Date().toISOString().split('T')[0]}.xlsx`);
-            } catch (error) {
-                console.error('Error al exportar Excel:', error);
-                alert('Error al exportar Excel.');
-            }
-        }
-
-        // Funciones de utilidad
-        function showLoading(show) {
-            loadingElement.style.display = show ? 'block' : 'none';
-        }
-
-        function showError(show) {
-            errorElement.style.display = show ? 'block' : 'none';
-        }
-
-        function showNotification(message, type = 'info') {
-            alert(message);
-        }
-
-        // Inicializar
-        async function inicializar() {
-            await cargarUsuarios();
-            await cargarSensores();
-        }
-
-        inicializar();
+        // Inicializar carga de datos
+        window.addEventListener('DOMContentLoaded', function() {
+            cargarUsuarios();
+            cargarSensores();
+        });
 
         // Buscar sensores
         searchInput.addEventListener('input', function(e) {
@@ -722,8 +524,7 @@
                 s.nombre_sensor.toLowerCase().includes(filtro) ||
                 s.tipo_sensor.toLowerCase().includes(filtro) ||
                 s.unidad_medida.toLowerCase().includes(filtro) ||
-                (s.descripcion && s.descripcion.toLowerCase().includes(filtro)) ||
-                (s.usuario_nombre && s.usuario_nombre.toLowerCase().includes(filtro))
+                (s.descripcion && s.descripcion.toLowerCase().includes(filtro))
             );
             sensoresFiltrados = filtrados;
             renderizarSensores(filtrados);
@@ -740,42 +541,14 @@
         const openModal = (modal) => modal.classList.add('active');
         const closeModal = (modal) => modal.classList.remove('active');
 
-        // Event listeners
-        addButton.addEventListener('click', () => {
-            document.getElementById('addSensorForm').reset();
-            openModal(addSensorModal);
-        });
-
+        addButton.addEventListener('click', () => openModal(addSensorModal));
         document.getElementById('download').addEventListener('click', function() {
             mostrarEstadisticas();
             openModal(reporteModal);
         });
-
         document.getElementById('verGraficos').addEventListener('click', function() {
             openModal(graficosModal);
             setTimeout(() => generarGraficos(), 200);
-        });
-
-        document.getElementById('filtroTipoSensor').addEventListener('change', filtrarSensoresReporte);
-        document.getElementById('filtroEstado').addEventListener('change', filtrarSensoresReporte);
-        document.getElementById('filtroUnidadMedida').addEventListener('change', filtrarSensoresReporte);
-
-        document.getElementById('exportarReportePDF').addEventListener('click', function() {
-            const sensoresFiltradosReporte = filtrarSensoresReporte();
-            exportarPDF(sensoresFiltradosReporte);
-        });
-
-        document.getElementById('exportarReporteExcel').addEventListener('click', function() {
-            const sensoresFiltradosReporte = filtrarSensoresReporte();
-            exportarExcel(sensoresFiltradosReporte);
-        });
-
-        document.getElementById('exportarPDF').addEventListener('click', function() {
-            exportarPDF(sensoresFiltrados);
-        });
-
-        document.getElementById('exportarExcel').addEventListener('click', function() {
-            exportarExcel(sensoresFiltrados);
         });
 
         // Agregar sensor
@@ -788,7 +561,8 @@
                 unidad_medida: document.getElementById("addUnidadMedida").value,
                 tiempo_escaneo: document.getElementById("addTiempoEscaneo").value,
                 descripcion: document.getElementById("addDescripcion").value,
-                usuario_id: document.getElementById("addUsuarioId").value || null
+                usuario_id: document.getElementById("addUsuarioId").value || null,
+                estado: 'habilitado'
             };
 
             try {
@@ -802,14 +576,14 @@
                     closeModal(addSensorModal);
                     e.target.reset();
                     cargarSensores();
-                    showNotification('Sensor agregado exitosamente', 'success');
+                    alert('Sensor agregado exitosamente');
                 } else {
                     const errorData = await response.json();
-                    showNotification('Error al agregar sensor: ' + (errorData.error || 'Error desconocido'), 'error');
+                    alert('Error al agregar sensor: ' + (errorData.message || 'Error desconocido'));
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showNotification('Error al agregar sensor', 'error');
+                alert('Error al agregar sensor');
             }
         });
 
@@ -830,13 +604,13 @@
                     document.getElementById("viewTiempoEscaneo").textContent = sensor.tiempo_escaneo;
                     document.getElementById("viewUsuarioNombre").textContent = sensor.usuario_nombre || 'Sin asignar';
                     document.getElementById("viewEstado").textContent = sensor.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado';
-                    document.getElementById("viewDescripcion").textContent = sensor.descripcion || 'Sin descripción';
+                    document.getElementById("viewDescripcion").textContent = sensor.descripcion;
                     document.getElementById("viewFechaCreacion").textContent = sensor.fecha_creacion ? formatearFecha(sensor.fecha_creacion) : 'No disponible';
                     
                     openModal(viewSensorModal);
                 } catch (error) {
                     console.error('Error:', error);
-                    showNotification('Error al cargar detalles del sensor', 'error');
+                    alert('Error al cargar detalles del sensor');
                 }
             }
             
@@ -851,14 +625,14 @@
                     document.getElementById("editTipoSensor").value = sensor.tipo_sensor;
                     document.getElementById("editUnidadMedida").value = sensor.unidad_medida;
                     document.getElementById("editTiempoEscaneo").value = sensor.tiempo_escaneo;
-                    document.getElementById("editDescripcion").value = sensor.descripcion || '';
+                    document.getElementById("editDescripcion").value = sensor.descripcion;
                     document.getElementById("editUsuarioId").value = sensor.usuario_id || '';
                     document.getElementById("editEstado").value = sensor.estado;
                     
                     openModal(editSensorModal);
                 } catch (error) {
                     console.error('Error:', error);
-                    showNotification('Error al cargar datos del sensor', 'error');
+                    alert('Error al cargar datos del sensor');
                 }
             }
             
@@ -871,14 +645,14 @@
                         
                         if (response.ok) {
                             cargarSensores();
-                            showNotification('Sensor eliminado exitosamente', 'success');
+                            alert('Sensor eliminado exitosamente');
                         } else {
                             const errorData = await response.json();
-                            showNotification('Error al eliminar sensor: ' + (errorData.error || 'Error desconocido'), 'error');
+                            alert('Error al eliminar sensor: ' + (errorData.message || 'Error desconocido'));
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        showNotification('Error al eliminar sensor', 'error');
+                        alert('Error al eliminar sensor');
                     }
                 }
             }
@@ -909,16 +683,105 @@
                     closeModal(editSensorModal);
                     e.target.reset();
                     cargarSensores();
-                    showNotification('Sensor actualizado exitosamente', 'success');
+                    alert('Sensor actualizado exitosamente');
                 } else {
                     const errorData = await response.json();
-                    showNotification('Error al actualizar sensor: ' + (errorData.error || 'Error desconocido'), 'error');
+                    alert('Error al actualizar sensor: ' + (errorData.message || 'Error desconocido'));
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showNotification('Error al actualizar sensor', 'error');
+                alert('Error al actualizar sensor');
             }
         });
+
+        // Función para generar gráficos
+        function generarGraficos(sensores = todosLosSensores) {
+            const stats = generarEstadisticas(sensores);
+
+            // Limpiar gráficos existentes
+            Chart.getChart('graficoTipos')?.destroy();
+            Chart.getChart('graficoEstados')?.destroy();
+            Chart.getChart('graficoUnidades')?.destroy();
+            Chart.getChart('graficoTiempos')?.destroy();
+
+            // Gráfico de tipos
+            const ctxTipos = document.getElementById('graficoTipos').getContext('2d');
+            new Chart(ctxTipos, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(stats.tipos),
+                    datasets: [{
+                        data: Object.values(stats.tipos),
+                        backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe']
+                    }]
+                }
+            });
+
+            // Gráfico de estados
+            const ctxEstados = document.getElementById('graficoEstados').getContext('2d');
+            new Chart(ctxEstados, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Habilitados', 'Deshabilitados'],
+                    datasets: [{
+                        data: [stats.habilitados, stats.deshabilitados],
+                        backgroundColor: ['#28a745', '#dc3545']
+                    }]
+                }
+            });
+        }
+
+        // Exportar PDFs
+        document.getElementById('exportarPDF').addEventListener('click', function() {
+            exportarPDF(sensoresFiltrados, 'sensores');
+        });
+
+        document.getElementById('exportarReportePDF').addEventListener('click', function() {
+            exportarPDF(sensoresFiltrados, 'reporte-sensores');
+        });
+
+        // Función para exportar PDF
+        function exportarPDF(data, filename) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.text('Reporte de Sensores', 20, 20);
+            
+            const tableData = data.map(sensor => [
+                sensor.id,
+                sensor.nombre_sensor,
+                sensor.tipo_sensor,
+                sensor.unidad_medida,
+                sensor.tiempo_escaneo,
+                sensor.usuario_nombre || 'Sin asignar',
+                sensor.estado === 'habilitado' ? 'Habilitado' : 'Deshabilitado'
+            ]);
+            
+            doc.autoTable({
+                head: [['ID', 'Nombre', 'Tipo', 'Unidad', 'Tiempo', 'Usuario', 'Estado']],
+                body: tableData,
+                startY: 30
+            });
+            
+            doc.save(`${filename}.pdf`);
+        }
+
+        // Exportar Excel
+        document.getElementById('exportarExcel').addEventListener('click', function() {
+            exportarExcel(sensoresFiltrados, 'sensores');
+        });
+
+        document.getElementById('exportarReporteExcel').addEventListener('click', function() {
+            exportarExcel(sensoresFiltrados, 'reporte-sensores');
+        });
+
+        // Función para exportar Excel
+        function exportarExcel(data, filename) {
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Sensores");
+            XLSX.writeFile(wb, `${filename}.xlsx`);
+        }
 
         // Cerrar modales
         [addSensorModal, editSensorModal, viewSensorModal, reporteModal, graficosModal].forEach(modal => {
@@ -933,6 +796,115 @@
                 }
             });
         });
+
+        // Gestión de roles para Sensores
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initializeSensoresRoles, 600);
+        });
+
+        function initializeSensoresRoles() {
+            if (!window.authGuard || !window.authGuard.isAuthenticated()) {
+                window.location.href = '/frontend/public/views/register.html';
+                return;
+            }
+
+            const roleManager = new RoleManager();
+            const userRole = roleManager.userRole;
+            
+            console.log('Configurando Sensores para rol:', userRole);
+            configureSensoresUI(userRole);
+        }
+
+        function configureSensoresUI(role) {
+            const createButton = document.getElementById('add');
+            const actionsColumn = document.querySelector('.content__table-header:last-child');
+            
+            switch(role) {
+                case 'visitante':
+                    console.log('Configurando para VISITANTE - Solo lectura');
+                    hideCreateButton(createButton);
+                    updateActionsColumn(actionsColumn, 'Ver');
+                    hideActionButtons(['edit', 'delete']);
+                    break;
+                case 'apoyo':
+                    console.log('Configurando para APOYO - Acceso completo a sensores');
+                    showCreateButton(createButton);
+                    updateActionsColumn(actionsColumn, 'Acciones');
+                    showActionButtons(['edit', 'delete']);
+                    break;
+                case 'admin':
+                    console.log('Configurando para ADMIN - Acceso completo');
+                    showCreateButton(createButton);
+                    updateActionsColumn(actionsColumn, 'Acciones');
+                    showActionButtons(['edit', 'delete']);
+                    break;
+                case 'superadmin':
+                    console.log('Configurando para SUPERADMIN - Solo lectura');
+                    hideCreateButton(createButton);
+                    updateActionsColumn(actionsColumn, 'Ver');
+                    hideActionButtons(['edit', 'delete']);
+                    break;
+                default:
+                    hideCreateButton(createButton);
+                    hideActionButtons(['edit', 'delete']);
+            }
+            setupSensoresActionInterceptors(role);
+        }
+
+        function hideCreateButton(button) {
+            if (button) button.style.display = 'none';
+        }
+
+        function showCreateButton(button) {
+            if (button) button.style.display = '';
+        }
+
+        function updateActionsColumn(column, text) {
+            if (column) column.textContent = text;
+        }
+
+        function hideActionButtons(buttonTypes) {
+            buttonTypes.forEach(type => {
+                const buttons = document.querySelectorAll(`.${type}-button`);
+                buttons.forEach(button => {
+                    const icon = button.closest('.content__icon');
+                    if (icon) icon.style.display = 'none';
+                });
+            });
+        }
+
+        function showActionButtons(buttonTypes) {
+            buttonTypes.forEach(type => {
+                const buttons = document.querySelectorAll(`.${type}-button`);
+                buttons.forEach(button => {
+                    const icon = button.closest('.content__icon');
+                    if (icon) icon.style.display = '';
+                });
+            });
+        }
+
+        function setupSensoresActionInterceptors(role) {
+            if (role === 'visitante' || role === 'superadmin') {
+                document.addEventListener('click', function(e) {
+                    if (e.target.id === 'add' || 
+                        e.target.classList.contains('edit-button') || 
+                        e.target.classList.contains('delete-button')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        alert('No tienes permisos para realizar esta acción.');
+                        return false;
+                    }
+                });
+                
+                document.addEventListener('submit', function(e) {
+                    if (e.target.id === 'addSensorForm' || e.target.id === 'editSensorForm') {
+                        e.preventDefault();
+                        alert('No tienes permisos para realizar esta acción.');
+                        return false;
+                    }
+                });
+            }
+        }
     </script>
 
     <style>

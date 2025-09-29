@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Autenticación</title>
+  <link rel="stylesheet" href="/frontend/public/css/pages/reister-login.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <div class="container__form" id="authContainer">
+    <!-- Logo -->
+    <div class="container__logo">
+      <img src="/IMG/logodos.jpeg" alt="Logo" class="container__logo--img">
+    </div>
+
+    <!-- Título dinámico -->
+    <h2 class="container__title" id="formTitle">Iniciar Sesión</h2>
+
+    <!-- Formulario de Login -->
+    <form id="loginForm" class="auth-form">
+      <div class="container__input-box">
+        <i class="fas fa-envelope container__icon"></i>
+        <input type="email" class="container__input" id="loginEmail" placeholder="Correo electrónico" required>
+      </div>
+
+      <div class="container__input-box">
+        <i class="fas fa-lock container__icon"></i>
+        <input type="password" class="container__input" id="loginPassword" placeholder="Contraseña" required>
+      </div>
+
+      <button type="submit" class="container__button">Iniciar Sesión</button>
+    </form>
+
+    <!-- Área de mensajes -->
+    <div id="messageArea"></div>
+  </div>
+
+  <script src="/frontend/JS/auth.js"></script>
+</body>
+</html>
