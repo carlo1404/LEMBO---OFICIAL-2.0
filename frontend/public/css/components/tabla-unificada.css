@@ -351,7 +351,7 @@
 	transform: translateY(-2px);
 }
 
-/* Estilo para IDs de sensores */
+/* Estilo IDs de sensores */
 .content__table-data:nth-child(2) {
 	display: flex;
 	font-family: var(--fs-md);
@@ -363,7 +363,7 @@
 	justify-content: center;
 }
 
-/* Estilo para la columna de tiempo/duración */
+/* Estilo la columna de tiempo/duración */
 .content__table-data:nth-child(5) {
 	font-weight: 600;
 	color: var(--primary-950);
