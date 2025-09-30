@@ -1,26 +1,25 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lembo</title>
-    <link rel="stylesheet" href="/frontend/public/css/pages/Normalize.css">
-    <link rel="stylesheet" href="/frontend/public/css/main.css">
-    <link rel="stylesheet" href="/frontend/public/css/pages/home.css">
+    <link rel="stylesheet" href="/frontend/public/css/pages/Normalize.css"> <!-- Normalización de estilos -->
+    <link rel="stylesheet" href="/frontend/public/css/main.css"> <!-- Estilos globales -->
+    <link rel="stylesheet" href="/frontend/public/css/pages/home.css"> <!-- Estilos de la pagina -->
     <!-- Fuente -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com"> <!--fuente traida de google -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!--fuente traida de google -->
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
-    <script src="https://kit.fontawesome.com/b08d7118d6.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/b08d7118d6.js" crossorigin="anonymous"></script> <!--fuente traida de google -->
 </head>
 
 <body>
-    <img src="/IMG/gov.jpeg" alt="gov" class="gov">
-    <header id="header-container"></header>
+    <img src="/IMG/gov.jpeg" alt="gov" class="gov"> <!-- Logo de la gobierno -->
+    <header id="header-container"></header> <!-- Menu de navegacion -->
 
-    <main class="main">
+    <main class="main">  <!-- Contenido principal -->
         <section class="hero">
             <div class="hero__content">
                 <h1 class="hero__title">Sistema Administrativo Lembo 2.0</h1>
@@ -50,7 +49,7 @@
             </div>
         </section>
 
-        <section class="features">
+        <section class="features"> <!-- Características del sistema -->
             <h2 class="features__title">Características del Sistema</h2>
             <div class="features__grid">
                 <article class="feature-card">
@@ -93,7 +92,7 @@
             </div>
         </section>
 
-        <section class="dashboard-preview">
+        <section class="dashboard-preview"> <!-- Panel de control intuitivo-->
             <h2 class="dashboard-preview__title">Panel de Control Intuitivo</h2>
             <div class="dashboard-preview__content">
                 <div class="dashboard-preview__stats">
@@ -122,8 +121,10 @@
         </section>
     </main>
 
-    <img src="/IMG/gov.jpeg" alt="gov" class="gov">
+    <img src="/IMG/gov.jpeg" alt="gov" class="gov__footer">
 
+
+    <!--Script de la pagina -->
     <script src="/frontend/JS/auth-guard.js"></script>
     <script src="/frontend/JS/role-manager.js"></script>
     <script src="/frontend/JS/home.js"></script>

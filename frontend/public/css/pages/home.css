@@ -21,6 +21,7 @@ body {
     width: 100%;
     top: 0;
     z-index: 100;
+    
 }
 .gov {
     position: relative;
@@ -30,12 +31,33 @@ body {
     margin-bottom: -0.5rem;
     z-index: 1000;
 }
+/* Estilo general (pantallas grandes) */
+.gov__footer {
+    height: 2.5rem;
+    font-size: 0.8rem;
+    width: 100%;
+    text-align: center;
+    color: white;
+    background: #004884; /* ejemplo */
+    top: 0;
+    margin-top: 1rem;
+}
+
 .nav {
     padding: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 2rem;
+
 }
+
+.nav__logo-img {
+    height: 3rem;
+    width: auto;
+    margin-bottom: 0.5rem;
+}
+
 
 .nav__logo-img {
     height: 4rem;
@@ -322,6 +344,10 @@ body {
 }
 
 @media (width < 768px) {
+
+    body{
+        overflow-x: none;
+    }
     .nav__list {
         display: none;
         padding: 1rem;
@@ -341,11 +367,21 @@ body {
     .nav__list.active {
         display: flex;
     }
+
+        .gov {
+        object-fit:cover;
+        height: 2rem; 
+        width: 100%;
+        margin-bottom: 0;
+        
+    }
+
     
     .nav__toggle {
         display: block;
         height: 2.8rem;
         width: 2.8rem;
+        margin-left: 1rem;
     }
 
     .nav__menu-btn {
@@ -386,6 +422,14 @@ body {
 
 
 @media (width < 480px) {
+
+    body{
+                overflow-x: hidden;
+    }
+
+    .nav__toggle{
+        margin-left: 1.5rem;
+    }
     
     .nav__list {
         display: none;
@@ -401,6 +445,25 @@ body {
         box-shadow: 0 0.4rem 0.6rem rgba(0, 0, 0, 0.1);
         border-radius: 0.6rem;
         text-align: center;
+    }
+
+    .gov{
+        display: block;
+        height: 2.5rem;
+        width: auto;        
+        margin: 0 auto;     
+        object-fit: contain;
+    }
+    
+    .gov__footer{
+        display: block;
+        height: 2.5rem;
+        width: auto;
+        margin: 0 auto;     
+        object-fit: contain;
+        bottom: 0;
+        left: 0;
+        right: 0;
     }
     
     .nav__list.active {
